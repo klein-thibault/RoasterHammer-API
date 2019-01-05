@@ -69,3 +69,6 @@ fastlane/test_output
 
 # Vapor
 *.xcodeproj/
+
+# MacOS
+.DS_Store
