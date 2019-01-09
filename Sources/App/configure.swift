@@ -37,4 +37,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: NodeElement.self, database: .psql)
     migrations.add(migration: CreateNodeElementClosure.self, database: .psql)
     services.register(migrations)
+
+    // Configure the command line tool to revert and migrate the database
+    var commandConfig = CommandConfig.default()
+    commandConfig.useFluentCommands()
+    services.register(commandConfig)
 }
