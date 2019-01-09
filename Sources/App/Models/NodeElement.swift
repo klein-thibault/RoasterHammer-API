@@ -24,4 +24,4 @@ final class NodeElement: PostgreSQLModel {
 }
 
 extension NodeElement: Content { }
-extension NodeElement: PostgreSQLMigration { }
+extension NodeElement: PostgreSQLMigration { }
