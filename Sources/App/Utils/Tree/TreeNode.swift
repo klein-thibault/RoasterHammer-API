@@ -29,16 +29,6 @@ final class TreeNode<Element> {
         }
     }
 
-    func forEachLevelFirst(atNode node: TreeNode, visit: (TreeNode) -> Void) {
-        visit(node)
-        let queue = Queue<TreeNode>()
-        node.children.forEach { queue.enqueue($0) }
-
-        while let node = queue.dequeue() {
-            visit(node)
-            node.children.forEach { queue.enqueue($0) }
-        }
-    }
 }
 
 extension TreeNode where Element: Equatable {

@@ -38,7 +38,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(migration: CreateNodeElementClosure.self, database: .psql)
     services.register(migrations)
 
-    // Configure the command line tool to revert and migrate the database
+    // Configure the command line tool to add Fluent commands like revert and migrate database
     var commandConfig = CommandConfig.default()
     commandConfig.useFluentCommands()
     services.register(commandConfig)
