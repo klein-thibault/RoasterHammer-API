@@ -5,7 +5,7 @@ update-xcode:
 	vapor update
 
 install:
-	swift package install
+	swift package update
 
 build:
 	swift build
