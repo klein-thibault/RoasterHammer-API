@@ -3,6 +3,12 @@ import FluentPostgreSQL
 
 final class TreeDatastore {
 
+    /// Given a tree, this function will persist all the node and branches in a closure table.
+    ///
+    /// - Parameters:
+    ///   - tree: The tree to persist.
+    ///   - conn: The database connection to use.
+    /// - Returns: The list of persisted node elements.
     func storeTree(_ tree: Tree<String>, on conn: DatabaseConnectable) -> Future<[NodeElementClosure]> {
         guard let root = tree.root else {
             return conn.eventLoop.newFailedFuture(error: RoasterHammerTreeError.treeIsEmpty)
@@ -37,6 +43,12 @@ final class TreeDatastore {
         return nodeElementClosureFutures.flatten(on: conn)
     }
 
+    /// Returns all the descendants of a given node, including the node itself.
+    ///
+    /// - Parameters:
+    ///   - node: The node to find the descendants from.
+    ///   - conn: The database connection.
+    /// - Returns: The list of all descendants of the given node.
     func findDescendantsForNode(_ node: NodeElement, on conn: DatabaseConnectable) -> Future<[NodeElement]> {
         return NodeElementClosure.query(on: conn)
             .filter(\.ancestor == node.id!)

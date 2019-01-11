@@ -1,3 +1,4 @@
+/// Tree data structure.
 final class Tree<T> {
     var root: TreeNode<T>?
 

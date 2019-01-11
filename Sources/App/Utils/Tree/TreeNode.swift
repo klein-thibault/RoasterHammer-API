@@ -1,3 +1,4 @@
+/// Tree node.
 final class TreeNode<Element> {
     var value: Element
     var height: Int = 0
