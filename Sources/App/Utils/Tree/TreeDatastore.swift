@@ -43,6 +43,52 @@ final class TreeDatastore {
         return nodeElementClosureFutures.flatten(on: conn)
     }
 
+    func insertValue(_ value: String,
+                     nodeType: NodeType,
+                     atNode nodeReceiver: TreeNode<String>,
+                     fromTree tree: Tree<String>,
+                     conn: DatabaseConnectable) -> Future<NodeElementClosure> {
+        let insertedNode = tree.insert(atNode: nodeReceiver, value: value)
+        let nodeElementToInsert = NodeElement(elementId: insertedNode.value, type: nodeType.rawValue).save(on: conn)
+        let nodeElementReceiver = NodeElement
+            .query(on: conn)
+            .filter(\.elementId == nodeReceiver.value)
+            .first()
+            .unwrap(or: RoasterHammerTreeError.missingNodesInDatabase)
+
+        return flatMap(nodeElementToInsert, nodeElementReceiver) { (nodeToInsert, nodeReceiver) -> EventLoopFuture<NodeElementClosure> in
+            guard let nodeToInsertId = nodeToInsert.id,
+                let nodeReceiverId = nodeReceiver.id else {
+                    return conn.eventLoop.newFailedFuture(error: RoasterHammerTreeError.nodeIsInvalid)
+            }
+
+            return self.ancestorsOfDescendant(nodeReceiverId, conn: conn)
+                .flatMap(to: [NodeElementClosure].self, { ancestors in
+                var futures: [Future<NodeElementClosure>] = []
+                for ancestor in ancestors {
+                    let nodeElementClosureFuture = NodeElementClosure(ancestor: ancestor.ancestor,
+                                                                      descendant: nodeToInsertId,
+                                                                      depth: ancestor.depth + 1).save(on: conn)
+                    futures.append(nodeElementClosureFuture)
+                }
+
+                return futures.flatten(on: conn)
+            }).flatMap(to: NodeElementClosure.self, { _ in
+                return NodeElementClosure(ancestor: nodeToInsertId, descendant: nodeToInsertId, depth: 0).save(on: conn)
+            })
+        }
+    }
+
+    /// Returns all the ancestors of the given descendant ID.
+    ///
+    /// - Parameters:
+    ///   - descendantId: The descendant ID to use.
+    ///   - conn: The database connection.
+    /// - Returns: The ancestors of the given descendant ID.
+    func ancestorsOfDescendant(_ descendantId: Int, conn: DatabaseConnectable) -> Future<[NodeElementClosure]> {
+        return NodeElementClosure.query(on: conn).filter(\.descendant == descendantId).all()
+    }
+
     /// Returns all the descendants of a given node, including the node itself.
     ///
     /// - Parameters:

@@ -5,7 +5,7 @@ import FluentPostgreSQL
 
 class TreeTests: BaseTests {
 
-    func testTreeCreation() throws {
+    private func setupTestTree() throws -> Tree<String> {
         let tree = Tree<String>()
         let node1 = tree.insert("1")
         let node2 = tree.insert(atNode: node1, value: "2")
@@ -15,16 +15,29 @@ class TreeTests: BaseTests {
         let node6 = tree.insert(atNode: node4, value: "6")
         let node7 = tree.insert(atNode: node6, value: "7")
 
-        let nodeElement1 = try NodeElement(elementId: node1.value, type: NodeType.game.rawValue).save(on: conn).wait()
-        let nodeElement2 = try NodeElement(elementId: node2.value, type: NodeType.roaster.rawValue).save(on: conn).wait()
-        let nodeElement3 = try NodeElement(elementId: node3.value, type: NodeType.army.rawValue).save(on: conn).wait()
-        let nodeElement4 = try NodeElement(elementId: node4.value, type: NodeType.roaster.rawValue).save(on: conn).wait()
-        let nodeElement5 = try NodeElement(elementId: node5.value, type: NodeType.army.rawValue).save(on: conn).wait()
-        let nodeElement6 = try NodeElement(elementId: node6.value, type: NodeType.army.rawValue).save(on: conn).wait()
-        let nodeElement7 = try NodeElement(elementId: node7.value, type: NodeType.detachment.rawValue).save(on: conn).wait()
+        _ = try NodeElement(elementId: node1.value, type: NodeType.game.rawValue).save(on: conn).wait()
+        _ = try NodeElement(elementId: node2.value, type: NodeType.roaster.rawValue).save(on: conn).wait()
+        _ = try NodeElement(elementId: node3.value, type: NodeType.army.rawValue).save(on: conn).wait()
+        _ = try NodeElement(elementId: node4.value, type: NodeType.roaster.rawValue).save(on: conn).wait()
+        _ = try NodeElement(elementId: node5.value, type: NodeType.army.rawValue).save(on: conn).wait()
+        _ = try NodeElement(elementId: node6.value, type: NodeType.army.rawValue).save(on: conn).wait()
+        _ = try NodeElement(elementId: node7.value, type: NodeType.detachment.rawValue).save(on: conn).wait()
 
+        return tree
+    }
+
+    func testTreeCreation() throws {
+        let tree = try setupTestTree()
         let treeDatastore = TreeDatastore()
         let nodeElementClosures = try treeDatastore.storeTree(tree, on: conn).wait()
+
+        let nodeElement1 = try NodeElement.query(on: conn).filter(\.elementId == "1").first().unwrap(or: RoasterHammerTreeError.missingNodesInDatabase).wait()
+        let nodeElement2 = try NodeElement.query(on: conn).filter(\.elementId == "2").first().unwrap(or: RoasterHammerTreeError.missingNodesInDatabase).wait()
+        let nodeElement3 = try NodeElement.query(on: conn).filter(\.elementId == "3").first().unwrap(or: RoasterHammerTreeError.missingNodesInDatabase).wait()
+        let nodeElement4 = try NodeElement.query(on: conn).filter(\.elementId == "4").first().unwrap(or: RoasterHammerTreeError.missingNodesInDatabase).wait()
+        let nodeElement5 = try NodeElement.query(on: conn).filter(\.elementId == "5").first().unwrap(or: RoasterHammerTreeError.missingNodesInDatabase).wait()
+        let nodeElement6 = try NodeElement.query(on: conn).filter(\.elementId == "6").first().unwrap(or: RoasterHammerTreeError.missingNodesInDatabase).wait()
+        let nodeElement7 = try NodeElement.query(on: conn).filter(\.elementId == "7").first().unwrap(or: RoasterHammerTreeError.missingNodesInDatabase).wait()
 
         // 1
         XCTAssertEqual(nodeElementClosures.filter { $0.ancestor == 1 && $0.descendant == 1}.first?.depth, 0)
@@ -79,6 +92,46 @@ class TreeTests: BaseTests {
         // 7
         let descendantsOf7 = try treeDatastore.findDescendantsForNode(nodeElement7, on: conn).wait()
         XCTAssertEqual(descendantsOf7.count, 1)
+    }
+
+    func testTreeInsertion() throws {
+        let tree = try setupTestTree()
+        let treeDatastore = TreeDatastore()
+        _ = try treeDatastore.storeTree(tree, on: conn).wait()
+
+        guard let nodeToInsertFrom = tree.search("5") else {
+            XCTFail("Could not find the expected node with value 5")
+            return
+        }
+
+        let insertedNode = try treeDatastore.insertValue("8", nodeType: .detachment, atNode: nodeToInsertFrom, fromTree: tree, conn: conn).wait()
+        XCTAssertEqual(insertedNode.ancestor, insertedNode.descendant)
+        XCTAssertEqual(insertedNode.depth, 0)
+
+        let ancestors = try treeDatastore.ancestorsOfDescendant(insertedNode.ancestor, conn: conn).wait()
+        XCTAssertEqual(ancestors.count, 4)
+        XCTAssertEqual(ancestors[0].ancestor, 1)
+        XCTAssertEqual(ancestors[0].depth, 3)
+        XCTAssertEqual(ancestors[1].ancestor, 4)
+        XCTAssertEqual(ancestors[1].depth, 2)
+        XCTAssertEqual(ancestors[2].ancestor, 5)
+        XCTAssertEqual(ancestors[2].depth, 1)
+        XCTAssertEqual(ancestors[3].ancestor, 8)
+        XCTAssertEqual(ancestors[3].depth, 0)
+    }
+
+    func testAncestorsOfDescendant() throws {
+        let tree = try setupTestTree()
+        let treeDatastore = TreeDatastore()
+        _ = try treeDatastore.storeTree(tree, on: conn).wait()
+
+        let descendant = try NodeElement.query(on: conn).filter(\.elementId == "5").first().unwrap(or: RoasterHammerTreeError.missingNodesInDatabase).wait()
+
+        let ancestors = try treeDatastore.ancestorsOfDescendant(descendant.id!, conn: conn).wait()
+        XCTAssertEqual(ancestors.count, 3)
+        XCTAssertEqual(ancestors[0].ancestor, 1)
+        XCTAssertEqual(ancestors[1].ancestor, 4)
+        XCTAssertEqual(ancestors[2].ancestor, 5)
     }
 
 }
