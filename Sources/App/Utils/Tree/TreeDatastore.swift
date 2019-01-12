@@ -177,7 +177,10 @@ final class TreeDatastore {
             })
     }
 
-    private func addDatabaseNodeToTree(tree: Tree<Int>, parentNode: TreeNode<Int>?, node: NodeElementClosure, conn: DatabaseConnectable) -> Future<Tree<Int>> {
+    private func addDatabaseNodeToTree(tree: Tree<Int>,
+                                       parentNode: TreeNode<Int>?,
+                                       node: NodeElementClosure,
+                                       conn: DatabaseConnectable) -> Future<Tree<Int>> {
         let insertedNode = tree.insert(atNode: parentNode, value: node.descendant)
 
         return self.nodeChildren(node, conn: conn).flatMap(to: Tree<Int>.self) { children in
@@ -200,6 +203,16 @@ final class TreeDatastore {
         return nodeElements.filter { $0.id == id }.first
     }
 
+    private func insertNodeElementChildren(toTree tree: Tree<NodeElement>,
+                                           from node: TreeNode<NodeElement>,
+                                           children: [TreeNode<Int>],
+                                           nodeElements: [NodeElement]) {
+        children.forEach {
+            let nodeElement = self.nodeElement(forId: $0.value, nodeElements: nodeElements)!
+            tree.insert(atNode: node, value: nodeElement)
+        }
+    }
+
     /// Transforms a tree of NodeElement ids into a tree of NodeElements.
     ///
     /// - Parameters:
@@ -210,20 +223,13 @@ final class TreeDatastore {
         let resultTree = Tree<NodeElement>()
 
         tree.root?.forEachLevelFirst(visit: { (node, children) in
+            let nodeElement = self.nodeElement(forId: node.value, nodeElements: nodeElements)!
+
             if resultTree.root == nil {
-                let insertedNode = resultTree.insert(nodeElement(forId: node.value, nodeElements: nodeElements)!)
-                children.forEach {
-                    let nodeElement = self.nodeElement(forId: $0.value, nodeElements: nodeElements)!
-                    resultTree.insert(atNode: insertedNode, value: nodeElement)
-                }
-            } else {
-                let nodeElement = self.nodeElement(forId: node.value, nodeElements: nodeElements)!
-                if let insertedNode = resultTree.search(nodeElement) {
-                    children.forEach {
-                        let nodeElement = self.nodeElement(forId: $0.value, nodeElements: nodeElements)!
-                        resultTree.insert(atNode: insertedNode, value: nodeElement)
-                    }
-                }
+                let insertedNode = resultTree.insert(nodeElement)
+                self.insertNodeElementChildren(toTree: resultTree, from: insertedNode, children: children, nodeElements: nodeElements)
+            } else if let insertedNode = resultTree.search(nodeElement) {
+                self.insertNodeElementChildren(toTree: resultTree, from: insertedNode, children: children, nodeElements: nodeElements)
             }
         })
 
