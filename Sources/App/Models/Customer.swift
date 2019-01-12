@@ -1,10 +1,3 @@
-//
-//  Customer.swift
-//  App
-//
-//  Created by Thibault Klein on 1/9/19.
-//
-
 import Vapor
 import FluentPostgreSQL
 import Authentication
@@ -40,7 +33,7 @@ final class Customer: PostgreSQLModel {
     }
 }
 
-extension Customer: Content {}
+extension Customer: Content { }
 
 extension Customer {
     func convertToPublic() -> Customer.Public {
@@ -64,4 +57,3 @@ extension Customer: BasicAuthenticatable {
 extension Customer: TokenAuthenticatable {
     typealias TokenType = UserToken
 }
-

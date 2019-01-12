@@ -34,8 +34,15 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     /// Configure migrations
     var migrations = MigrationConfig()
     NodeElementClosure.defaultDatabase = .psql
+    GameRule.defaultDatabase = .psql
+    RoasterRule.defaultDatabase = .psql
     migrations.add(model: NodeElement.self, database: .psql)
+    migrations.add(model: Game.self, database: .psql)
+    migrations.add(model: Rule.self, database: .psql)
+    migrations.add(model: Roaster.self, database: .psql)
     migrations.add(migration: CreateNodeElementClosure.self, database: .psql)
+    migrations.add(migration: CreateGameRule.self, database: .psql)
+    migrations.add(migration: CreateRoasterRule.self, database: .psql)
     services.register(migrations)
 
     // Configure the command line tool to add Fluent commands like revert and migrate database
