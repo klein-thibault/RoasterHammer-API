@@ -141,9 +141,48 @@ class TreeTests: BaseTests {
 
         let treeRoot = tree.root!
         let treeFromDatabase = try treeDatastore.createTreeFromRoot(treeRoot, conn: conn).wait()
-        treeFromDatabase.root?.forEachLevelFirst(visit: { node in
-            print(node.value)
+
+        var allTreeNodes: [String] = []
+        tree.root?.forEachLevelFirst(visit: { testTreeNode in
+            allTreeNodes.append(testTreeNode.value)
         })
+
+        var allDatabaseTreeNodes: [String] = []
+        treeFromDatabase.root?.forEachLevelFirst(visit: { databaseTreeNode in
+            allDatabaseTreeNodes.append(String(databaseTreeNode.value))
+        })
+
+        XCTAssertEqual(allTreeNodes.count, allDatabaseTreeNodes.count)
+        for i in 0...allTreeNodes.count - 1 {
+            XCTAssertEqual(allTreeNodes[i], allDatabaseTreeNodes[i])
+        }
+    }
+
+    func testCreateRoasterTreeFromDatabaseTree() throws {
+        let tree = try setupTestTree()
+        let treeDatastore = TreeDatastore()
+        _ = try treeDatastore.storeTreeToDatabase(tree, on: conn).wait()
+
+        let treeRoot = tree.root!
+        let treeFromDatabase = try treeDatastore.createTreeFromRoot(treeRoot, conn: conn).wait()
+
+        let roasterTree = try treeDatastore.createRoasterTreeFromDatabaseTree(treeFromDatabase, conn: conn).wait()
+        XCTAssertNotNil(roasterTree.root)
+
+        var allTreeNodes: [String] = []
+        tree.root?.forEachLevelFirst(visit: { testTreeNode in
+            allTreeNodes.append(testTreeNode.value)
+        })
+
+        var allRoasterTreeNodes: [String] = []
+        roasterTree.root?.forEachLevelFirst(visit: { roasterTreeNode in
+            allRoasterTreeNodes.append(roasterTreeNode.value.elementId)
+        })
+
+        XCTAssertEqual(allTreeNodes.count, allRoasterTreeNodes.count)
+        for i in 0...allTreeNodes.count - 1 {
+            XCTAssertEqual(allTreeNodes[i], allRoasterTreeNodes[i])
+        }
     }
 
 }

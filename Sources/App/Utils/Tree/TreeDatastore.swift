@@ -3,6 +3,8 @@ import FluentPostgreSQL
 
 final class TreeDatastore {
 
+    // MARK: - Public Functions
+
     /// Given a tree, this function will persist all the node and branches in a closure table.
     ///
     /// - Parameters:
@@ -109,6 +111,47 @@ final class TreeDatastore {
         return NodeElementClosure.query(on: conn).filter(\.descendant == descendantId).all()
     }
 
+    /// Returns the roaster tree, a tree structuring how to roaster looks like (game, army, detachments, units, rules, etc.)
+    /// This tree can then be used to display the current state of the roaster.
+    ///
+    /// - Parameters:
+    ///   - databaseTree: The tree coming from the database with NodeElement ID nodes.
+    ///   - conn: The database connection.
+    /// - Returns: The final roaster tree containing NodeElement node objects.
+    func createRoasterTreeFromDatabaseTree(_ databaseTree: Tree<Int>, conn: DatabaseConnectable) -> Future<Tree<NodeElement>> {
+        guard let root = databaseTree.root else {
+            return conn.future(error: RoasterHammerTreeError.treeIsEmpty)
+        }
+
+        var nodeElementFuture: [Future<NodeElement>] = []
+
+        root.forEachLevelFirst { (node) in
+            let nodeElement = NodeElement
+                .query(on: conn)
+                .filter(\.id == node.value)
+                .first()
+                .unwrap(or: RoasterHammerTreeError.nodeIsInvalid)
+            nodeElementFuture.append(nodeElement)
+        }
+
+        return nodeElementFuture.flatten(on: conn)
+            .flatMap(to: Tree<NodeElement>.self) { nodeElements in
+                let tree = self.transformTree(databaseTree, nodeElements: nodeElements)
+
+                return conn.future(tree)
+        }
+    }
+
+    // MARK: - Private Functions
+
+    private func nodeChildren(_ node: NodeElementClosure, conn: DatabaseConnectable) -> Future<[NodeElementClosure]> {
+        return NodeElementClosure
+            .query(on: conn)
+            .filter(\.ancestor == node.descendant)
+            .filter(\.depth == 1)
+            .all()
+    }
+
     /// Returns all the descendants of a given node, including the node itself.
     ///
     /// - Parameters:
@@ -131,17 +174,7 @@ final class TreeDatastore {
                 }
 
                 return nodeElementFutures.flatten(on: conn)
-        })
-    }
-
-    // MARK: - Private Functions
-
-    private func nodeChildren(_ node: NodeElementClosure, conn: DatabaseConnectable) -> Future<[NodeElementClosure]> {
-        return NodeElementClosure
-            .query(on: conn)
-            .filter(\.ancestor == node.descendant)
-            .filter(\.depth == 1)
-            .all()
+            })
     }
 
     private func addDatabaseNodeToTree(tree: Tree<Int>, parentNode: TreeNode<Int>?, node: NodeElementClosure, conn: DatabaseConnectable) -> Future<Tree<Int>> {
@@ -163,12 +196,38 @@ final class TreeDatastore {
         }
     }
 
-//    private func createRoasterTreeFromDatabaseTree(_ databaseTree: Tree<Int>, conn: DatabaseConnectable) -> Future<Tree<NodeElement>> {
-//        guard let root = databaseTree.root else {
-//            return conn.future(error: RoasterHammerTreeError.treeIsEmpty)
-//        }
-//
-//        root.forEachLevelFirst(visit: <#T##(TreeNode<Int>) -> Void#>)
-//    }
+    private func nodeElement(forId id: Int, nodeElements: [NodeElement]) -> NodeElement? {
+        return nodeElements.filter { $0.id == id }.first
+    }
+
+    /// Transforms a tree of NodeElement ids into a tree of NodeElements.
+    ///
+    /// - Parameters:
+    ///   - tree: The tree of element ids.
+    ///   - nodeElements: The list of all node elements.
+    /// - Returns: The tree of NodeElement.
+    private func transformTree(_ tree: Tree<Int>, nodeElements: [NodeElement]) -> Tree<NodeElement> {
+        let resultTree = Tree<NodeElement>()
+
+        tree.root?.forEachLevelFirst(visit: { (node, children) in
+            if resultTree.root == nil {
+                let insertedNode = resultTree.insert(nodeElement(forId: node.value, nodeElements: nodeElements)!)
+                children.forEach {
+                    let nodeElement = self.nodeElement(forId: $0.value, nodeElements: nodeElements)!
+                    resultTree.insert(atNode: insertedNode, value: nodeElement)
+                }
+            } else {
+                let nodeElement = self.nodeElement(forId: node.value, nodeElements: nodeElements)!
+                if let insertedNode = resultTree.search(nodeElement) {
+                    children.forEach {
+                        let nodeElement = self.nodeElement(forId: $0.value, nodeElements: nodeElements)!
+                        resultTree.insert(atNode: insertedNode, value: nodeElement)
+                    }
+                }
+            }
+        })
+
+        return resultTree
+    }
 
 }

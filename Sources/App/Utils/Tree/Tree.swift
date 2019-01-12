@@ -8,6 +8,7 @@ final class Tree<T> {
 
     init() {}
 
+    @discardableResult
     func insert(_ value: T) -> TreeNode<T> {
         return insert(atNode: root, value: value)
     }

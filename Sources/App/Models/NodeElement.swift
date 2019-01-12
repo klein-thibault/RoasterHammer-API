@@ -25,3 +25,9 @@ final class NodeElement: PostgreSQLModel {
 
 extension NodeElement: Content { }
 extension NodeElement: PostgreSQLMigration { }
+
+extension NodeElement: Equatable {
+    static func == (lhs: NodeElement, rhs: NodeElement) -> Bool {
+        return lhs.id == rhs.id && lhs.elementId == rhs.elementId && lhs.type == rhs.type
+    }
+}
