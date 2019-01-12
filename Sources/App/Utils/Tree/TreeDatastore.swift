@@ -9,7 +9,7 @@ final class TreeDatastore {
     ///   - tree: The tree to persist.
     ///   - conn: The database connection to use.
     /// - Returns: The list of persisted node elements.
-    func storeTree(_ tree: Tree<String>, on conn: DatabaseConnectable) -> Future<[NodeElementClosure]> {
+    func storeTreeToDatabase(_ tree: Tree<String>, on conn: DatabaseConnectable) -> Future<[NodeElementClosure]> {
         guard let root = tree.root else {
             return conn.eventLoop.newFailedFuture(error: RoasterHammerTreeError.treeIsEmpty)
         }
@@ -41,6 +41,26 @@ final class TreeDatastore {
         }
 
         return nodeElementClosureFutures.flatten(on: conn)
+    }
+
+    func createTreeFromRoot(_ root: TreeNode<String>, conn: DatabaseConnectable) -> Future<Tree<Int>> {
+        return NodeElement
+            .query(on: conn)
+            .filter(\.elementId == root.value)
+            .first()
+            .unwrap(or: RoasterHammerTreeError.missingNodesInDatabase)
+            .flatMap(to: NodeElementClosure.self, { rootElement in
+                return NodeElementClosure
+                    .query(on: conn)
+                    .filter(\.ancestor == rootElement.id!)
+                    .filter(\.depth == 0)
+                    .first()
+                    .unwrap(or: RoasterHammerTreeError.missingNodesInDatabase)
+            })
+            .flatMap(to: Tree<Int>.self) { root in
+                let tree = Tree<Int>()
+                return self.addDatabaseNodeToTree(tree: tree, parentNode: nil, node: root, conn: conn)
+        }
     }
 
     func insertValue(_ value: String,
@@ -113,5 +133,42 @@ final class TreeDatastore {
                 return nodeElementFutures.flatten(on: conn)
         })
     }
+
+    // MARK: - Private Functions
+
+    private func nodeChildren(_ node: NodeElementClosure, conn: DatabaseConnectable) -> Future<[NodeElementClosure]> {
+        return NodeElementClosure
+            .query(on: conn)
+            .filter(\.ancestor == node.descendant)
+            .filter(\.depth == 1)
+            .all()
+    }
+
+    private func addDatabaseNodeToTree(tree: Tree<Int>, parentNode: TreeNode<Int>?, node: NodeElementClosure, conn: DatabaseConnectable) -> Future<Tree<Int>> {
+        let insertedNode = tree.insert(atNode: parentNode, value: node.descendant)
+
+        return self.nodeChildren(node, conn: conn).flatMap(to: Tree<Int>.self) { children in
+            if children.isEmpty {
+                return conn.future(tree)
+            }
+
+            var futures: [Future<Tree<Int>>] = []
+            for child in children {
+                futures.append(self.addDatabaseNodeToTree(tree: tree, parentNode: insertedNode, node: child, conn: conn))
+            }
+
+            return futures.flatten(on: conn).then({ (trees) -> EventLoopFuture<Tree<Int>> in
+                return conn.future(trees.last!)
+            })
+        }
+    }
+
+//    private func createRoasterTreeFromDatabaseTree(_ databaseTree: Tree<Int>, conn: DatabaseConnectable) -> Future<Tree<NodeElement>> {
+//        guard let root = databaseTree.root else {
+//            return conn.future(error: RoasterHammerTreeError.treeIsEmpty)
+//        }
+//
+//        root.forEachLevelFirst(visit: <#T##(TreeNode<Int>) -> Void#>)
+//    }
 
 }

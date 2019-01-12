@@ -29,7 +29,7 @@ class TreeTests: BaseTests {
     func testTreeCreation() throws {
         let tree = try setupTestTree()
         let treeDatastore = TreeDatastore()
-        let nodeElementClosures = try treeDatastore.storeTree(tree, on: conn).wait()
+        let nodeElementClosures = try treeDatastore.storeTreeToDatabase(tree, on: conn).wait()
 
         let nodeElement1 = try NodeElement.query(on: conn).filter(\.elementId == "1").first().unwrap(or: RoasterHammerTreeError.missingNodesInDatabase).wait()
         let nodeElement2 = try NodeElement.query(on: conn).filter(\.elementId == "2").first().unwrap(or: RoasterHammerTreeError.missingNodesInDatabase).wait()
@@ -97,7 +97,7 @@ class TreeTests: BaseTests {
     func testTreeInsertion() throws {
         let tree = try setupTestTree()
         let treeDatastore = TreeDatastore()
-        _ = try treeDatastore.storeTree(tree, on: conn).wait()
+        _ = try treeDatastore.storeTreeToDatabase(tree, on: conn).wait()
 
         guard let nodeToInsertFrom = tree.search("5") else {
             XCTFail("Could not find the expected node with value 5")
@@ -123,7 +123,7 @@ class TreeTests: BaseTests {
     func testAncestorsOfDescendant() throws {
         let tree = try setupTestTree()
         let treeDatastore = TreeDatastore()
-        _ = try treeDatastore.storeTree(tree, on: conn).wait()
+        _ = try treeDatastore.storeTreeToDatabase(tree, on: conn).wait()
 
         let descendant = try NodeElement.query(on: conn).filter(\.elementId == "5").first().unwrap(or: RoasterHammerTreeError.missingNodesInDatabase).wait()
 
@@ -132,6 +132,18 @@ class TreeTests: BaseTests {
         XCTAssertEqual(ancestors[0].ancestor, 1)
         XCTAssertEqual(ancestors[1].ancestor, 4)
         XCTAssertEqual(ancestors[2].ancestor, 5)
+    }
+
+    func testTreeFromDatabase() throws {
+        let tree = try setupTestTree()
+        let treeDatastore = TreeDatastore()
+        _ = try treeDatastore.storeTreeToDatabase(tree, on: conn).wait()
+
+        let treeRoot = tree.root!
+        let treeFromDatabase = try treeDatastore.createTreeFromRoot(treeRoot, conn: conn).wait()
+        treeFromDatabase.root?.forEachLevelFirst(visit: { node in
+            print(node.value)
+        })
     }
 
 }
