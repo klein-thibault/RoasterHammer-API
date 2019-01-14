@@ -12,9 +12,6 @@ final class Roaster: PostgreSQLModel {
     var rules: Siblings<Roaster, Rule, RoasterRule> {
         return siblings()
     }
-    var users: Siblings<Roaster, Customer, UserRoaster> {
-        return siblings()
-    }
 
     init(name: String, version: Int, gameId: Int) {
         self.name = name

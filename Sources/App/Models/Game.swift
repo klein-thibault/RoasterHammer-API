@@ -11,6 +11,9 @@ final class Game: PostgreSQLModel {
     var rules: Siblings<Game, Rule, GameRule> {
         return siblings()
     }
+    var users: Siblings<Game, Customer, UserGame> {
+        return siblings()
+    }
 
     init(name: String, version: Int) {
         self.name = name

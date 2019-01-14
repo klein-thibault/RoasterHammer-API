@@ -7,7 +7,11 @@ class RoasterControllerTests: BaseTests {
 
     func testCreateRoaster() throws {
         let user = try app.createAndLogUser()
-        let game = try Game(name: "Warhammer 40,000", version: 8).save(on: conn).wait()
+        let game = try app.getResponse(to: "games",
+                                       method: .POST,
+                                       decodeTo: Game.self,
+                                       loggedInRequest: true,
+                                       loggedInCustomer: user)
         let request = CreateRoasterRequest(name: "My Roaster", gameId: game.id!)
         let roaster = try app.getResponse(to: "/roasters",
                                           method: .POST,
@@ -24,16 +28,15 @@ class RoasterControllerTests: BaseTests {
         XCTAssertEqual(roasterGame.id, game.id)
         XCTAssertEqual(roasterGame.name, game.name)
         XCTAssertEqual(roasterGame.version, game.version)
-
-        let userId = try Customer.query(on: conn).filter(\.email == user.email).first().wait()?.id
-        let roasterUser = try roaster.users.query(on: conn).filter(\.id == userId).first().wait()
-        XCTAssertEqual(roasterUser?.id, userId)
-        XCTAssertEqual(roasterUser?.email, user.email)
     }
 
     func testGetRoasters() throws {
         let user = try app.createAndLogUser()
-        let game = try Game(name: "Warhammer 40,000", version: 8).save(on: conn).wait()
+        let game = try app.getResponse(to: "games",
+                                       method: .POST,
+                                       decodeTo: Game.self,
+                                       loggedInRequest: true,
+                                       loggedInCustomer: user)
         let request = CreateRoasterRequest(name: "My Roaster", gameId: game.id!)
         let roaster = try app.getResponse(to: "/roasters",
                                           method: .POST,

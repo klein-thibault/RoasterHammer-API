@@ -10,7 +10,7 @@ final class Customer: PostgreSQLModel {
     var tokens: Children<Customer, UserToken> {
         return children(\.userID)
     }
-    var roasters: Siblings<Customer, Roaster, UserRoaster> {
+    var games: Siblings<Customer, Game, UserGame> {
         return siblings()
     }
 

@@ -1,20 +1,20 @@
 import FluentPostgreSQL
 
-struct CreateUserRoaster: PostgreSQLMigration {
+struct CreateUserGame: PostgreSQLMigration {
 
     static func prepare(on conn: PostgreSQLConnection) -> EventLoopFuture<Void> {
-        return PostgreSQLDatabase.create(UserRoaster.self, on: conn, closure: { (builder) in
+        return PostgreSQLDatabase.create(UserGame.self, on: conn, closure: { (builder) in
             builder.field(for: \.id, isIdentifier: true)
-            builder.field(for: \.roasterId)
+            builder.field(for: \.gameId)
             builder.field(for: \.userId)
-            builder.reference(from: \.roasterId, to: \Roaster.id, onDelete: .cascade)
+            builder.reference(from: \.gameId, to: \Game.id, onDelete: .cascade)
             builder.reference(from: \.userId, to: \Customer.id, onDelete: .cascade)
-            builder.unique(on: \.roasterId, \.userId)
+            builder.unique(on: \.gameId, \.userId)
         })
     }
 
     static func revert(on conn: PostgreSQLConnection) -> EventLoopFuture<Void> {
-        return PostgreSQLDatabase.delete(UserRoaster.self, on: conn)
+        return PostgreSQLDatabase.delete(UserGame.self, on: conn)
     }
 
 }

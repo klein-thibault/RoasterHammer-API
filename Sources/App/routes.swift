@@ -16,6 +16,10 @@ public func routes(_ router: Router) throws {
     protectedBasicRouter.post("users/login", use: userController.loginUser)
     protectedAuthRouter.get("users", use: userController.getUser)
 
+    // Game
+    let gameController = GameController()
+    protectedAuthRouter.post("games", use: gameController.createGame)
+
     // Roaster
     let roasterController = RoasterController()
     protectedAuthRouter.post("roasters", use: roasterController.createRoster)
