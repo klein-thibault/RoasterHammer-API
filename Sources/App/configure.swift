@@ -1,5 +1,6 @@
-import FluentPostgreSQL
 import Vapor
+import FluentPostgreSQL
+import Authentication
 
 /// Called before your application initializes.
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
@@ -36,6 +37,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     NodeElementClosure.defaultDatabase = .psql
     GameRule.defaultDatabase = .psql
     RoasterRule.defaultDatabase = .psql
+    UserRoaster.defaultDatabase = .psql
+    migrations.add(model: Customer.self, database: .psql)
+    migrations.add(model: UserToken.self, database: .psql)
     migrations.add(model: NodeElement.self, database: .psql)
     migrations.add(model: Game.self, database: .psql)
     migrations.add(model: Rule.self, database: .psql)
@@ -43,10 +47,14 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(migration: CreateNodeElementClosure.self, database: .psql)
     migrations.add(migration: CreateGameRule.self, database: .psql)
     migrations.add(migration: CreateRoasterRule.self, database: .psql)
+    migrations.add(migration: CreateUserRoaster.self, database: .psql)
     services.register(migrations)
 
     // Configure the command line tool to add Fluent commands like revert and migrate database
     var commandConfig = CommandConfig.default()
     commandConfig.useFluentCommands()
     services.register(commandConfig)
+
+    // Auth provider
+    try services.register(AuthenticationProvider())
 }

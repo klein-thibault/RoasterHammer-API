@@ -27,6 +27,7 @@ final class UserToken: PostgreSQLModel {
 }
 
 extension UserToken: Content { }
+extension UserToken: PostgreSQLMigration { }
 
 extension UserToken: Token {
     typealias UserType = Customer

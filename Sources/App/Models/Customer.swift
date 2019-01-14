@@ -7,6 +7,12 @@ final class Customer: PostgreSQLModel {
     var customerId: String
     var email: String
     var password: String
+    var tokens: Children<Customer, UserToken> {
+        return children(\.userID)
+    }
+    var roasters: Siblings<Customer, Roaster, UserRoaster> {
+        return siblings()
+    }
 
     init(id: Int? = nil,
          customerId: String,
@@ -27,13 +33,10 @@ final class Customer: PostgreSQLModel {
             self.email = email
         }
     }
-
-    var tokens: Children<Customer, UserToken> {
-        return children(\.userID)
-    }
 }
 
 extension Customer: Content { }
+extension Customer: PostgreSQLMigration { }
 
 extension Customer {
     func convertToPublic() -> Customer.Public {
