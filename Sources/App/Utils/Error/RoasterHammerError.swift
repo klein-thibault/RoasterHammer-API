@@ -8,4 +8,6 @@ enum RoasterHammerTreeError: Swift.Error {
 
 enum RoasterHammerError: Swift.Error {
     case gameIsMissing
+    case roasterIsMissing
+    case armyIsMissing
 }

@@ -9,6 +9,9 @@ final class Roaster: PostgreSQLModel {
     var game: Parent<Roaster, Game> {
         return parent(\.gameId)
     }
+    var armies: Siblings<Roaster, Army, RoasterArmy> {
+        return siblings()
+    }
     var rules: Siblings<Roaster, Rule, RoasterRule> {
         return siblings()
     }

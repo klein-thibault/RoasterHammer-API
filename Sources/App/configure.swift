@@ -38,16 +38,21 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     GameRule.defaultDatabase = .psql
     RoasterRule.defaultDatabase = .psql
     UserGame.defaultDatabase = .psql
+    ArmyRule.defaultDatabase = .psql
+    RoasterArmy.defaultDatabase = .psql
     migrations.add(model: Customer.self, database: .psql)
     migrations.add(model: UserToken.self, database: .psql)
     migrations.add(model: NodeElement.self, database: .psql)
     migrations.add(model: Game.self, database: .psql)
     migrations.add(model: Rule.self, database: .psql)
     migrations.add(model: Roaster.self, database: .psql)
+    migrations.add(model: Army.self, database: .psql)
     migrations.add(migration: CreateNodeElementClosure.self, database: .psql)
     migrations.add(migration: CreateGameRule.self, database: .psql)
     migrations.add(migration: CreateRoasterRule.self, database: .psql)
     migrations.add(migration: CreateUserGame.self, database: .psql)
+    migrations.add(migration: CreateArmyRule.self, database: .psql)
+    migrations.add(migration: CreateRoasterArmy.self, database: .psql)
     services.register(migrations)
 
     // Configure the command line tool to add Fluent commands like revert and migrate database

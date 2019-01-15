@@ -26,3 +26,9 @@ extension Rule {
         return siblings()
     }
 }
+
+extension Rule {
+    var armies: Siblings<Rule, Army, ArmyRule> {
+        return siblings()
+    }
+}
