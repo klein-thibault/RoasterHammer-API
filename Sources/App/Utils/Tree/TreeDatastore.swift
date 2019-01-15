@@ -45,20 +45,13 @@ final class TreeDatastore {
         return nodeElementClosureFutures.flatten(on: conn)
     }
 
-    func createTreeFromRoot(_ root: TreeNode<String>, conn: DatabaseConnectable) -> Future<Tree<Int>> {
-        return NodeElement
+    func createTreeFromRoot(_ root: NodeElement, conn: DatabaseConnectable) -> Future<Tree<Int>> {
+        return NodeElementClosure
             .query(on: conn)
-            .filter(\.elementId == root.value)
+            .filter(\.ancestor == root.id!)
+            .filter(\.depth == 0)
             .first()
             .unwrap(or: RoasterHammerTreeError.missingNodesInDatabase)
-            .flatMap(to: NodeElementClosure.self, { rootElement in
-                return NodeElementClosure
-                    .query(on: conn)
-                    .filter(\.ancestor == rootElement.id!)
-                    .filter(\.depth == 0)
-                    .first()
-                    .unwrap(or: RoasterHammerTreeError.missingNodesInDatabase)
-            })
             .flatMap(to: Tree<Int>.self) { root in
                 let tree = Tree<Int>()
                 return self.addDatabaseNodeToTree(tree: tree, parentNode: nil, node: root, conn: conn)

@@ -139,7 +139,7 @@ class TreeTests: BaseTests {
         let treeDatastore = TreeDatastore()
         _ = try treeDatastore.storeTreeToDatabase(tree, on: conn).wait()
 
-        let treeRoot = tree.root!
+        let treeRoot = try NodeElement.query(on: conn).filter(\.elementId == tree.root!.value).first().unwrap(or: RoasterHammerTreeError.missingNodesInDatabase).wait()
         let treeFromDatabase = try treeDatastore.createTreeFromRoot(treeRoot, conn: conn).wait()
 
         var allTreeNodes: [String] = []
@@ -163,7 +163,7 @@ class TreeTests: BaseTests {
         let treeDatastore = TreeDatastore()
         _ = try treeDatastore.storeTreeToDatabase(tree, on: conn).wait()
 
-        let treeRoot = tree.root!
+        let treeRoot = try NodeElement.query(on: conn).filter(\.elementId == tree.root!.value).first().unwrap(or: RoasterHammerTreeError.missingNodesInDatabase).wait()
         let treeFromDatabase = try treeDatastore.createTreeFromRoot(treeRoot, conn: conn).wait()
 
         let roasterTree = try treeDatastore.createRoasterTreeFromDatabaseTree(treeFromDatabase, conn: conn).wait()

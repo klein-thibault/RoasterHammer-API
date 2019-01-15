@@ -5,3 +5,7 @@ enum RoasterHammerTreeError: Swift.Error {
     case missingNodesInDatabase
     case treeIsEmpty
 }
+
+enum RoasterHammerError: Swift.Error {
+    case gameIsMissing
+}

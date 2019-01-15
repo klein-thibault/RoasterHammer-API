@@ -12,8 +12,8 @@ class RoasterControllerTests: BaseTests {
                                        decodeTo: Game.self,
                                        loggedInRequest: true,
                                        loggedInCustomer: user)
-        let request = CreateRoasterRequest(name: "My Roaster", gameId: game.id!)
-        let roaster = try app.getResponse(to: "/roasters",
+        let request = CreateRoasterRequest(name: "My Roaster")
+        let roaster = try app.getResponse(to: "games/\(game.id!)/roasters",
                                           method: .POST,
                                           headers: ["Content-Type": "application/json"],
                                           data: request,
@@ -37,8 +37,8 @@ class RoasterControllerTests: BaseTests {
                                        decodeTo: Game.self,
                                        loggedInRequest: true,
                                        loggedInCustomer: user)
-        let request = CreateRoasterRequest(name: "My Roaster", gameId: game.id!)
-        let roaster = try app.getResponse(to: "/roasters",
+        let request = CreateRoasterRequest(name: "My Roaster")
+        let roaster = try app.getResponse(to: "games/\(game.id!)/roasters",
                                           method: .POST,
                                           headers: ["Content-Type": "application/json"],
                                           data: request,
@@ -46,7 +46,7 @@ class RoasterControllerTests: BaseTests {
                                           loggedInRequest: true,
                                           loggedInCustomer: user)
 
-        let roasters = try app.getResponse(to: "/roasters",
+        let roasters = try app.getResponse(to: "games/\(game.id!)/roasters",
                                               method: .GET,
                                               decodeTo: [Roaster].self,
                                               loggedInRequest: true,

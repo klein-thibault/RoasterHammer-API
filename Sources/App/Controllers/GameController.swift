@@ -14,4 +14,9 @@ final class GameController {
             })
     }
 
+    func getGames(_ req: Request) throws -> Future<[Game]> {
+        let customer = try req.requireAuthenticated(Customer.self)
+        return try customer.games.query(on: req).all()
+    }
+
 }
