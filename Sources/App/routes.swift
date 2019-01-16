@@ -32,4 +32,10 @@ public func routes(_ router: Router) throws {
     router.get("armies", use: armyController.armies)
     protectedAuthRouter.post("games", Int.parameter, "roasters", Int.parameter, "armies",
                              use: armyController.addArmyToRoaster)
+
+    // Detachment
+    let detachmentController = DetachmentController()
+    router.post("detachments", use: detachmentController.createDetachment)
+    router.get("detachments", use: detachmentController.detachments)
+    protectedAuthRouter.post("armies", Int.parameter, "detachments", use: detachmentController.addDetachmentToArmy)
 }

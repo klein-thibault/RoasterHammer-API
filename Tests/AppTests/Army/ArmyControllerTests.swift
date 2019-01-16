@@ -56,6 +56,7 @@ class ArmyControllerTests: BaseTests {
             loggedInCustomer: user)
         let finalRoasterArmies = try finalRoaster.armies.query(on: conn).all().wait()
         XCTAssertEqual(finalRoasterArmies.count, 1)
+        XCTAssertEqual(finalRoasterArmies[0].id!, army.id!)
         XCTAssertEqual(finalRoasterArmies[0].name, army.name)
     }
 
