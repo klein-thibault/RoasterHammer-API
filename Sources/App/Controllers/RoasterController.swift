@@ -27,23 +27,4 @@ final class RoasterController {
         })
     }
 
-    func addArmyToRoaster(_ req: Request) throws -> Future<Roaster> {
-        _ = try req.requireAuthenticated(Customer.self)
-        _ = try req.parameters.next(Int.self)
-        let roasterId = try req.parameters.next(Int.self)
-
-        return try req.content.decode(AddArmyToRoasterRequest.self)
-            .flatMap(to: Army.self, { request in
-                return Army.find(request.armyId, on: req).unwrap(or: RoasterHammerError.armyIsMissing)
-            })
-            .flatMap(to: Roaster.self, { army in
-                return Roaster.find(roasterId, on: req).unwrap(or: RoasterHammerError.roasterIsMissing)
-                    .then({ roaster in
-                        return roaster.armies.attach(army, on: req).then({ _ in
-                            return req.future(roaster)
-                        })
-                })
-            })
-    }
-
 }

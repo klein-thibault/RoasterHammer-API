@@ -8,6 +8,9 @@ final class Army: PostgreSQLModel {
     var roasters: Siblings<Army, Roaster, RoasterArmy> {
         return siblings()
     }
+    var detachments: Siblings<Army, Detachment, ArmyDetachment> {
+        return siblings()
+    }
     var rules: Siblings<Army, Rule, ArmyRule> {
         return siblings()
     }

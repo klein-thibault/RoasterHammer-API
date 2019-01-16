@@ -40,6 +40,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     UserGame.defaultDatabase = .psql
     ArmyRule.defaultDatabase = .psql
     RoasterArmy.defaultDatabase = .psql
+    ArmyDetachment.defaultDatabase = .psql
     migrations.add(model: Customer.self, database: .psql)
     migrations.add(model: UserToken.self, database: .psql)
     migrations.add(model: NodeElement.self, database: .psql)
@@ -47,12 +48,14 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: Rule.self, database: .psql)
     migrations.add(model: Roaster.self, database: .psql)
     migrations.add(model: Army.self, database: .psql)
+    migrations.add(model: Detachment.self, database: .psql)
     migrations.add(migration: CreateNodeElementClosure.self, database: .psql)
     migrations.add(migration: CreateGameRule.self, database: .psql)
     migrations.add(migration: CreateRoasterRule.self, database: .psql)
     migrations.add(migration: CreateUserGame.self, database: .psql)
     migrations.add(migration: CreateArmyRule.self, database: .psql)
     migrations.add(migration: CreateRoasterArmy.self, database: .psql)
+    migrations.add(migration: CreateArmyDetachment.self, database: .psql)
     services.register(migrations)
 
     // Configure the command line tool to add Fluent commands like revert and migrate database

@@ -25,10 +25,11 @@ public func routes(_ router: Router) throws {
     let roasterController = RoasterController()
     protectedAuthRouter.post("games", Int.parameter, "roasters", use: roasterController.createRoster)
     protectedAuthRouter.get("games", Int.parameter, "roasters", use: roasterController.getRoasters)
-    protectedAuthRouter.post("games", Int.parameter, "roasters", Int.parameter, "armies", use: roasterController.addArmyToRoaster)
 
     // Army
     let armyController = ArmyController()
     router.post("armies", use: armyController.createArmy)
     router.get("armies", use: armyController.armies)
+    protectedAuthRouter.post("games", Int.parameter, "roasters", Int.parameter, "armies",
+                             use: armyController.addArmyToRoaster)
 }
