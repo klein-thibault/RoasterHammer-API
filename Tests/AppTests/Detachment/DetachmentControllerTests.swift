@@ -16,6 +16,26 @@ class DetachmentControllerTests: BaseTests {
         XCTAssertEqual(detachment.commandPoints, request.commandPoints)
     }
 
+    func testCreateDetachmentWithUnitRoles() throws {
+        let request = CreateDetachmentRequest(name: "Patrol", commandPoints: 0)
+        try app.sendRequest(to: "unitRoles", method: .POST, headers: ["Content-Type": "application/json"], data: CreateUnitRoleRequest(name: "HQ"))
+        try app.sendRequest(to: "unitRoles", method: .POST, headers: ["Content-Type": "application/json"], data: CreateUnitRoleRequest(name: "Troops"))
+        try app.sendRequest(to: "unitRoles", method: .POST, headers: ["Content-Type": "application/json"], data: CreateUnitRoleRequest(name: "Elites"))
+        let detachment = try app.getResponse(to: "detachments",
+                                             method: .POST,
+                                             headers: ["Content-Type": "application/json"],
+                                             data: request,
+                                             decodeTo: Detachment.self)
+        let unitRoles = try detachment.unitRoles.query(on: conn).all().wait()
+
+        XCTAssertEqual(detachment.name, request.name)
+        XCTAssertEqual(detachment.commandPoints, request.commandPoints)
+        XCTAssertEqual(unitRoles.count, 3)
+        XCTAssertEqual(unitRoles[0].name, "HQ")
+        XCTAssertEqual(unitRoles[1].name, "Troops")
+        XCTAssertEqual(unitRoles[2].name, "Elites")
+    }
+
     func testGetAllDetachments() throws {
         let request = CreateDetachmentRequest(name: "Patrol", commandPoints: 0)
         try app.sendRequest(to: "detachments",

@@ -8,6 +8,9 @@ final class Detachment: PostgreSQLModel {
     var armies: Siblings<Detachment, Army, ArmyDetachment> {
         return siblings()
     }
+    var unitRoles: Siblings<Detachment, UnitRole, DetachmentUnit> {
+        return siblings()
+    }
 
     init(name: String, commandPoints: Int) {
         self.name = name

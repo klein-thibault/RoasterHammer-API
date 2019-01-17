@@ -5,7 +5,18 @@ final class DetachmentController {
 
     func createDetachment(_ req: Request) throws -> Future<Detachment> {
         return try req.content.decode(Detachment.self).flatMap(to: Detachment.self, { detachment in
-            return detachment.save(on: req)
+            return detachment.save(on: req).flatMap(to: Detachment.self, { detachment in
+                return UnitRole.query(on: req).all().then({ unitRoles in
+                    var futures: [Future<DetachmentUnit>] = []
+                    for unitRole in unitRoles {
+                        futures.append(detachment.unitRoles.attach(unitRole, on: req))
+                    }
+
+                    return futures.flatten(on: req).then({ _ in
+                        return req.future(detachment)
+                    })
+                })
+            })
         })
     }
 
