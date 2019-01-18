@@ -1,20 +1,22 @@
 import Vapor
 import FluentPostgreSQL
 
-final class UnitRole: PostgreSQLModel {
-    var id: Int?
-    var name: String
-    var detachmentId: Int
-    var detachments: Parent<UnitRole, Detachment> {
-        return parent(\.detachmentId)
-    }
+final class UnitRole: PostgreSQLPivot, ModifiablePivot {
+    typealias Left = Unit
+    typealias Right = Role
 
-    init(name: String, detachmentId: Int) {
-        self.name = name
-        self.detachmentId = detachmentId
+    static var leftIDKey: WritableKeyPath<UnitRole, Int> = \.unitId
+    static var rightIDKey: WritableKeyPath<UnitRole, Int> = \.roleId
+
+    var id: Int?
+    var unitId: Int
+    var roleId: Int
+
+    init(_ left: Unit, _ right: Role) throws {
+        unitId = try left.requireID()
+        roleId = try right.requireID()
     }
 
 }
 
 extension UnitRole: Content { }
-extension UnitRole: PostgreSQLMigration { }

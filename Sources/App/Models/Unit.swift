@@ -8,6 +8,9 @@ final class Unit: PostgreSQLModel {
     var characteristics: Children<Unit, Characteristics> {
         return children(\.unitId)
     }
+    var roles: Siblings<Unit, Role, UnitRole> {
+        return siblings()
+    }
     var rules: Siblings<Unit, Rule, UnitRule> {
         return siblings()
     }
@@ -16,7 +19,7 @@ final class Unit: PostgreSQLModel {
         self.name = name
         self.cost = cost
     }
-    
+
 }
 
 extension Unit: Content { }

@@ -15,7 +15,7 @@ class DetachmentControllerTests: BaseTests {
         XCTAssertEqual(detachment.name, request.name)
         XCTAssertEqual(detachment.commandPoints, request.commandPoints)
 
-        let unitRoles = try detachment.unitRoles.query(on: conn).all().wait()
+        let unitRoles = try detachment.roles.query(on: conn).all().wait()
         XCTAssertEqual(unitRoles.count, 5)
         XCTAssertEqual(unitRoles[0].name, "HQ")
         XCTAssertEqual(unitRoles[1].name, "Troop")

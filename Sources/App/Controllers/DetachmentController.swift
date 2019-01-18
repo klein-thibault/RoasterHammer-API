@@ -7,15 +7,15 @@ final class DetachmentController {
         return try req.content.decode(Detachment.self).flatMap(to: Detachment.self, { detachment in
             return detachment.save(on: req).flatMap(to: Detachment.self, { detachment in
                 let detachmentId = try detachment.requireID()
-                let unitRoleFutures = [
-                    UnitRole(name: "HQ", detachmentId: detachmentId).save(on: req),
-                    UnitRole(name: "Troop", detachmentId: detachmentId).save(on: req),
-                    UnitRole(name: "Elite", detachmentId: detachmentId).save(on: req),
-                    UnitRole(name: "Fast Attack", detachmentId: detachmentId).save(on: req),
-                    UnitRole(name: "Heavy Support", detachmentId: detachmentId).save(on: req)
+                let rolesFutures = [
+                    Role(name: "HQ", detachmentId: detachmentId).save(on: req),
+                    Role(name: "Troop", detachmentId: detachmentId).save(on: req),
+                    Role(name: "Elite", detachmentId: detachmentId).save(on: req),
+                    Role(name: "Fast Attack", detachmentId: detachmentId).save(on: req),
+                    Role(name: "Heavy Support", detachmentId: detachmentId).save(on: req)
                 ]
 
-                return unitRoleFutures.flatten(on: req).then({ _ in
+                return rolesFutures.flatten(on: req).then({ _ in
                     return req.future(detachment)
                 })
             })

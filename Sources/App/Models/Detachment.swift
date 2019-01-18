@@ -8,7 +8,7 @@ final class Detachment: PostgreSQLModel {
     var armies: Siblings<Detachment, Army, ArmyDetachment> {
         return siblings()
     }
-    var unitRoles: Children<Detachment, UnitRole> {
+    var roles: Children<Detachment, Role> {
         return children(\.detachmentId)
     }
 
