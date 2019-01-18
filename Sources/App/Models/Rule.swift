@@ -32,3 +32,9 @@ extension Rule {
         return siblings()
     }
 }
+
+extension Rule {
+    var units: Siblings<Rule, Unit, UnitRule> {
+        return siblings()
+    }
+}
