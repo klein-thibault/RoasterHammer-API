@@ -38,8 +38,4 @@ public func routes(_ router: Router) throws {
     router.post("detachments", use: detachmentController.createDetachment)
     router.get("detachments", use: detachmentController.detachments)
     protectedAuthRouter.post("armies", Int.parameter, "detachments", use: detachmentController.addDetachmentToArmy)
-
-    // UnitRole
-    let unitRoleController = UnitRoleController()
-    router.post("unitRoles", use: unitRoleController.createUnitRole)
 }

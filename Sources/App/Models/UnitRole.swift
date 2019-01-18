@@ -4,12 +4,14 @@ import FluentPostgreSQL
 final class UnitRole: PostgreSQLModel {
     var id: Int?
     var name: String
-    var detachments: Siblings<UnitRole, Detachment, DetachmentUnit> {
-        return siblings()
+    var detachmentId: Int
+    var detachments: Parent<UnitRole, Detachment> {
+        return parent(\.detachmentId)
     }
 
-    init(name: String) {
+    init(name: String, detachmentId: Int) {
         self.name = name
+        self.detachmentId = detachmentId
     }
 
 }
