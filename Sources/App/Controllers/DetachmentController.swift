@@ -49,15 +49,29 @@ final class DetachmentController {
 
     // MARK: - Utility Functions
 
+    func roleResponse(forRole role: Role,
+                      conn: DatabaseConnectable) throws -> Future<RoleResponse> {
+        return try role.units.query(on: conn).all()
+            .map(to: RoleResponse.self, { units in
+                return try RoleResponse(role: role, units: units)
+            })
+    }
+
     func detachmentResponse(forDetachment detachment: Detachment,
                             conn: DatabaseConnectable) throws -> Future<DetachmentResponse> {
         return try detachment.roles.query(on: conn).all()
+            .flatMap(to: [RoleResponse].self, { roles in
+                return try roles.map { try self.roleResponse(forRole: $0, conn: conn) }.flatten(on: conn)
+            })
             .map(to: DetachmentResponse.self, { roles in
                 return try DetachmentResponse(detachment: detachment, roles: roles)
             })
     }
 
-    func generateRoles(forDetachment detachment: Detachment, conn: DatabaseConnectable) throws -> Future<Detachment> {
+    // MARK: - Private Functions
+
+    private func generateRoles(forDetachment detachment: Detachment,
+                               conn: DatabaseConnectable) throws -> Future<Detachment> {
         let detachmentId = try detachment.requireID()
         let rolesFutures = [
             Role(name: "HQ", detachmentId: detachmentId).save(on: conn),

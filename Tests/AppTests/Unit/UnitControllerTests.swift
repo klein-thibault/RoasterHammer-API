@@ -68,8 +68,8 @@ class UnitControllerTests: BaseTests {
                                              method: .POST,
                                              headers: ["Content-Type": "application/json"],
                                              data: createDetachmentRequest,
-                                             decodeTo: Detachment.self)
-        let unitRoles = try detachment.roles.query(on: conn).all().wait()
+                                             decodeTo: DetachmentResponse.self)
+        let unitRoles = detachment.roles
         let characteristics = CharacteristicsRequest(movement: "6\"",
                                                      weaponSkill: "2+",
                                                      balisticSkill: "2+",
@@ -86,7 +86,7 @@ class UnitControllerTests: BaseTests {
                                        data: createUnitRequest,
                                        decodeTo: Unit.self)
 
-        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(unit.id!)",
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id!)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             decodeTo: Detachment.self,

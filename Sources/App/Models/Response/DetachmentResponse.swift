@@ -4,9 +4,9 @@ struct DetachmentResponse: Content {
     let id: Int
     let name: String
     let commandPoints: Int
-    let roles: [Role]
+    let roles: [RoleResponse]
 
-    init(detachment: Detachment, roles: [Role]) throws {
+    init(detachment: Detachment, roles: [RoleResponse]) throws {
         self.id = try detachment.requireID()
         self.name = detachment.name
         self.commandPoints = detachment.commandPoints
