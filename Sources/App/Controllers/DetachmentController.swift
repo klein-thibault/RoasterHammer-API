@@ -5,7 +5,7 @@ final class DetachmentController {
 
     // MARK: - Public Functions
 
-    func createDetachment(_ req: Request) throws -> Future<DetachmentResponse> {
+    func createDetachment(_ req: Request) throws -> Future<Detachment> {
         return try req.content.decode(Detachment.self)
             .flatMap(to: Detachment.self, { detachment in
                 return detachment.save(on: req)
@@ -13,17 +13,10 @@ final class DetachmentController {
                         return try self.generateRoles(forDetachment: detachment, conn: req)
                     })
             })
-            .flatMap(to: DetachmentResponse.self, { detachment in
-                return try self.detachmentResponse(forDetachment: detachment, conn: req)
-            })
     }
 
-    func detachments(_ req: Request) throws -> Future<[DetachmentResponse]> {
+    func detachments(_ req: Request) throws -> Future<[Detachment]> {
         return Detachment.query(on: req).all()
-            .flatMap(to: [DetachmentResponse].self, { detachments in
-                let response = try detachments.map { try self.detachmentResponse(forDetachment: $0, conn: req) }
-                return response.flatten(on: req)
-            })
     }
 
     func addDetachmentToArmy(_ req: Request) throws -> Future<ArmyResponse> {
@@ -52,6 +45,10 @@ final class DetachmentController {
     func roleResponse(forRole role: Role,
                       conn: DatabaseConnectable) throws -> Future<RoleResponse> {
         return try role.units.query(on: conn).all()
+            .flatMap(to: [UnitResponse].self, { units in
+                let unitController = UnitController()
+                return try units.map { try unitController.unitResponse(forUnit: $0, conn: conn) }.flatten(on: conn)
+            })
             .map(to: RoleResponse.self, { units in
                 return try RoleResponse(role: role, units: units)
             })

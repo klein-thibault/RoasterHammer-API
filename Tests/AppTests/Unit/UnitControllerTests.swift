@@ -21,21 +21,21 @@ class UnitControllerTests: BaseTests {
                                        method: .POST,
                                        headers: ["Content-Type": "application/json"],
                                        data: request,
-                                       decodeTo: Unit.self)
-        let unitCharacteristics = try unit.characteristics.query(on: conn).filter(\.unitId == unit.id!).first().wait()
+                                       decodeTo: UnitResponse.self)
+        let unitCharacteristics = unit.characteristics
 
         XCTAssertNotNil(unit.id)
         XCTAssertEqual(unit.name, request.name)
         XCTAssertEqual(unit.cost, request.cost)
-        XCTAssertEqual(unitCharacteristics?.movement, request.characteristics.movement)
-        XCTAssertEqual(unitCharacteristics?.weaponSkill, request.characteristics.weaponSkill)
-        XCTAssertEqual(unitCharacteristics?.balisticSkill, request.characteristics.balisticSkill)
-        XCTAssertEqual(unitCharacteristics?.strength, request.characteristics.strength)
-        XCTAssertEqual(unitCharacteristics?.toughness, request.characteristics.toughness)
-        XCTAssertEqual(unitCharacteristics?.wounds, request.characteristics.wounds)
-        XCTAssertEqual(unitCharacteristics?.attacks, request.characteristics.attacks)
-        XCTAssertEqual(unitCharacteristics?.leadership, request.characteristics.leadership)
-        XCTAssertEqual(unitCharacteristics?.save, request.characteristics.save)
+        XCTAssertEqual(unitCharacteristics.movement, request.characteristics.movement)
+        XCTAssertEqual(unitCharacteristics.weaponSkill, request.characteristics.weaponSkill)
+        XCTAssertEqual(unitCharacteristics.balisticSkill, request.characteristics.balisticSkill)
+        XCTAssertEqual(unitCharacteristics.strength, request.characteristics.strength)
+        XCTAssertEqual(unitCharacteristics.toughness, request.characteristics.toughness)
+        XCTAssertEqual(unitCharacteristics.wounds, request.characteristics.wounds)
+        XCTAssertEqual(unitCharacteristics.attacks, request.characteristics.attacks)
+        XCTAssertEqual(unitCharacteristics.leadership, request.characteristics.leadership)
+        XCTAssertEqual(unitCharacteristics.save, request.characteristics.save)
     }
 
     func testGettingAllUnits() throws {
@@ -53,12 +53,10 @@ class UnitControllerTests: BaseTests {
                                        method: .POST,
                                        headers: ["Content-Type": "application/json"],
                                        data: request,
-                                       decodeTo: Unit.self)
-        // TODO: replace by the API call - got a type error for some reason
-        let units = try Unit.query(on: conn).all().wait()
-
+                                       decodeTo: UnitResponse.self)
+        let units = try app.getResponse(to: "units", decodeTo: [UnitResponse].self)
         XCTAssertEqual(units.count, 1)
-        XCTAssertEqual(units[0].id!, unit.id!)
+        XCTAssertEqual(units[0].id, unit.id)
     }
 
     func testAddUnitToDetachment() throws {
@@ -68,8 +66,8 @@ class UnitControllerTests: BaseTests {
                                              method: .POST,
                                              headers: ["Content-Type": "application/json"],
                                              data: createDetachmentRequest,
-                                             decodeTo: DetachmentResponse.self)
-        let unitRoles = detachment.roles
+                                             decodeTo: Detachment.self)
+        let unitRoles = try detachment.roles.query(on: conn).all().wait()
         let characteristics = CharacteristicsRequest(movement: "6\"",
                                                      weaponSkill: "2+",
                                                      balisticSkill: "2+",
@@ -84,9 +82,9 @@ class UnitControllerTests: BaseTests {
                                        method: .POST,
                                        headers: ["Content-Type": "application/json"],
                                        data: createUnitRequest,
-                                       decodeTo: Unit.self)
+                                       decodeTo: UnitResponse.self)
 
-        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id!)",
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(unit.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             decodeTo: Detachment.self,

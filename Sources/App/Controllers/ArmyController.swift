@@ -52,8 +52,13 @@ final class ArmyController {
         let detachmentsFuture = try army.detachments.query(on: conn).all()
         let rulesFuture = try army.rules.query(on: conn).all()
 
-        return map(to: ArmyResponse.self, detachmentsFuture, rulesFuture, { (detachments, rules) in
-            return try ArmyResponse(army: army, detachments: detachments, rules: rules)
+        return flatMap(to: ArmyResponse.self, detachmentsFuture, rulesFuture, { (detachments, rules) in
+            let detachmentController = DetachmentController()
+            return try detachments.map { try detachmentController.detachmentResponse(forDetachment: $0, conn: conn) }
+                .flatten(on: conn)
+                .map(to: ArmyResponse.self, { detachments in
+                    return try ArmyResponse(army: army, detachments: detachments, rules: rules)
+                })
         })
     }
 

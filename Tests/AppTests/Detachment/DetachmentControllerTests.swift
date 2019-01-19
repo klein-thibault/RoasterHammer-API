@@ -11,11 +11,11 @@ class DetachmentControllerTests: BaseTests {
                                              method: .POST,
                                              headers: ["Content-Type": "application/json"],
                                              data: request,
-                                             decodeTo: DetachmentResponse.self)
+                                             decodeTo: Detachment.self)
         XCTAssertEqual(detachment.name, request.name)
         XCTAssertEqual(detachment.commandPoints, request.commandPoints)
 
-        let unitRoles = detachment.roles
+        let unitRoles = try detachment.roles.query(on: conn).all().wait()
         XCTAssertEqual(unitRoles.count, 5)
         XCTAssertEqual(unitRoles[0].name, "HQ")
         XCTAssertEqual(unitRoles[1].name, "Troop")
@@ -30,10 +30,10 @@ class DetachmentControllerTests: BaseTests {
                             method: .POST,
                             headers: ["Content-Type": "application/json"],
                             data: request)
-        let detachments = try app.getResponse(to: "detachments", decodeTo: [DetachmentResponse].self)
-        XCTAssertEqual(detachments.count, 1)
-        XCTAssertEqual(detachments[0].name, request.name)
-        XCTAssertEqual(detachments[0].commandPoints, request.commandPoints)
+        let detachemnts = try app.getResponse(to: "detachments", decodeTo: [Detachment].self)
+        XCTAssertEqual(detachemnts.count, 1)
+        XCTAssertEqual(detachemnts[0].name, request.name)
+        XCTAssertEqual(detachemnts[0].commandPoints, request.commandPoints)
     }
 
     func testAddDetachmentToArmy() throws {
@@ -69,21 +69,20 @@ class DetachmentControllerTests: BaseTests {
                                              method: .POST,
                                              headers: ["Content-Type": "application/json"],
                                              data: createDetachmentRequest,
-                                             decodeTo: DetachmentResponse.self)
+                                             decodeTo: Detachment.self)
 
-        let addDetachmentRequest = AddDetachmentToArmyRequest(detachmentId: detachment.id)
-        try app.sendRequest(to: "armies/\(army.id)/detachments",
+        let addDetachmentRequest = AddDetachmentToArmyRequest(detachmentId: detachment.id!)
+        let finalArmy = try app.getResponse(to: "armies/\(army.id)/detachments",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: addDetachmentRequest,
+            decodeTo: ArmyResponse.self,
             loggedInRequest: true,
             loggedInCustomer: user)
-
-        let finalArmy = try Army.find(army.id, on: conn).unwrap(or: RoasterHammerError.armyIsMissing).wait()
-        let finalArmyDetachments = try finalArmy.detachments.query(on: conn).all().wait()
+        let finalArmyDetachments = finalArmy.detachments
 
         XCTAssertEqual(finalArmyDetachments.count, 1)
-        XCTAssertEqual(finalArmyDetachments[0].id!, detachment.id)
+        XCTAssertEqual(finalArmyDetachments[0].id, detachment.id)
         XCTAssertEqual(finalArmyDetachments[0].name, detachment.name)
         XCTAssertEqual(finalArmyDetachments[0].commandPoints, detachment.commandPoints)
     }
