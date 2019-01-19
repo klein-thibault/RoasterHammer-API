@@ -4,10 +4,10 @@ struct RoasterResponse: Content {
     let id: Int
     let name: String
     let version: Int
-    let armies: [Army]
+    let armies: [ArmyResponse]
     let rules: [Rule]
 
-    init(roaster: Roaster, armies: [Army], rules: [Rule]) throws {
+    init(roaster: Roaster, armies: [ArmyResponse], rules: [Rule]) throws {
         self.id = try roaster.requireID()
         self.name = roaster.name
         self.version = roaster.version

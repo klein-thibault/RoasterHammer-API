@@ -48,10 +48,10 @@ final class GameController {
 
     private func gameResponse(forGame game: Game,
                               conn: DatabaseConnectable) throws -> Future<GameResponse> {
-        let rulesFuture = try game.rules.query(on: conn).all()
         let roastersFuture = try game.roasters.query(on: conn).all()
+        let rulesFuture = try game.rules.query(on: conn).all()
 
-        return flatMap(to: GameResponse.self, rulesFuture, roastersFuture, { (rules, roasters) in
+        return flatMap(to: GameResponse.self, roastersFuture, rulesFuture, { (roasters, rules) in
             let roasterController = RoasterController()
             let roasterResponses = try roasters
                 .map { try roasterController.roasterResponse(forRoaster: $0, conn: conn) }

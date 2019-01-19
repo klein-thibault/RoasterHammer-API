@@ -42,8 +42,15 @@ final class RoasterController {
         let armiesFuture = try roaster.armies.query(on: conn).all()
         let rulesFuture = try roaster.rules.query(on: conn).all()
 
-        return map(to: RoasterResponse.self, armiesFuture, rulesFuture, { (armies, rules) in
-            return try RoasterResponse(roaster: roaster, armies: armies, rules: rules)
+        return flatMap(to: RoasterResponse.self, armiesFuture, rulesFuture, { (armies, rules) in
+            let armyController = ArmyController()
+            let armyResponses = try armies
+                .map { try armyController.armyResponse(forArmy: $0, conn: conn) }
+                .flatten(on: conn)
+
+            return armyResponses.map(to: RoasterResponse.self, { armies in
+                return try RoasterResponse(roaster: roaster, armies: armies, rules: rules)
+            })
         })
     }
 

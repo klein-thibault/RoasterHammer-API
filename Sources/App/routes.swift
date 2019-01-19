@@ -31,8 +31,7 @@ public func routes(_ router: Router) throws {
     let armyController = ArmyController()
     router.post("armies", use: armyController.createArmy)
     router.get("armies", use: armyController.armies)
-    protectedAuthRouter.post("games", Int.parameter, "roasters", Int.parameter, "armies",
-                             use: armyController.addArmyToRoaster)
+    protectedAuthRouter.post("roasters", Int.parameter, "armies", use: armyController.addArmyToRoaster)
 
     // Detachment
     let detachmentController = DetachmentController()
