@@ -13,7 +13,7 @@ final class GameController {
                 })
             })
             .flatMap(to: GameResponse.self, { game in
-                let response = try GameResponse(game: game, roasters: [])
+                let response = try GameResponse(game: game, roasters: [], rules: [])
                 return req.future(response)
             })
     }
@@ -24,9 +24,13 @@ final class GameController {
             .query(on: req)
             .all()
             .flatMap(to: [GameResponse].self, { games in
-                let gameResponseFutures = try games.map({ game in
-                    try game.roasters.query(on: req).all().map({ roasters in
-                        return try GameResponse(game: game, roasters: roasters)
+                let gameResponseFutures: [Future<GameResponse>] = try games.map({ game in
+                    let rulesFuture = try game.rules.query(on: req).all()
+                    let roastersFuture = try game.roasters.query(on: req).all()
+
+                    return flatMap(to: GameResponse.self, rulesFuture, roastersFuture, { (rules, roasters) in
+                        let response = try GameResponse(game: game, roasters: roasters, rules: rules)
+                        return req.future(response)
                     })
                 })
 
@@ -43,11 +47,13 @@ final class GameController {
             .first()
             .unwrap(or: RoasterHammerError.gameIsMissing)
             .flatMap(to: GameResponse.self, { game in
-                return try game.roasters.query(on: req).all()
-                    .flatMap(to: GameResponse.self, { roasters in
-                        let response = try GameResponse(game: game, roasters: roasters)
-                        return req.future(response)
-                    })
+                let rulesFuture = try game.rules.query(on: req).all()
+                let roastersFuture = try game.roasters.query(on: req).all()
+
+                return flatMap(to: GameResponse.self, rulesFuture, roastersFuture, { (rules, roasters) in
+                    let response = try GameResponse(game: game, roasters: roasters, rules: rules)
+                    return req.future(response)
+                })
             })
     }
 
