@@ -26,4 +26,29 @@ final class UnitController {
         })
     }
 
+    func units(_ req: Request) throws -> Future<[Unit]> {
+        return Unit.query(on: req).all()
+    }
+
+    func addUnitToDetachmentUnitRole(_ req: Request) throws -> Future<Detachment> {
+        _ = try req.requireAuthenticated(Customer.self)
+        let detachmentId = try req.parameters.next(Int.self)
+        let roleId = try req.parameters.next(Int.self)
+        let unitId = try req.parameters.next(Int.self)
+
+        return Role.find(roleId, on: req)
+            .unwrap(or: RoasterHammerError.roleIsMissing)
+            .flatMap(to: UnitRole.self, { role in
+                return Unit.find(unitId, on: req)
+                    .unwrap(or: RoasterHammerError.unitIsMissing)
+                    .flatMap(to: UnitRole.self, { unit in
+                    return role.units.attach(unit, on: req)
+                })
+            })
+            .flatMap(to: Detachment.self, { _ in
+                return Detachment.find(detachmentId, on: req)
+                    .unwrap(or: RoasterHammerError.detachmentIsMissing)
+            })
+    }
+
 }

@@ -11,4 +11,6 @@ enum RoasterHammerError: Swift.Error {
     case roasterIsMissing
     case armyIsMissing
     case detachmentIsMissing
+    case roleIsMissing
+    case unitIsMissing
 }
