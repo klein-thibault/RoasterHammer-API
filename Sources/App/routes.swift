@@ -19,7 +19,8 @@ public func routes(_ router: Router) throws {
     // Game
     let gameController = GameController()
     protectedAuthRouter.post("games", use: gameController.createGame)
-    protectedAuthRouter.get("games", use: gameController.getGames)
+    protectedAuthRouter.get("games", use: gameController.games)
+    protectedAuthRouter.get("games", Int.parameter, use: gameController.gameById)
 
     // Roaster
     let roasterController = RoasterController()

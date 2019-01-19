@@ -53,8 +53,8 @@ extension Future where T: Customer {
 }
 
 extension Customer: BasicAuthenticatable {
-    static var usernameKey: UsernameKey = \Customer.email
-    static var passwordKey: PasswordKey = \Customer.password
+    static var usernameKey: UsernameKey = \.email
+    static var passwordKey: PasswordKey = \.password
 }
 
 extension Customer: TokenAuthenticatable {
