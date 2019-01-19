@@ -5,22 +5,15 @@ final class ArmyController {
 
     // MARK: - Public Functions
 
-    func createArmy(_ req: Request) throws -> Future<ArmyResponse> {
+    func createArmy(_ req: Request) throws -> Future<Army> {
         return try req.content.decode(Army.self)
-            .flatMap(to: ArmyResponse.self, { army in
-                return army.save(on: req).flatMap(to: ArmyResponse.self, { army in
-                    return try self.armyResponse(forArmy: army, conn: req)
-                })
+            .flatMap(to: Army.self, { army in
+                return army.save(on: req)
             })
     }
 
-    func armies(_ req: Request) throws -> Future<[ArmyResponse]> {
-        return Army.query(on: req)
-            .all()
-            .flatMap(to: [ArmyResponse].self, { armies in
-                let armyResponses = try armies.map { try self.armyResponse(forArmy: $0, conn: req) }
-                return armyResponses.flatten(on: req)
-            })
+    func armies(_ req: Request) throws -> Future<[Army]> {
+        return Army.query(on: req).all()
     }
 
     func addArmyToRoaster(_ req: Request) throws -> Future<RoasterResponse> {

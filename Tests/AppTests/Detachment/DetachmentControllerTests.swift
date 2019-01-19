@@ -56,8 +56,8 @@ class DetachmentControllerTests: BaseTests {
                                        method: .POST,
                                        headers: ["Content-Type": "application/json"],
                                        data: createArmyRequest,
-                                       decodeTo: ArmyResponse.self)
-        let addArmyRequest = AddArmyToRoasterRequest(armyId: army.id)
+                                       decodeTo: Army.self)
+        let addArmyRequest = AddArmyToRoasterRequest(armyId: army.id!)
         try app.sendRequest(to: "games/\(game.id)/roasters/\(roaster.id)/armies",
             method: .POST,
             headers: ["Content-Type": "application/json"],
@@ -72,7 +72,7 @@ class DetachmentControllerTests: BaseTests {
                                              decodeTo: Detachment.self)
 
         let addDetachmentRequest = AddDetachmentToArmyRequest(detachmentId: detachment.id!)
-        let finalArmy = try app.getResponse(to: "armies/\(army.id)/detachments",
+        let finalArmy = try app.getResponse(to: "armies/\(army.id!)/detachments",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: addDetachmentRequest,
