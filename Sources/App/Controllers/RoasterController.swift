@@ -35,9 +35,9 @@ final class RoasterController {
             })
     }
 
-    // MARK: - Private Functions
+    // MARK: - Utility Functions
 
-    private func roasterResponse(forRoaster roaster: Roaster,
+    func roasterResponse(forRoaster roaster: Roaster,
                                  conn: DatabaseConnectable) throws -> Future<RoasterResponse> {
         let armiesFuture = try roaster.armies.query(on: conn).all()
         let rulesFuture = try roaster.rules.query(on: conn).all()

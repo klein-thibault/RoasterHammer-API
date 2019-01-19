@@ -40,15 +40,15 @@ class DetachmentControllerTests: BaseTests {
         let user = try app.createAndLogUser()
         let game = try app.getResponse(to: "games",
                                        method: .POST,
-                                       decodeTo: Game.self,
+                                       decodeTo: GameResponse.self,
                                        loggedInRequest: true,
                                        loggedInCustomer: user)
         let createRoasterRequest = CreateRoasterRequest(name: "My Roaster")
-        let roaster = try app.getResponse(to: "games/\(game.id!)/roasters",
+        let roaster = try app.getResponse(to: "games/\(game.id)/roasters",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: createRoasterRequest,
-            decodeTo: Roaster.self,
+            decodeTo: RoasterResponse.self,
             loggedInRequest: true,
             loggedInCustomer: user)
         let createArmyRequest = CreateArmyRequest(name: "Chaos Space Marines")
@@ -58,7 +58,7 @@ class DetachmentControllerTests: BaseTests {
                                        data: createArmyRequest,
                                        decodeTo: Army.self)
         let addArmyRequest = AddArmyToRoasterRequest(armyId: army.id!)
-        try app.sendRequest(to: "games/\(game.id!)/roasters/\(roaster.id!)/armies",
+        try app.sendRequest(to: "games/\(game.id)/roasters/\(roaster.id)/armies",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: addArmyRequest,
