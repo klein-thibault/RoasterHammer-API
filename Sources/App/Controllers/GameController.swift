@@ -3,6 +3,8 @@ import FluentPostgreSQL
 
 final class GameController {
 
+    // MARK: - Public Functions
+
     func createGame(_ req: Request) throws -> Future<GameResponse> {
         let customer = try req.requireAuthenticated(Customer.self)
 
@@ -42,13 +44,15 @@ final class GameController {
             })
     }
 
-    private func gameResponse(forGame game: Game, conn: DatabaseConnectable) throws -> Future<GameResponse> {
+    // MARK: - Private Functions
+
+    private func gameResponse(forGame game: Game,
+                              conn: DatabaseConnectable) throws -> Future<GameResponse> {
         let rulesFuture = try game.rules.query(on: conn).all()
         let roastersFuture = try game.roasters.query(on: conn).all()
 
-        return flatMap(to: GameResponse.self, rulesFuture, roastersFuture, { (rules, roasters) in
-            let response = try GameResponse(game: game, roasters: roasters, rules: rules)
-            return conn.future(response)
+        return map(to: GameResponse.self, rulesFuture, roastersFuture, { (rules, roasters) in
+            return try GameResponse(game: game, roasters: roasters, rules: rules)
         })
     }
 

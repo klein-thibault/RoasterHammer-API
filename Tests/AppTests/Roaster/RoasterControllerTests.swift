@@ -9,21 +9,23 @@ class RoasterControllerTests: BaseTests {
         let user = try app.createAndLogUser()
         let game = try app.getResponse(to: "games",
                                        method: .POST,
-                                       decodeTo: Game.self,
+                                       decodeTo: GameResponse.self,
                                        loggedInRequest: true,
                                        loggedInCustomer: user)
         let request = CreateRoasterRequest(name: "My Roaster")
-        let roaster = try app.getResponse(to: "games/\(game.id!)/roasters",
-                                          method: .POST,
-                                          headers: ["Content-Type": "application/json"],
-                                          data: request,
-                                          decodeTo: Roaster.self,
-                                          loggedInRequest: true,
-                                          loggedInCustomer: user)
+        let response = try app.getResponse(to: "games/\(game.id)/roasters",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: request,
+            decodeTo: RoasterResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let roaster = try Roaster.find(response.id, on: conn).unwrap(or: RoasterHammerError.roasterIsMissing).wait()
         let roasterGame = try roaster.game.get(on: conn).wait()
 
-        XCTAssertEqual(roaster.name, request.name)
-        XCTAssertEqual(roaster.version, 1)
+        XCTAssertEqual(response.name, request.name)
+        XCTAssertEqual(response.version, 1)
         XCTAssertEqual(roaster.gameId, game.id)
         XCTAssertEqual(roasterGame.id, game.id)
         XCTAssertEqual(roasterGame.name, game.name)
@@ -34,28 +36,26 @@ class RoasterControllerTests: BaseTests {
         let user = try app.createAndLogUser()
         let game = try app.getResponse(to: "games",
                                        method: .POST,
-                                       decodeTo: Game.self,
+                                       decodeTo: GameResponse.self,
                                        loggedInRequest: true,
                                        loggedInCustomer: user)
         let request = CreateRoasterRequest(name: "My Roaster")
-        let roaster = try app.getResponse(to: "games/\(game.id!)/roasters",
-                                          method: .POST,
-                                          headers: ["Content-Type": "application/json"],
-                                          data: request,
-                                          decodeTo: Roaster.self,
-                                          loggedInRequest: true,
-                                          loggedInCustomer: user)
+        let roaster = try app.getResponse(to: "games/\(game.id)/roasters",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: request,
+            decodeTo: RoasterResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
 
-        let roasters = try app.getResponse(to: "games/\(game.id!)/roasters",
-                                              method: .GET,
-                                              decodeTo: [Roaster].self,
-                                              loggedInRequest: true,
-                                              loggedInCustomer: user)
+        let response = try app.getResponse(to: "games/\(game.id)/roasters",
+            decodeTo: [RoasterResponse].self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
 
-        XCTAssertEqual(roasters.count, 1)
-        XCTAssertEqual(roasters[0].id, roaster.id)
-        XCTAssertEqual(roasters[0].name, roaster.name)
-        XCTAssertEqual(roasters[0].gameId, roaster.gameId)
+        XCTAssertEqual(response.count, 1)
+        XCTAssertEqual(response[0].id, roaster.id)
+        XCTAssertEqual(response[0].name, roaster.name)
     }
 
 }
