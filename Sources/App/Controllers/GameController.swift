@@ -24,16 +24,7 @@ final class GameController {
             .query(on: req)
             .all()
             .flatMap(to: [GameResponse].self, { games in
-                let gameResponseFutures: [Future<GameResponse>] = try games.map({ game in
-                    let rulesFuture = try game.rules.query(on: req).all()
-                    let roastersFuture = try game.roasters.query(on: req).all()
-
-                    return flatMap(to: GameResponse.self, rulesFuture, roastersFuture, { (rules, roasters) in
-                        let response = try GameResponse(game: game, roasters: roasters, rules: rules)
-                        return req.future(response)
-                    })
-                })
-
+                let gameResponseFutures = try games.map { try self.gameResponse(forGame: $0, conn: req) }
                 return gameResponseFutures.flatten(on: req)
             })
     }
@@ -47,14 +38,18 @@ final class GameController {
             .first()
             .unwrap(or: RoasterHammerError.gameIsMissing)
             .flatMap(to: GameResponse.self, { game in
-                let rulesFuture = try game.rules.query(on: req).all()
-                let roastersFuture = try game.roasters.query(on: req).all()
-
-                return flatMap(to: GameResponse.self, rulesFuture, roastersFuture, { (rules, roasters) in
-                    let response = try GameResponse(game: game, roasters: roasters, rules: rules)
-                    return req.future(response)
-                })
+                return try self.gameResponse(forGame: game, conn: req)
             })
+    }
+
+    private func gameResponse(forGame game: Game, conn: DatabaseConnectable) throws -> Future<GameResponse> {
+        let rulesFuture = try game.rules.query(on: conn).all()
+        let roastersFuture = try game.roasters.query(on: conn).all()
+
+        return flatMap(to: GameResponse.self, rulesFuture, roastersFuture, { (rules, roasters) in
+            let response = try GameResponse(game: game, roasters: roasters, rules: rules)
+            return conn.future(response)
+        })
     }
 
 }
