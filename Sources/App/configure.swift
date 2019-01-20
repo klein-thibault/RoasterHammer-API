@@ -39,8 +39,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     RoasterRule.defaultDatabase = .psql
     UserGame.defaultDatabase = .psql
     ArmyRule.defaultDatabase = .psql
-    RoasterArmy.defaultDatabase = .psql
-    ArmyDetachment.defaultDatabase = .psql
+    RoasterDetachment.defaultDatabase = .psql
     UnitRule.defaultDatabase = .psql
     UnitRole.defaultDatabase = .psql
     migrations.add(model: Customer.self, database: .psql)
@@ -59,8 +58,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(migration: CreateRoasterRule.self, database: .psql)
     migrations.add(migration: CreateUserGame.self, database: .psql)
     migrations.add(migration: CreateArmyRule.self, database: .psql)
-    migrations.add(migration: CreateRoasterArmy.self, database: .psql)
-    migrations.add(migration: CreateArmyDetachment.self, database: .psql)
+    migrations.add(migration: CreateRoasterDetachment.self, database: .psql)
     migrations.add(migration: CreateUnitRule.self, database: .psql)
     migrations.add(migration: CreateUnitRole.self, database: .psql)
     services.register(migrations)

@@ -6,9 +6,14 @@ final class DetachmentController {
     // MARK: - Public Functions
 
     func createDetachment(_ req: Request) throws -> Future<Detachment> {
-        return try req.content.decode(Detachment.self)
-            .flatMap(to: Detachment.self, { detachment in
-                return detachment.save(on: req)
+        return try req.content.decode(CreateDetachmentRequest.self)
+            .flatMap(to: Detachment.self, { request in
+                return Army.find(request.armyId, on: req).unwrap(or: RoasterHammerError.armyIsMissing)
+                    .flatMap(to: Detachment.self, { army in
+                        let armyId = try army.requireID()
+                        return Detachment(name: request.name, commandPoints: request.commandPoints, armyId: armyId)
+                            .save(on: req)
+                    })
                     .flatMap(to: Detachment.self, { detachment in
                         return try self.generateRoles(forDetachment: detachment, conn: req)
                     })
@@ -19,24 +24,27 @@ final class DetachmentController {
         return Detachment.query(on: req).all()
     }
 
-    func addDetachmentToArmy(_ req: Request) throws -> Future<ArmyResponse> {
+    func addDetachmentToRoaster(_ req: Request) throws -> Future<RoasterResponse> {
         _ = try req.requireAuthenticated(Customer.self)
-        let armyId = try req.parameters.next(Int.self)
+        let roasterId = try req.parameters.next(Int.self)
 
-        return try req.content.decode(AddDetachmentToArmyRequest.self)
+        return try req.content.decode(AddDetachmentToRoasterRequest.self)
             .flatMap(to: Detachment.self, { request in
+                // Might need to duplicate the detachment for the roaster to avoid collusion
                 return Detachment.find(request.detachmentId, on: req).unwrap(or: RoasterHammerError.detachmentIsMissing)
             })
-            .flatMap(to: Army.self, { detachment in
-                return Army.find(armyId, on: req).unwrap(or: RoasterHammerError.armyIsMissing).then({ army in
-                    return army.detachments.attach(detachment, on: req).then({ _ in
-                        return req.future(army)
+            .flatMap(to: Roaster.self, { detachment in
+                return Roaster.find(roasterId, on: req).unwrap(or: RoasterHammerError.roasterIsMissing)
+                    .then({ roaster in
+                        return roaster.detachments.attach(detachment, on: req)
+                            .then ({ _ in
+                                return req.future(roaster)
+                            })
                     })
-                })
             })
-            .flatMap(to: ArmyResponse.self, { army in
-                let armyController = ArmyController()
-                return try armyController.armyResponse(forArmy: army, conn: req)
+            .flatMap(to: RoasterResponse.self, { roaster in
+                let roasterController = RoasterController()
+                return try roasterController.roasterResponse(forRoaster: roaster, conn: req)
             })
     }
 
@@ -56,13 +64,18 @@ final class DetachmentController {
 
     func detachmentResponse(forDetachment detachment: Detachment,
                             conn: DatabaseConnectable) throws -> Future<DetachmentResponse> {
-        return try detachment.roles.query(on: conn).all()
-            .flatMap(to: [RoleResponse].self, { roles in
-                return try roles.map { try self.roleResponse(forRole: $0, conn: conn) }.flatten(on: conn)
+        let rolesFuture = try detachment.roles.query(on: conn).all()
+        let armyFuture = detachment.army.get(on: conn)
+
+        return flatMap(rolesFuture, armyFuture, { (roles, army) in
+            let roleResponsesFuture = try roles.map { try self.roleResponse(forRole: $0, conn: conn) }.flatten(on: conn)
+            let armyResponse = try ArmyController().armyResponse(forArmy: army, conn: conn)
+
+            return map(roleResponsesFuture, armyResponse, { (roleResponses, armyResponse) in
+                return try DetachmentResponse(detachment: detachment, roles: roleResponses, army: armyResponse)
             })
-            .map(to: DetachmentResponse.self, { roles in
-                return try DetachmentResponse(detachment: detachment, roles: roles)
-            })
+        })
+
     }
 
     // MARK: - Private Functions

@@ -35,21 +35,30 @@ final class RoasterController {
             })
     }
 
+    func getRoasterById(_ req: Request) throws -> Future<RoasterResponse> {
+        let roasterId = try req.parameters.next(Int.self)
+
+        return Roaster.find(roasterId, on: req).unwrap(or: RoasterHammerError.roasterIsMissing)
+            .flatMap(to: RoasterResponse.self, { roaster in
+                return try self.roasterResponse(forRoaster: roaster, conn: req)
+            })
+    }
+
     // MARK: - Utility Functions
 
     func roasterResponse(forRoaster roaster: Roaster,
                                  conn: DatabaseConnectable) throws -> Future<RoasterResponse> {
-        let armiesFuture = try roaster.armies.query(on: conn).all()
+        let detachmentsFuture = try roaster.detachments.query(on: conn).all()
         let rulesFuture = try roaster.rules.query(on: conn).all()
 
-        return flatMap(to: RoasterResponse.self, armiesFuture, rulesFuture, { (armies, rules) in
-            let armyController = ArmyController()
-            let armyResponses = try armies
-                .map { try armyController.armyResponse(forArmy: $0, conn: conn) }
+        return flatMap(to: RoasterResponse.self, detachmentsFuture, rulesFuture, { (detachments, rules) in
+            let detachmentController = DetachmentController()
+            let detachmentResponses = try detachments
+                .map { try detachmentController.detachmentResponse(forDetachment: $0, conn: conn) }
                 .flatten(on: conn)
 
-            return armyResponses.map(to: RoasterResponse.self, { armies in
-                return try RoasterResponse(roaster: roaster, armies: armies, rules: rules)
+            return detachmentResponses.map(to: RoasterResponse.self, { detachments in
+                return try RoasterResponse(roaster: roaster, detachments: detachments, rules: rules)
             })
         })
     }

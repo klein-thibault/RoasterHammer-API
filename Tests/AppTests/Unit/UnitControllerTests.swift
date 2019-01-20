@@ -61,7 +61,15 @@ class UnitControllerTests: BaseTests {
 
     func testAddUnitToDetachment() throws {
         let user = try app.createAndLogUser()
-        let createDetachmentRequest = CreateDetachmentRequest(name: "Patrol", commandPoints: 0)
+
+        let createArmyRequest = CreateArmyRequest(name: "Chaos Space Marines")
+        let army = try app.getResponse(to: "armies",
+                                       method: .POST,
+                                       headers: ["Content-Type": "application/json"],
+                                       data: createArmyRequest,
+                                       decodeTo: Army.self)
+
+        let createDetachmentRequest = CreateDetachmentRequest(name: "Patrol", commandPoints: 0, armyId: army.id!)
         let detachment = try app.getResponse(to: "detachments",
                                              method: .POST,
                                              headers: ["Content-Type": "application/json"],
@@ -87,23 +95,23 @@ class UnitControllerTests: BaseTests {
         let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(unit.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
-            decodeTo: Detachment.self,
+            decodeTo: DetachmentResponse.self,
             loggedInRequest: true,
             loggedInCustomer: user)
-        let updatedDetachmentRole = try updatedDetachment.roles.query(on: conn).first().wait()
-        let addedUnit = try updatedDetachmentRole?.units.query(on: conn).first().wait()
-        let addedUnitCharacteristics = try addedUnit?.characteristics.query(on: conn).first().wait()
-        XCTAssertEqual(addedUnit?.name, unit.name)
-        XCTAssertEqual(addedUnit?.cost, unit.cost)
-        XCTAssertEqual(addedUnitCharacteristics?.movement, createUnitRequest.characteristics.movement)
-        XCTAssertEqual(addedUnitCharacteristics?.weaponSkill, createUnitRequest.characteristics.weaponSkill)
-        XCTAssertEqual(addedUnitCharacteristics?.balisticSkill, createUnitRequest.characteristics.balisticSkill)
-        XCTAssertEqual(addedUnitCharacteristics?.strength, createUnitRequest.characteristics.strength)
-        XCTAssertEqual(addedUnitCharacteristics?.toughness, createUnitRequest.characteristics.toughness)
-        XCTAssertEqual(addedUnitCharacteristics?.wounds, createUnitRequest.characteristics.wounds)
-        XCTAssertEqual(addedUnitCharacteristics?.attacks, createUnitRequest.characteristics.attacks)
-        XCTAssertEqual(addedUnitCharacteristics?.leadership, createUnitRequest.characteristics.leadership)
-        XCTAssertEqual(addedUnitCharacteristics?.save, createUnitRequest.characteristics.save)
+        let updatedDetachmentRole = updatedDetachment.roles
+        let addedUnit = updatedDetachmentRole[0].units
+        let addedUnitCharacteristics = addedUnit[0].characteristics
+        XCTAssertEqual(addedUnit[0].name, unit.name)
+        XCTAssertEqual(addedUnit[0].cost, unit.cost)
+        XCTAssertEqual(addedUnitCharacteristics.movement, createUnitRequest.characteristics.movement)
+        XCTAssertEqual(addedUnitCharacteristics.weaponSkill, createUnitRequest.characteristics.weaponSkill)
+        XCTAssertEqual(addedUnitCharacteristics.balisticSkill, createUnitRequest.characteristics.balisticSkill)
+        XCTAssertEqual(addedUnitCharacteristics.strength, createUnitRequest.characteristics.strength)
+        XCTAssertEqual(addedUnitCharacteristics.toughness, createUnitRequest.characteristics.toughness)
+        XCTAssertEqual(addedUnitCharacteristics.wounds, createUnitRequest.characteristics.wounds)
+        XCTAssertEqual(addedUnitCharacteristics.attacks, createUnitRequest.characteristics.attacks)
+        XCTAssertEqual(addedUnitCharacteristics.leadership, createUnitRequest.characteristics.leadership)
+        XCTAssertEqual(addedUnitCharacteristics.save, createUnitRequest.characteristics.save)
     }
 
 }

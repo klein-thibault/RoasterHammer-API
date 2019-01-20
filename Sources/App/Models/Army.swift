@@ -5,11 +5,8 @@ final class Army: PostgreSQLModel {
 
     var id: Int?
     var name: String
-    var roasters: Siblings<Army, Roaster, RoasterArmy> {
-        return siblings()
-    }
-    var detachments: Siblings<Army, Detachment, ArmyDetachment> {
-        return siblings()
+    var detachments: Children<Army, Detachment> {
+        return children(\.armyId)
     }
     var rules: Siblings<Army, Rule, ArmyRule> {
         return siblings()

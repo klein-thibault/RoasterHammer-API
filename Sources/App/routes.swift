@@ -26,22 +26,28 @@ public func routes(_ router: Router) throws {
     let roasterController = RoasterController()
     protectedAuthRouter.post("games", Int.parameter, "roasters", use: roasterController.createRoster)
     protectedAuthRouter.get("games", Int.parameter, "roasters", use: roasterController.getRoasters)
+    router.get("roasters", Int.parameter, use: roasterController.getRoasterById)
 
     // Army
     let armyController = ArmyController()
     router.post("armies", use: armyController.createArmy)
     router.get("armies", use: armyController.armies)
-    protectedAuthRouter.post("roasters", Int.parameter, "armies", use: armyController.addArmyToRoaster)
 
     // Detachment
     let detachmentController = DetachmentController()
     router.post("detachments", use: detachmentController.createDetachment)
     router.get("detachments", use: detachmentController.detachments)
-    protectedAuthRouter.post("armies", Int.parameter, "detachments", use: detachmentController.addDetachmentToArmy)
+    protectedAuthRouter.post("roasters", Int.parameter, "detachments", use: detachmentController.addDetachmentToRoaster)
 
     // Unit
     let unitController = UnitController()
     router.post("units", use: unitController.createUnit)
     router.get("units", use: unitController.units)
-    protectedAuthRouter.post("detachments", Int.parameter, "roles", Int.parameter, "units", Int.parameter, use: unitController.addUnitToDetachmentUnitRole)
+    protectedAuthRouter.post("detachments",
+                             Int.parameter,
+                             "roles",
+                             Int.parameter,
+                             "units",
+                             Int.parameter,
+                             use: unitController.addUnitToDetachmentUnitRole)
 }
