@@ -1,7 +1,7 @@
 import Vapor
 import Theo
 
-final class GraphDatabaseClient {
+final class Neo4j {
     let client: BoltClient
 
     init() throws {
@@ -13,11 +13,11 @@ final class GraphDatabaseClient {
     }
 }
 
-extension GraphDatabaseClient: Service { }
-extension GraphDatabaseClient: ServiceType {
+extension Neo4j: Service { }
+extension Neo4j: ServiceType {
 
-    static func makeService(for worker: Container) throws -> GraphDatabaseClient {
-        return try GraphDatabaseClient()
+    static func makeService(for worker: Container) throws -> Neo4j {
+        return try Neo4j()
     }
 
 

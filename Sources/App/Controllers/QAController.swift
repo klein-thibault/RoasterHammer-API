@@ -5,7 +5,7 @@ import Theo
 final class QAController {
 
     func testGraphDatabase(_ req: Request) throws -> Future<HTTPStatus> {
-        let graphClient = try req.sharedContainer.make(GraphDatabaseClient.self)
+        let graphClient = try req.sharedContainer.make(Neo4j.self)
         graphClient.client.connectSync()
 
         let node = Node(label: "User", properties: ["email": "test@test.com"])
