@@ -2,7 +2,7 @@ import Vapor
 import FluentPostgreSQL
 
 final class UnitRole: PostgreSQLPivot, ModifiablePivot {
-    typealias Left = Unit
+    typealias Left = SelectedUnit
     typealias Right = Role
 
     static var leftIDKey: WritableKeyPath<UnitRole, Int> = \.unitId
@@ -12,7 +12,7 @@ final class UnitRole: PostgreSQLPivot, ModifiablePivot {
     var unitId: Int
     var roleId: Int
 
-    init(_ left: Unit, _ right: Role) throws {
+    init(_ left: SelectedUnit, _ right: Role) throws {
         unitId = try left.requireID()
         roleId = try right.requireID()
     }

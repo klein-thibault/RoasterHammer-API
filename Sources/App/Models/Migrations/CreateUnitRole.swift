@@ -7,7 +7,7 @@ struct CreateUnitRole: PostgreSQLMigration {
             builder.field(for: \.id, isIdentifier: true)
             builder.field(for: \.unitId)
             builder.field(for: \.roleId)
-            builder.reference(from: \.unitId, to: \Unit.id, onDelete: .cascade)
+            builder.reference(from: \.unitId, to: \SelectedUnit.id, onDelete: .cascade)
             builder.reference(from: \.roleId, to: \Role.id, onDelete: .cascade)
         })
     }

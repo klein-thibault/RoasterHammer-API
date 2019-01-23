@@ -8,7 +8,7 @@ final class Role: PostgreSQLModel {
     var detachments: Parent<Role, Detachment> {
         return parent(\.detachmentId)
     }
-    var units: Siblings<Role, Unit, UnitRole> {
+    var units: Siblings<Role, SelectedUnit, UnitRole> {
         return siblings()
     }
 

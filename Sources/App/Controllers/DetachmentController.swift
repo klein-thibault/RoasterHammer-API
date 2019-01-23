@@ -53,9 +53,9 @@ final class DetachmentController {
     func roleResponse(forRole role: Role,
                       conn: DatabaseConnectable) throws -> Future<RoleResponse> {
         return try role.units.query(on: conn).all()
-            .flatMap(to: [UnitResponse].self, { units in
+            .flatMap(to: [SelectedUnitResponse].self, { units in
                 let unitController = UnitController()
-                return try units.map { try unitController.unitResponse(forUnit: $0, conn: conn) }.flatten(on: conn)
+                return try units.map { try unitController.unitResponse(forSelectedUnit: $0, conn: conn) }.flatten(on: conn)
             })
             .map(to: RoleResponse.self, { units in
                 return try RoleResponse(role: role, units: units)

@@ -12,7 +12,6 @@ final class UnitWeapon: PostgreSQLPivot, ModifiablePivot {
     var id: Int?
     var unitId: Int
     var weaponId: Int
-    var isSelected: Bool = false
 
     init(_ left: Unit, _ right: Weapon) throws {
         unitId = try left.requireID()

@@ -50,6 +50,13 @@ public func routes(_ router: Router) throws {
                              "units",
                              Int.parameter,
                              use: unitController.addUnitToDetachmentUnitRole)
+    protectedAuthRouter.post("detachments",
+                             Int.parameter,
+                             "units",
+                             Int.parameter,
+                             "weapons",
+                             Int.parameter,
+                             use: unitController.attachWeaponToUnit)
 
     // Weapon
     let weaponController = WeaponController()

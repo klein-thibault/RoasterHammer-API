@@ -8,9 +8,6 @@ final class Unit: PostgreSQLModel {
     var characteristics: Children<Unit, Characteristics> {
         return children(\.unitId)
     }
-    var roles: Siblings<Unit, Role, UnitRole> {
-        return siblings()
-    }
     var weapons: Siblings<Unit, Weapon, UnitWeapon> {
         return siblings()
     }
