@@ -67,13 +67,20 @@ final class UnitController {
     // MARK: - Utility Functions
 
     func unitResponse(forUnit unit: Unit, conn: DatabaseConnectable) throws -> Future<UnitResponse> {
-        return try unit.characteristics
-            .query(on: conn)
-            .first()
-            .unwrap(or: RoasterHammerError.unitIsMissing)
-            .map(to: UnitResponse.self, { characteristics in
-                return try UnitResponse(unit: unit, characteristics: characteristics)
-        })
+        let unitCharacteristicsFuture = try unit.characteristics.query(on: conn).first().unwrap(or: RoasterHammerError.unitIsMissing)
+        let unitWeaponsFuture = try unit.weapons.query(on: conn).all()
+        let unitSelectedWeaponsFuture = try unit.weapons.pivots(on: conn).filter(\.isSelected == true).all()
+
+        return flatMap(to: UnitResponse.self,
+                       unitCharacteristicsFuture,
+                       unitWeaponsFuture,
+                       unitSelectedWeaponsFuture) { (characteristics, weapons, selectedWeaponsPivot) -> EventLoopFuture<UnitResponse> in
+                        return selectedWeaponsPivot.map { Weapon.find($0.weaponId, on: conn).unwrap(or: RoasterHammerError.weaponIsMissing) }
+                            .flatten(on: conn)
+                            .map(to: UnitResponse.self, { selectedWeapons in
+                                return try UnitResponse(unit: unit, characteristics: characteristics, weapons: weapons, selectedWeapons: selectedWeapons)
+                            })
+        }
     }
 
 }

@@ -11,6 +11,9 @@ final class Unit: PostgreSQLModel {
     var roles: Siblings<Unit, Role, UnitRole> {
         return siblings()
     }
+    var weapons: Siblings<Unit, Weapon, UnitWeapon> {
+        return siblings()
+    }
     var rules: Siblings<Unit, Rule, UnitRule> {
         return siblings()
     }

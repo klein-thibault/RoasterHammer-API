@@ -1,19 +1,18 @@
 import FluentPostgreSQL
 
-struct CreateUnitRole: PostgreSQLMigration {
-
+struct CreateUnitWeapon: PostgreSQLMigration {
     static func prepare(on conn: PostgreSQLConnection) -> EventLoopFuture<Void> {
-        return PostgreSQLDatabase.create(UnitRole.self, on: conn, closure: { (builder) in
+        return PostgreSQLDatabase.create(UnitWeapon.self, on: conn, closure: { (builder) in
             builder.field(for: \.id, isIdentifier: true)
             builder.field(for: \.unitId)
-            builder.field(for: \.roleId)
+            builder.field(for: \.weaponId)
+            builder.field(for: \.isSelected)
             builder.reference(from: \.unitId, to: \Unit.id, onDelete: .cascade)
-            builder.reference(from: \.roleId, to: \Role.id, onDelete: .cascade)
+            builder.reference(from: \.weaponId, to: \Weapon.id, onDelete: .cascade)
         })
     }
 
     static func revert(on conn: PostgreSQLConnection) -> EventLoopFuture<Void> {
-        return PostgreSQLDatabase.delete(UnitRole.self, on: conn)
+        return PostgreSQLDatabase.delete(UnitWeapon.self, on: conn)
     }
-
 }

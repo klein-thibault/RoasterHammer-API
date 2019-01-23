@@ -42,6 +42,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     RoasterDetachment.defaultDatabase = .psql
     UnitRule.defaultDatabase = .psql
     UnitRole.defaultDatabase = .psql
+    UnitWeapon.defaultDatabase = .psql
     migrations.add(model: Customer.self, database: .psql)
     migrations.add(model: UserToken.self, database: .psql)
     migrations.add(model: NodeElement.self, database: .psql)
@@ -53,6 +54,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: Role.self, database: .psql)
     migrations.add(model: Unit.self, database: .psql)
     migrations.add(model: Characteristics.self, database: .psql)
+    migrations.add(model: Weapon.self, database: .psql)
     migrations.add(migration: CreateNodeElementClosure.self, database: .psql)
     migrations.add(migration: CreateGameRule.self, database: .psql)
     migrations.add(migration: CreateRoasterRule.self, database: .psql)
@@ -61,6 +63,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(migration: CreateRoasterDetachment.self, database: .psql)
     migrations.add(migration: CreateUnitRule.self, database: .psql)
     migrations.add(migration: CreateUnitRole.self, database: .psql)
+    migrations.add(migration: CreateUnitWeapon.self, database: .psql)
     services.register(migrations)
 
     // Configure the command line tool to add Fluent commands like revert and migrate database
