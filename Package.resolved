@@ -11,6 +11,33 @@
         }
       },
       {
+        "package": "Socket",
+        "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
+        "state": {
+          "branch": null,
+          "revision": "26c8f4e4e3000421a0c97aaf0c7b5e9aa5475222",
+          "version": "0.12.94"
+        }
+      },
+      {
+        "package": "SSLService",
+        "repositoryURL": "https://github.com/IBM-Swift/BlueSSLService.git",
+        "state": {
+          "branch": null,
+          "revision": "3a87b64a97fb8e923f52f2a68e31e7bd4fc46b42",
+          "version": "0.12.84"
+        }
+      },
+      {
+        "package": "Bolt",
+        "repositoryURL": "https://github.com/Neo4j-Swift/Bolt-swift.git",
+        "state": {
+          "branch": null,
+          "revision": "08e977dad72a264594b614ed19eea0182b73c6bb",
+          "version": "1.0.3"
+        }
+      },
+      {
         "package": "Console",
         "repositoryURL": "https://github.com/vapor/console.git",
         "state": {
@@ -92,12 +119,39 @@
         }
       },
       {
+        "package": "Theo",
+        "repositoryURL": "https://github.com/Neo4j-Swift/Neo4j-Swift.git",
+        "state": {
+          "branch": null,
+          "revision": "42b13db855eea7125fce988bff8221303fa67653",
+          "version": "4.0.2"
+        }
+      },
+      {
+        "package": "PackStream",
+        "repositoryURL": "https://github.com/Neo4j-Swift/PackStream-swift.git",
+        "state": {
+          "branch": null,
+          "revision": "906c37547d167a8b01f36a41ac77abb3e7179bc0",
+          "version": "1.0.2"
+        }
+      },
+      {
         "package": "PostgreSQL",
         "repositoryURL": "https://github.com/vapor/postgresql.git",
         "state": {
           "branch": null,
           "revision": "975cc8b3471966a7986e1ffac4db4bac26d6db86",
           "version": "1.1.2"
+        }
+      },
+      {
+        "package": "Result",
+        "repositoryURL": "https://github.com/antitypical/Result.git",
+        "state": {
+          "branch": null,
+          "revision": "7477584259bfce2560a19e06ad9f71db441fff11",
+          "version": "3.2.4"
         }
       },
       {

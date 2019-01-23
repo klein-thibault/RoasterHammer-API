@@ -97,4 +97,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
 
     // Auth provider
     try services.register(AuthenticationProvider())
+
+    // Graph database client
+    services.register(GraphDatabaseClient.self)
 }

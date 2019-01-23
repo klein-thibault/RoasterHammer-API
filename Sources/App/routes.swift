@@ -101,4 +101,10 @@ public func routes(_ router: Router) throws {
     router.post(CreateArmyAndRulesData.self,
                 at: "roasterhammer", "armies", "create",
                 use: websiteController.createArmyPostHandler)
+    router.post("units", Int.parameter, "weapons", Int.parameter, use: weaponController.attachWeaponToUnit)
+
+    // QA
+    let qaController = QAController()
+    router.post("qa/node", use: qaController.testGraphDatabase)
+
 }
