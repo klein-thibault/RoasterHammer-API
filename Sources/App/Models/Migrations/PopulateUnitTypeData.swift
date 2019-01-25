@@ -7,6 +7,8 @@ struct PopulateUnitTypeData: PostgreSQLMigration {
         "Elite",
         "Fast Attack",
         "Heavy Support",
+        "Flyer",
+        "Dedicated Transport",
         "Lord of War"
     ]
 
@@ -23,6 +25,5 @@ struct PopulateUnitTypeData: PostgreSQLMigration {
         }
         return Future<Void>.andAll(futures, eventLoop: conn.eventLoop)
     }
-
 
 }
