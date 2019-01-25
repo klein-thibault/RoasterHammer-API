@@ -4,9 +4,8 @@ import Theo
 
 final class QAController {
 
-    func testGraphDatabase(_ req: Request) throws -> Future<HTTPStatus> {
+    func addNodeQA(_ req: Request) throws -> Future<HTTPStatus> {
         let graphClient = try req.sharedContainer.make(Neo4j.self)
-        graphClient.client.connectSync()
 
         let node = Node(label: "User", properties: ["email": "test@test.com"])
         let promise = req.eventLoop.newPromise(HTTPStatus.self)
@@ -21,6 +20,30 @@ final class QAController {
         }
 
         return promise.futureResult
+    }
+
+    func getNodeQA(_ req: Request) throws -> Future<String> {
+        let graphClient = try req.sharedContainer.make(Neo4j.self)
+        let promise = req.eventLoop.newPromise(String.self)
+
+        graphClient.client.nodesWith(label: "User") { (result) in
+            switch result {
+            case let .failure(error):
+                promise.fail(error: error)
+            case let .success(nodes):
+                if let node = nodes.first {
+                    promise.succeed(result: node.properties["email"] as! String)
+                } else {
+                    promise.succeed(result: "Empty")
+                }
+            }
+        }
+
+        return promise.futureResult
+
+//        client.nodesWith(labels: labels, andProperties: properties) { result in
+//            print("Found \(result.value?.count ?? 0) nodes")
+//        }
     }
 
 }

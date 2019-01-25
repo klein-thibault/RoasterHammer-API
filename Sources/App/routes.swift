@@ -105,6 +105,6 @@ public func routes(_ router: Router) throws {
 
     // QA
     let qaController = QAController()
-    router.post("qa/node", use: qaController.testGraphDatabase)
-
+    router.post("qa/node", use: qaController.addNodeQA)
+    router.get("qa/node", use: qaController.getNodeQA)
 }
