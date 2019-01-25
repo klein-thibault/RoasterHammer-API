@@ -25,6 +25,9 @@ class UnitControllerTests: BaseTests {
         XCTAssertEqual(unitCharacteristics.save, createUnitRequest.characteristics.save)
         XCTAssertEqual(unit.keywords.count, createUnitRequest.keywords.count)
         XCTAssertEqual(unit.keywords[0], createUnitRequest.keywords[0].name)
+        XCTAssertEqual(unit.rules.count, 1)
+        XCTAssertEqual(unit.rules[0].name, createUnitRequest.rules[0].name)
+        XCTAssertEqual(unit.rules[0].description, createUnitRequest.rules[0].description)
     }
 
     func testGettingAllUnits() throws {

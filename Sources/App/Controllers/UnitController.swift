@@ -92,17 +92,20 @@ final class UnitController {
         let unitWeaponsFuture = try unit.weapons.query(on: conn).all()
         let unitKeywordsFuture = try unit.keywords.query(on: conn).all()
         let unitTypeFuture = unit.unitType.get(on: conn)
+        let unitRulesFuture = try unit.rules.query(on: conn).all()
         
         return map(to: UnitResponse.self,
                    unitCharacteristicsFuture,
                    unitWeaponsFuture,
                    unitKeywordsFuture,
-                   unitTypeFuture) { (characteristics, weapons, keywords, unitType) in
+                   unitTypeFuture,
+                   unitRulesFuture) { (characteristics, weapons, keywords, unitType, rules) in
                     return try UnitResponse(unit: unit,
                                             unitType: unitType.name,
                                             characteristics: characteristics,
                                             weapons: weapons,
-                                            keywords: keywords.map { $0.name} )
+                                            keywords: keywords.map { $0.name},
+                                            rules: rules)
         }
     }
 
@@ -120,6 +123,11 @@ final class UnitController {
                 return self.createKeywords(forUnit: unit,
                                            keywords: request.keywords,
                                            conn: conn)
+            })
+            .flatMap(to: Unit.self, { unit in
+                return self.createRules(forUnit: unit,
+                                        rules: request.rules,
+                                        conn: conn)
             })
     }
 
@@ -150,7 +158,20 @@ final class UnitController {
         return keywordsFuture
             .flatMap(to: [UnitKeyword].self) { keywords in
                 return keywords.map { unit.keywords.attach($0, on: conn) }.flatten(on: conn)
-        }
+            }
+            .map(to: Unit.self, { _ in
+                return unit
+            })
+    }
+
+    private func createRules(forUnit unit: Unit,
+                             rules: [AddRuleRequest],
+                             conn: DatabaseConnectable) -> Future<Unit> {
+        let rulesFuture = rules.map { Rule(name: $0.name, description: $0.description).save(on: conn) }.flatten(on: conn)
+        return rulesFuture
+            .flatMap(to: [UnitRule].self, { rules in
+                return rules.map { unit.rules.attach($0, on: conn) }.flatten(on: conn)
+            })
             .map(to: Unit.self, { _ in
                 return unit
             })

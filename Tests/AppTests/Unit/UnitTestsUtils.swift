@@ -15,6 +15,7 @@ final class UnitTestsUtils {
                                                      leadership: "9",
                                                      save: "3+")
         let keywords = [UnitKeywordRequest(name: "Chaos"), UnitKeywordRequest(name: "Khorne")]
+        let rules = [AddRuleRequest(name: "Blood for the Blood God", description: "This unit can attack twice during the fight phase")]
         let unitTypes = try app.getResponse(to: "unit-types", decodeTo: [UnitType].self)
         let hqUnitType = unitTypes.filter({$0.name == "HQ"}).first!
         let createUnitRequest = try CreateUnitRequest(name: "Kharn",
@@ -22,7 +23,8 @@ final class UnitTestsUtils {
                                                       isUnique: true,
                                                       unitTypeId: hqUnitType.requireID(),
                                                       characteristics: characteristics,
-                                                      keywords: keywords)
+                                                      keywords: keywords,
+                                                      rules: rules)
         let unit = try app.getResponse(to: "units",
                                        method: .POST,
                                        headers: ["Content-Type": "application/json"],

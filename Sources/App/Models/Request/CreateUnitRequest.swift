@@ -7,6 +7,7 @@ struct CreateUnitRequest: Content {
     var unitTypeId: Int
     var characteristics: CharacteristicsRequest
     var keywords: [UnitKeywordRequest]
+    var rules: [AddRuleRequest]
 }
 
 struct CharacteristicsRequest: Content {

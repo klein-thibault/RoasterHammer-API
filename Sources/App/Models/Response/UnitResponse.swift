@@ -9,12 +9,14 @@ struct UnitResponse: Content {
     let characteristics: Characteristics
     let weapons: [Weapon]
     let keywords: [String]
+    let rules: [Rule]
 
     init(unit: Unit,
          unitType: String,
          characteristics: Characteristics,
          weapons: [Weapon],
-         keywords: [String]) throws {
+         keywords: [String],
+         rules: [Rule]) throws {
         self.id = try unit.requireID()
         self.name = unit.name
         self.cost = unit.cost
@@ -23,5 +25,6 @@ struct UnitResponse: Content {
         self.characteristics = characteristics
         self.weapons = weapons
         self.keywords = keywords
+        self.rules = rules
     }
 }
