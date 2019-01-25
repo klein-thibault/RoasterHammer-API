@@ -6,54 +6,27 @@ import FluentPostgreSQL
 class UnitControllerTests: BaseTests {
 
     func testCreateUnit() throws {
-        let characteristics = CharacteristicsRequest(movement: "6\"",
-                                              weaponSkill: "2+",
-                                              balisticSkill: "2+",
-                                              strength: "5",
-                                              toughness: "4",
-                                              wounds: "6",
-                                              attacks: "5",
-                                              leadership: "9",
-                                              save: "3+")
-        let request = CreateUnitRequest(name: "Kharn", cost: 120, characteristics: characteristics)
-
-        let unit = try app.getResponse(to: "units",
-                                       method: .POST,
-                                       headers: ["Content-Type": "application/json"],
-                                       data: request,
-                                       decodeTo: UnitResponse.self)
+        let (createUnitRequest, unit) = try UnitTestsUtils.createUnit(app: app)
         let unitCharacteristics = unit.characteristics
 
         XCTAssertNotNil(unit.id)
-        XCTAssertEqual(unit.name, request.name)
-        XCTAssertEqual(unit.cost, request.cost)
-        XCTAssertEqual(unitCharacteristics.movement, request.characteristics.movement)
-        XCTAssertEqual(unitCharacteristics.weaponSkill, request.characteristics.weaponSkill)
-        XCTAssertEqual(unitCharacteristics.balisticSkill, request.characteristics.balisticSkill)
-        XCTAssertEqual(unitCharacteristics.strength, request.characteristics.strength)
-        XCTAssertEqual(unitCharacteristics.toughness, request.characteristics.toughness)
-        XCTAssertEqual(unitCharacteristics.wounds, request.characteristics.wounds)
-        XCTAssertEqual(unitCharacteristics.attacks, request.characteristics.attacks)
-        XCTAssertEqual(unitCharacteristics.leadership, request.characteristics.leadership)
-        XCTAssertEqual(unitCharacteristics.save, request.characteristics.save)
+        XCTAssertEqual(unit.name, createUnitRequest.name)
+        XCTAssertEqual(unit.cost, createUnitRequest.cost)
+        XCTAssertEqual(unitCharacteristics.movement, createUnitRequest.characteristics.movement)
+        XCTAssertEqual(unitCharacteristics.weaponSkill, createUnitRequest.characteristics.weaponSkill)
+        XCTAssertEqual(unitCharacteristics.balisticSkill, createUnitRequest.characteristics.balisticSkill)
+        XCTAssertEqual(unitCharacteristics.strength, createUnitRequest.characteristics.strength)
+        XCTAssertEqual(unitCharacteristics.toughness, createUnitRequest.characteristics.toughness)
+        XCTAssertEqual(unitCharacteristics.wounds, createUnitRequest.characteristics.wounds)
+        XCTAssertEqual(unitCharacteristics.attacks, createUnitRequest.characteristics.attacks)
+        XCTAssertEqual(unitCharacteristics.leadership, createUnitRequest.characteristics.leadership)
+        XCTAssertEqual(unitCharacteristics.save, createUnitRequest.characteristics.save)
+        XCTAssertEqual(unit.keywords.count, createUnitRequest.keywords.count)
+        XCTAssertEqual(unit.keywords[0], createUnitRequest.keywords[0].name)
     }
 
     func testGettingAllUnits() throws {
-        let characteristics = CharacteristicsRequest(movement: "6\"",
-                                                     weaponSkill: "2+",
-                                                     balisticSkill: "2+",
-                                                     strength: "5",
-                                                     toughness: "4",
-                                                     wounds: "6",
-                                                     attacks: "5",
-                                                     leadership: "9",
-                                                     save: "3+")
-        let request = CreateUnitRequest(name: "Kharn", cost: 120, characteristics: characteristics)
-        let unit = try app.getResponse(to: "units",
-                                       method: .POST,
-                                       headers: ["Content-Type": "application/json"],
-                                       data: request,
-                                       decodeTo: UnitResponse.self)
+        let (_, unit) = try UnitTestsUtils.createUnit(app: app)
         let units = try app.getResponse(to: "units", decodeTo: [UnitResponse].self)
         XCTAssertEqual(units.count, 1)
         XCTAssertEqual(units[0].id, unit.id)
@@ -76,21 +49,8 @@ class UnitControllerTests: BaseTests {
                                              data: createDetachmentRequest,
                                              decodeTo: Detachment.self)
         let unitRoles = try detachment.roles.query(on: conn).all().wait()
-        let characteristics = CharacteristicsRequest(movement: "6\"",
-                                                     weaponSkill: "2+",
-                                                     balisticSkill: "2+",
-                                                     strength: "5",
-                                                     toughness: "4",
-                                                     wounds: "6",
-                                                     attacks: "5",
-                                                     leadership: "9",
-                                                     save: "3+")
-        let createUnitRequest = CreateUnitRequest(name: "Kharn", cost: 120, characteristics: characteristics)
-        let unit = try app.getResponse(to: "units",
-                                       method: .POST,
-                                       headers: ["Content-Type": "application/json"],
-                                       data: createUnitRequest,
-                                       decodeTo: UnitResponse.self)
+
+        let (createUnitRequest, unit) = try UnitTestsUtils.createUnit(app: app)
 
         let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(unit.id)",
             method: .POST,
@@ -100,9 +60,9 @@ class UnitControllerTests: BaseTests {
             loggedInCustomer: user)
         let updatedDetachmentRole = updatedDetachment.roles
         let addedUnit = updatedDetachmentRole[0].units
-        let addedUnitCharacteristics = addedUnit[0].characteristics
-        XCTAssertEqual(addedUnit[0].name, unit.name)
-        XCTAssertEqual(addedUnit[0].cost, unit.cost)
+        let addedUnitCharacteristics = addedUnit[0].unit.characteristics
+        XCTAssertEqual(addedUnit[0].unit.name, unit.name)
+        XCTAssertEqual(addedUnit[0].unit.cost, unit.cost)
         XCTAssertEqual(addedUnitCharacteristics.movement, createUnitRequest.characteristics.movement)
         XCTAssertEqual(addedUnitCharacteristics.weaponSkill, createUnitRequest.characteristics.weaponSkill)
         XCTAssertEqual(addedUnitCharacteristics.balisticSkill, createUnitRequest.characteristics.balisticSkill)

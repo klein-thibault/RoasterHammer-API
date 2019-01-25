@@ -70,22 +70,7 @@ class WeaponControllerTests: BaseTests {
     }
 
     func testAttachWeaponToUnit() throws {
-        let characteristics = CharacteristicsRequest(movement: "6\"",
-                                                     weaponSkill: "2+",
-                                                     balisticSkill: "2+",
-                                                     strength: "5",
-                                                     toughness: "4",
-                                                     wounds: "6",
-                                                     attacks: "5",
-                                                     leadership: "9",
-                                                     save: "3+")
-        let createUnitRequest = CreateUnitRequest(name: "Kharn", cost: 120, characteristics: characteristics)
-        let unit = try app.getResponse(to: "units",
-                                       method: .POST,
-                                       headers: ["Content-Type": "application/json"],
-                                       data: createUnitRequest,
-                                       decodeTo: UnitResponse.self)
-
+        let (_, unit) = try UnitTestsUtils.createUnit(app: app)
         let createWeaponRequest = CreateWeaponRequest(name: "Pistol",
                                                       range: "12\"",
                                                       type: "Pistol",
@@ -101,7 +86,6 @@ class WeaponControllerTests: BaseTests {
             decodeTo: UnitResponse.self)
 
         XCTAssertEqual(unitWithWeapon.weapons.count, 1)
-        XCTAssertEqual(unitWithWeapon.selectedWeapons.count, 0)
         XCTAssertEqual(unitWithWeapon.weapons[0].name, "Pistol")
         XCTAssertEqual(unitWithWeapon.weapons[0].range, "12\"")
         XCTAssertEqual(unitWithWeapon.weapons[0].type, "Pistol")

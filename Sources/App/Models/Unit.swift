@@ -5,6 +5,7 @@ final class Unit: PostgreSQLModel {
     var id: Int?
     var name: String
     var cost: Int
+    var isUnique: Bool
     var characteristics: Children<Unit, Characteristics> {
         return children(\.unitId)
     }
@@ -14,10 +15,14 @@ final class Unit: PostgreSQLModel {
     var rules: Siblings<Unit, Rule, UnitRule> {
         return siblings()
     }
+    var keywords: Siblings<Unit, Keyword, UnitKeyword> {
+        return siblings()
+    }
 
-    init(name: String, cost: Int) {
+    init(name: String, cost: Int, isUnique: Bool) {
         self.name = name
         self.cost = cost
+        self.isUnique = isUnique
     }
 
 }

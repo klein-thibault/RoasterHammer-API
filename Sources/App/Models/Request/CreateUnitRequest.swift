@@ -3,7 +3,9 @@ import Vapor
 struct CreateUnitRequest: Content {
     var name: String
     var cost: Int
+    var isUnique: Bool
     var characteristics: CharacteristicsRequest
+    var keywords: [UnitKeywordRequest]
 }
 
 struct CharacteristicsRequest: Content {
@@ -16,4 +18,8 @@ struct CharacteristicsRequest: Content {
     var attacks: String
     var leadership: String
     var save: String
+}
+
+struct UnitKeywordRequest: Content {
+    var name: String
 }
