@@ -15,16 +15,19 @@ final class UnitTestsUtils {
                                                      leadership: "9",
                                                      save: "3+")
         let keywords = [UnitKeywordRequest(name: "Chaos"), UnitKeywordRequest(name: "Khorne")]
-        let createUnitRequest = CreateUnitRequest(name: "Kharn",
-                                                  cost: 120,
-                                                  isUnique: true,
-                                                  characteristics: characteristics,
-                                                  keywords: keywords)
+        let unitTypes = try app.getResponse(to: "unit-types", decodeTo: [UnitType].self)
+        let hqUnitType = unitTypes.filter({$0.name == "HQ"}).first!
+        let createUnitRequest = try CreateUnitRequest(name: "Kharn",
+                                                      cost: 120,
+                                                      isUnique: true,
+                                                      unitTypeId: hqUnitType.requireID(),
+                                                      characteristics: characteristics,
+                                                      keywords: keywords)
         let unit = try app.getResponse(to: "units",
-                                   method: .POST,
-                                   headers: ["Content-Type": "application/json"],
-                                   data: createUnitRequest,
-                                   decodeTo: UnitResponse.self)
+                                       method: .POST,
+                                       headers: ["Content-Type": "application/json"],
+                                       data: createUnitRequest,
+                                       decodeTo: UnitResponse.self)
 
         return (createUnitRequest, unit)
     }

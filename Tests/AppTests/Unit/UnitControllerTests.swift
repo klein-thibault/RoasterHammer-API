@@ -12,6 +12,8 @@ class UnitControllerTests: BaseTests {
         XCTAssertNotNil(unit.id)
         XCTAssertEqual(unit.name, createUnitRequest.name)
         XCTAssertEqual(unit.cost, createUnitRequest.cost)
+        XCTAssertEqual(unit.isUnique, createUnitRequest.isUnique)
+        XCTAssertEqual(unit.unitType, "HQ")
         XCTAssertEqual(unitCharacteristics.movement, createUnitRequest.characteristics.movement)
         XCTAssertEqual(unitCharacteristics.weaponSkill, createUnitRequest.characteristics.weaponSkill)
         XCTAssertEqual(unitCharacteristics.balisticSkill, createUnitRequest.characteristics.balisticSkill)

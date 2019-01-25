@@ -4,6 +4,7 @@ struct CreateUnitRequest: Content {
     var name: String
     var cost: Int
     var isUnique: Bool
+    var unitTypeId: Int
     var characteristics: CharacteristicsRequest
     var keywords: [UnitKeywordRequest]
 }

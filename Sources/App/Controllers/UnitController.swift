@@ -8,20 +8,7 @@ final class UnitController {
     func createUnit(_ req: Request) throws -> Future<UnitResponse> {
         return try req.content.decode(CreateUnitRequest.self)
             .flatMap(to: Unit.self, { request in
-                return Unit(name: request.name,
-                            cost: request.cost,
-                            isUnique: request.isUnique)
-                    .save(on: req)
-                    .flatMap(to: Unit.self, { unit in
-                        return try self.createCharacteristics(forUnit: unit,
-                                                              characteristics: request.characteristics,
-                                                              conn: req)
-                    })
-                    .flatMap(to: Unit.self, { unit in
-                        return self.createKeywords(forUnit: unit,
-                                                   keywords: request.keywords,
-                                                   conn: req)
-                    })
+                return self.createUnit(request: request, conn: req)
             })
             .flatMap(to: UnitResponse.self, { unit in
                 return try self.unitResponse(forUnit: unit, conn: req)
@@ -104,12 +91,15 @@ final class UnitController {
         let unitCharacteristicsFuture = try unit.characteristics.query(on: conn).first().unwrap(or: RoasterHammerError.unitIsMissing)
         let unitWeaponsFuture = try unit.weapons.query(on: conn).all()
         let unitKeywordsFuture = try unit.keywords.query(on: conn).all()
+        let unitTypeFuture = unit.unitType.get(on: conn)
         
         return map(to: UnitResponse.self,
                    unitCharacteristicsFuture,
                    unitWeaponsFuture,
-                   unitKeywordsFuture) { (characteristics, weapons, keywords) in
+                   unitKeywordsFuture,
+                   unitTypeFuture) { (characteristics, weapons, keywords, unitType) in
                     return try UnitResponse(unit: unit,
+                                            unitType: unitType.name,
                                             characteristics: characteristics,
                                             weapons: weapons,
                                             keywords: keywords.map { $0.name} )
@@ -117,6 +107,21 @@ final class UnitController {
     }
 
     // MARK: - Private Functions
+
+    private func createUnit(request: CreateUnitRequest, conn: DatabaseConnectable) -> Future<Unit> {
+        return Unit(name: request.name, cost: request.cost, isUnique: request.isUnique, unitTypeId: request.unitTypeId)
+            .save(on: conn)
+            .flatMap(to: Unit.self, { unit in
+                return try self.createCharacteristics(forUnit: unit,
+                                                      characteristics: request.characteristics,
+                                                      conn: conn)
+            })
+            .flatMap(to: Unit.self, { unit in
+                return self.createKeywords(forUnit: unit,
+                                           keywords: request.keywords,
+                                           conn: conn)
+            })
+    }
 
     private func createCharacteristics(forUnit unit: Unit,
                                        characteristics: CharacteristicsRequest,
