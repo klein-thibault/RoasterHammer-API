@@ -40,12 +40,7 @@ class UnitControllerTests: BaseTests {
     func testAddUnitToDetachment() throws {
         let user = try app.createAndLogUser()
 
-        let createArmyRequest = CreateArmyRequest(name: "Chaos Space Marines")
-        let army = try app.getResponse(to: "armies",
-                                       method: .POST,
-                                       headers: ["Content-Type": "application/json"],
-                                       data: createArmyRequest,
-                                       decodeTo: Army.self)
+        let (_, army) = try ArmyTestsUtils.createArmyWithFaction(app: app)
 
         let createDetachmentRequest = CreateDetachmentRequest(name: "Patrol", commandPoints: 0, armyId: army.id!)
         let detachment = try app.getResponse(to: "detachments",

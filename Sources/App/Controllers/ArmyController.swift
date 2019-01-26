@@ -20,10 +20,17 @@ final class ArmyController {
 
     func armyResponse(forArmy army: Army,
                       conn: DatabaseConnectable) throws -> Future<ArmyResponse> {
-        return try army.rules.query(on: conn).all()
-            .map(to: ArmyResponse.self, { rules in
-                return try ArmyResponse(army: army, rules: rules)
-            })
+        let factionsFuture = try army.factions.query(on: conn).all()
+        let rulesFuture = try army.rules.query(on: conn).all()
+
+        return flatMap(to: ArmyResponse.self, factionsFuture, rulesFuture, { (factions, rules) in
+            let factionController = FactionController()
+            return try factions.map { try factionController.factionResponse(faction: $0, conn: conn) }
+                .flatten(on: conn)
+                .map(to: ArmyResponse.self, { factions in
+                    return try ArmyResponse(army: army, factions: factions, rules: rules)
+                })
+        })
     }
 
 }

@@ -2,10 +2,12 @@ import Vapor
 import FluentPostgreSQL
 
 final class Army: PostgreSQLModel {
-
     var id: Int?
     var name: String
     var detachments: Children<Army, Detachment> {
+        return children(\.armyId)
+    }
+    var factions: Children<Army, Faction> {
         return children(\.armyId)
     }
     var rules: Siblings<Army, Rule, ArmyRule> {

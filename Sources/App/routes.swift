@@ -33,6 +33,12 @@ public func routes(_ router: Router) throws {
     router.post("armies", use: armyController.createArmy)
     router.get("armies", use: armyController.armies)
 
+    // Faction
+    let factionController = FactionController()
+    router.post("armies", Int.parameter, "factions", use: factionController.createFaction)
+    router.get("factions", use: factionController.getAllFactions)
+    router.delete("factions", Int.parameter, use: factionController.deleteFaction)
+
     // Detachment
     let detachmentController = DetachmentController()
     router.post("detachments", use: detachmentController.createDetachment)

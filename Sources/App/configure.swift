@@ -45,6 +45,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     UnitWeapon.defaultDatabase = .psql
     SelectedUnitWeapon.defaultDatabase = .psql
     UnitKeyword.defaultDatabase = .psql
+    FactionRule.defaultDatabase = .psql
     migrations.add(model: Customer.self, database: .psql)
     migrations.add(model: UserToken.self, database: .psql)
     migrations.add(model: NodeElement.self, database: .psql)
@@ -60,6 +61,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: SelectedUnit.self, database: .psql)
     migrations.add(model: Keyword.self, database: .psql)
     migrations.add(model: UnitType.self, database: .psql)
+    migrations.add(model: Faction.self, database: .psql)
     migrations.add(migration: CreateNodeElementClosure.self, database: .psql)
     migrations.add(migration: CreateGameRule.self, database: .psql)
     migrations.add(migration: CreateRoasterRule.self, database: .psql)
@@ -71,6 +73,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(migration: CreateUnitWeapon.self, database: .psql)
     migrations.add(migration: CreateSelectedUnitWeapon.self, database: .psql)
     migrations.add(migration: CreateUnitKeyword.self, database: .psql)
+    migrations.add(migration: CreateFactionRule.self, database: .psql)
     migrations.add(migration: PopulateUnitTypeData.self, database: .psql)
     services.register(migrations)
 

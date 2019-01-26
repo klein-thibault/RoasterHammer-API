@@ -38,3 +38,9 @@ extension Rule {
         return siblings()
     }
 }
+
+extension Rule {
+    var factions: Siblings<Rule, Faction, FactionRule> {
+        return siblings()
+    }
+}

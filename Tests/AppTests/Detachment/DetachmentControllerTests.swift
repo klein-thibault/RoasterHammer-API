@@ -6,19 +6,7 @@ import FluentPostgreSQL
 class DetachmentControllerTests: BaseTests {
 
     func testCreateDetachment() throws {
-        let createArmyRequest = CreateArmyRequest(name: "Chaos Space Marines")
-        let army = try app.getResponse(to: "armies",
-                                       method: .POST,
-                                       headers: ["Content-Type": "application/json"],
-                                       data: createArmyRequest,
-                                       decodeTo: Army.self)
-
-        let request = CreateDetachmentRequest(name: "Patrol", commandPoints: 0, armyId: army.id!)
-        let detachment = try app.getResponse(to: "detachments",
-                                             method: .POST,
-                                             headers: ["Content-Type": "application/json"],
-                                             data: request,
-                                             decodeTo: Detachment.self)
+        let (request, detachment) = try DetachmentTestsUtils.createDetachment(app: app)
         XCTAssertEqual(detachment.name, request.name)
         XCTAssertEqual(detachment.commandPoints, request.commandPoints)
 
@@ -32,22 +20,11 @@ class DetachmentControllerTests: BaseTests {
     }
 
     func testGetAllDetachments() throws {
-        let createArmyRequest = CreateArmyRequest(name: "Chaos Space Marines")
-        let army = try app.getResponse(to: "armies",
-                                       method: .POST,
-                                       headers: ["Content-Type": "application/json"],
-                                       data: createArmyRequest,
-                                       decodeTo: Army.self)
-
-        let request = CreateDetachmentRequest(name: "Patrol", commandPoints: 0, armyId: army.id!)
-        try app.sendRequest(to: "detachments",
-                            method: .POST,
-                            headers: ["Content-Type": "application/json"],
-                            data: request)
-        let detachemnts = try app.getResponse(to: "detachments", decodeTo: [Detachment].self)
-        XCTAssertEqual(detachemnts.count, 1)
-        XCTAssertEqual(detachemnts[0].name, request.name)
-        XCTAssertEqual(detachemnts[0].commandPoints, request.commandPoints)
+        let (request, _) = try DetachmentTestsUtils.createDetachment(app: app)
+        let detachments = try app.getResponse(to: "detachments", decodeTo: [Detachment].self)
+        XCTAssertEqual(detachments.count, 1)
+        XCTAssertEqual(detachments[0].name, request.name)
+        XCTAssertEqual(detachments[0].commandPoints, request.commandPoints)
     }
 
     func testAddDetachmentToRoaster() throws {
@@ -68,19 +45,7 @@ class DetachmentControllerTests: BaseTests {
             loggedInRequest: true,
             loggedInCustomer: user)
 
-        let createArmyRequest = CreateArmyRequest(name: "Chaos Space Marines")
-        let army = try app.getResponse(to: "armies",
-                                       method: .POST,
-                                       headers: ["Content-Type": "application/json"],
-                                       data: createArmyRequest,
-                                       decodeTo: Army.self)
-
-        let createDetachmentRequest = CreateDetachmentRequest(name: "Patrol", commandPoints: 0, armyId: army.id!)
-        let detachment = try app.getResponse(to: "detachments",
-                                             method: .POST,
-                                             headers: ["Content-Type": "application/json"],
-                                             data: createDetachmentRequest,
-                                             decodeTo: Detachment.self)
+        let (_, detachment) = try DetachmentTestsUtils.createDetachment(app: app)
 
         let addDetachmentRequest = AddDetachmentToRoasterRequest(detachmentId: detachment.id!)
         try app.sendRequest(to: "roasters/\(roaster.id)/detachments",
@@ -90,6 +55,8 @@ class DetachmentControllerTests: BaseTests {
             loggedInRequest: true,
             loggedInCustomer: user)
 
+        let army = try detachment.army.get(on: conn).wait()
+        let factions = try army.factions.query(on: conn).all().wait()
         let updatedRoaster = try app.getResponse(to: "roasters/\(roaster.id)", decodeTo: RoasterResponse.self)
         XCTAssertEqual(updatedRoaster.detachments.count, 1)
         XCTAssertEqual(updatedRoaster.detachments[0].id, detachment.id!)
@@ -97,6 +64,8 @@ class DetachmentControllerTests: BaseTests {
         XCTAssertEqual(updatedRoaster.detachments[0].commandPoints, detachment.commandPoints)
         XCTAssertEqual(updatedRoaster.detachments[0].army.id, army.id!)
         XCTAssertEqual(updatedRoaster.detachments[0].army.name, army.name)
+        XCTAssertEqual(updatedRoaster.detachments[0].army.factions.count, factions.count)
+        XCTAssertEqual(updatedRoaster.detachments[0].army.factions[0].name, factions[0].name)
     }
 
 }
