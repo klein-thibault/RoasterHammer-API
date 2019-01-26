@@ -4,7 +4,7 @@ import FluentPostgreSQL
 
 final class DetachmentTestsUtils {
 
-    static func createDetachment(app: Application) throws -> (request: CreateDetachmentRequest, response: Detachment) {
+    static func createDetachmentWithArmy(app: Application) throws -> (request: CreateDetachmentRequest, response: Detachment) {
         let (_, army) = try ArmyTestsUtils.createArmyWithFaction(app: app)
 
         let request = CreateDetachmentRequest(name: "Patrol", commandPoints: 0, armyId: army.id!)

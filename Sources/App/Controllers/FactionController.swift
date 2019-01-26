@@ -29,6 +29,8 @@ final class FactionController {
         }
     }
 
+    // MARK: - Utility Functions
+
     func factionResponse(faction: Faction, conn: DatabaseConnectable) throws -> Future<FactionResponse> {
         return try faction.rules.query(on: conn).all()
             .map(to: FactionResponse.self, { rules in

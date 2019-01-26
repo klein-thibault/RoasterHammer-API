@@ -48,6 +48,26 @@ final class DetachmentController {
             })
     }
 
+    func selectDetachmentFaction(_ req: Request) throws -> Future<RoasterResponse> {
+        _ = try req.requireAuthenticated(Customer.self)
+        let roasterId = try req.parameters.next(Int.self)
+        let detachmentId = try req.parameters.next(Int.self)
+        let factionId = try req.parameters.next(Int.self)
+
+        return Detachment.find(detachmentId, on: req).unwrap(or: RoasterHammerError.detachmentIsMissing)
+            .flatMap(to: Detachment.self, { detachment in
+                detachment.factionId = factionId
+                return detachment.update(on: req)
+            })
+            .flatMap(to: Roaster.self, { _ in
+                return Roaster.find(roasterId, on: req).unwrap(or: RoasterHammerError.roasterIsMissing)
+            })
+            .flatMap(to: RoasterResponse.self, { roaster in
+                let roasterController = RoasterController()
+                return try roasterController.roasterResponse(forRoaster: roaster, conn: req)
+            })
+    }
+
     // MARK: - Utility Functions
 
     func roleResponse(forRole role: Role,
@@ -66,14 +86,23 @@ final class DetachmentController {
                             conn: DatabaseConnectable) throws -> Future<DetachmentResponse> {
         let rolesFuture = try detachment.roles.query(on: conn).all()
         let armyFuture = detachment.army.get(on: conn)
+        let selectedFactionFuture = Faction.find(detachment.factionId ?? -1, on: conn)
 
-        return flatMap(rolesFuture, armyFuture, { (roles, army) in
+        return flatMap(rolesFuture, armyFuture, selectedFactionFuture, { (roles, army, selectedFaction) in
             let roleResponsesFuture = try roles.map { try self.roleResponse(forRole: $0, conn: conn) }.flatten(on: conn)
             let armyResponse = try ArmyController().armyResponse(forArmy: army, conn: conn)
 
-            return map(roleResponsesFuture, armyResponse, { (roleResponses, armyResponse) in
-                return try DetachmentResponse(detachment: detachment, roles: roleResponses, army: armyResponse)
-            })
+            if let selectedFaction = selectedFaction {
+                let selectedFactionResponse = try FactionController().factionResponse(faction: selectedFaction, conn: conn)
+
+                return map(roleResponsesFuture, armyResponse, selectedFactionResponse, { (roleResponses, armyResponse, selectedFactionResponse) in
+                    return try DetachmentResponse(detachment: detachment, selectedFaction: selectedFactionResponse, roles: roleResponses, army: armyResponse)
+                })
+            } else {
+                return map(roleResponsesFuture, armyResponse, { (roleResponses, armyResponse) in
+                    return try DetachmentResponse(detachment: detachment, selectedFaction: nil, roles: roleResponses, army: armyResponse)
+                })
+            }
         })
 
     }

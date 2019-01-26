@@ -6,6 +6,7 @@ final class Detachment: PostgreSQLModel {
     var name: String
     var commandPoints: Int
     var armyId: Int
+    var factionId: Int?
     var roasters: Siblings<Detachment, Roaster, RoasterDetachment> {
         return siblings()
     }

@@ -6,7 +6,7 @@ import FluentPostgreSQL
 class DetachmentControllerTests: BaseTests {
 
     func testCreateDetachment() throws {
-        let (request, detachment) = try DetachmentTestsUtils.createDetachment(app: app)
+        let (request, detachment) = try DetachmentTestsUtils.createDetachmentWithArmy(app: app)
         XCTAssertEqual(detachment.name, request.name)
         XCTAssertEqual(detachment.commandPoints, request.commandPoints)
 
@@ -20,7 +20,7 @@ class DetachmentControllerTests: BaseTests {
     }
 
     func testGetAllDetachments() throws {
-        let (request, _) = try DetachmentTestsUtils.createDetachment(app: app)
+        let (request, _) = try DetachmentTestsUtils.createDetachmentWithArmy(app: app)
         let detachments = try app.getResponse(to: "detachments", decodeTo: [Detachment].self)
         XCTAssertEqual(detachments.count, 1)
         XCTAssertEqual(detachments[0].name, request.name)
@@ -29,23 +29,9 @@ class DetachmentControllerTests: BaseTests {
 
     func testAddDetachmentToRoaster() throws {
         let user = try app.createAndLogUser()
-
-        let game = try app.getResponse(to: "games",
-                                       method: .POST,
-                                       decodeTo: GameResponse.self,
-                                       loggedInRequest: true,
-                                       loggedInCustomer: user)
-
-        let createRoasterRequest = CreateRoasterRequest(name: "My Roaster")
-        let roaster = try app.getResponse(to: "games/\(game.id)/roasters",
-            method: .POST,
-            headers: ["Content-Type": "application/json"],
-            data: createRoasterRequest,
-            decodeTo: RoasterResponse.self,
-            loggedInRequest: true,
-            loggedInCustomer: user)
-
-        let (_, detachment) = try DetachmentTestsUtils.createDetachment(app: app)
+        let game = try GameTestsUtils.createGame(user: user, app: app)
+        let (_, roaster) = try RoasterTestsUtils.createRoaster(user: user, gameId: game.id, app: app)
+        let (_, detachment) = try DetachmentTestsUtils.createDetachmentWithArmy(app: app)
 
         let addDetachmentRequest = AddDetachmentToRoasterRequest(detachmentId: detachment.id!)
         try app.sendRequest(to: "roasters/\(roaster.id)/detachments",
@@ -66,6 +52,33 @@ class DetachmentControllerTests: BaseTests {
         XCTAssertEqual(updatedRoaster.detachments[0].army.name, army.name)
         XCTAssertEqual(updatedRoaster.detachments[0].army.factions.count, factions.count)
         XCTAssertEqual(updatedRoaster.detachments[0].army.factions[0].name, factions[0].name)
+    }
+
+    func testSelectDetachmentFaction() throws {
+        let user = try app.createAndLogUser()
+        let game = try GameTestsUtils.createGame(user: user, app: app)
+        let (_, roaster) = try RoasterTestsUtils.createRoaster(user: user, gameId: game.id, app: app)
+        let (_, detachment) = try DetachmentTestsUtils.createDetachmentWithArmy(app: app)
+
+        let addDetachmentRequest = AddDetachmentToRoasterRequest(detachmentId: detachment.id!)
+        try app.sendRequest(to: "roasters/\(roaster.id)/detachments",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addDetachmentRequest,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let army = try detachment.army.get(on: conn).wait()
+        let faction = try army.factions.query(on: conn).first().unwrap(or: RoasterHammerError.factionIsMissing).wait()
+
+        let updatedRoaster = try app.getResponse(to: "roasters/\(roaster.id)/detachments/\(detachment.id!)/factions/\(faction.id!)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: nil,
+            decodeTo: RoasterResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+        XCTAssertNotNil(updatedRoaster.detachments[0].selectedFaction)
     }
 
 }

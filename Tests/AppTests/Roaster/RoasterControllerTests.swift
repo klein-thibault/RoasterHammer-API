@@ -7,19 +7,8 @@ class RoasterControllerTests: BaseTests {
 
     func testCreateRoaster() throws {
         let user = try app.createAndLogUser()
-        let game = try app.getResponse(to: "games",
-                                       method: .POST,
-                                       decodeTo: GameResponse.self,
-                                       loggedInRequest: true,
-                                       loggedInCustomer: user)
-        let request = CreateRoasterRequest(name: "My Roaster")
-        let response = try app.getResponse(to: "games/\(game.id)/roasters",
-            method: .POST,
-            headers: ["Content-Type": "application/json"],
-            data: request,
-            decodeTo: RoasterResponse.self,
-            loggedInRequest: true,
-            loggedInCustomer: user)
+        let game = try GameTestsUtils.createGame(user: user, app: app)
+        let (request, response) = try RoasterTestsUtils.createRoaster(user: user, gameId: game.id, app: app)
 
         let roaster = try Roaster.find(response.id, on: conn).unwrap(or: RoasterHammerError.roasterIsMissing).wait()
         let roasterGame = try roaster.game.get(on: conn).wait()
@@ -34,19 +23,8 @@ class RoasterControllerTests: BaseTests {
 
     func testGetRoasters() throws {
         let user = try app.createAndLogUser()
-        let game = try app.getResponse(to: "games",
-                                       method: .POST,
-                                       decodeTo: GameResponse.self,
-                                       loggedInRequest: true,
-                                       loggedInCustomer: user)
-        let request = CreateRoasterRequest(name: "My Roaster")
-        let roaster = try app.getResponse(to: "games/\(game.id)/roasters",
-            method: .POST,
-            headers: ["Content-Type": "application/json"],
-            data: request,
-            decodeTo: RoasterResponse.self,
-            loggedInRequest: true,
-            loggedInCustomer: user)
+        let game = try GameTestsUtils.createGame(user: user, app: app)
+        let (_, roaster) = try RoasterTestsUtils.createRoaster(user: user, gameId: game.id, app: app)
 
         let response = try app.getResponse(to: "games/\(game.id)/roasters",
             decodeTo: [RoasterResponse].self,
