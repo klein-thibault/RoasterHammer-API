@@ -1,6 +1,6 @@
 import Vapor
 
-struct AddWeaponToUnitRequest: Content {
+struct AddWeaponToModelRequest: Content {
     let minQuantity: Int
     let maxQuantity: Int
 }

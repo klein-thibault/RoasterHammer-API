@@ -12,10 +12,10 @@ final class Characteristics: PostgreSQLModel {
     var attacks: String
     var leadership: String
     var save: String
-    var unitId: Int
+    var modelId: Int
 
-    var unit: Parent<Characteristics, Unit> {
-        return parent(\.unitId)
+    var model: Parent<Characteristics, Model> {
+        return parent(\.modelId)
     }
 
     init(movement: String,
@@ -27,7 +27,7 @@ final class Characteristics: PostgreSQLModel {
          attacks: String,
          leadership: String,
          save: String,
-         unitId: Int) {
+         modelId: Int) {
         self.movement = movement
         self.weaponSkill = weaponSkill
         self.balisticSkill = balisticSkill
@@ -37,7 +37,7 @@ final class Characteristics: PostgreSQLModel {
         self.attacks = attacks
         self.leadership = leadership
         self.save = save
-        self.unitId = unitId
+        self.modelId = modelId
     }
 
 }

@@ -84,31 +84,46 @@ final class UnitController {
     }
     
     func unitResponse(forUnit unit: Unit, conn: DatabaseConnectable) throws -> Future<UnitResponse> {
-        let unitCharacteristicsFuture = try unit.characteristics.query(on: conn).first().unwrap(or: RoasterHammerError.unitIsMissing)
-        let unitWeaponsFuture = try unit.weapons.query(on: conn).all()
+        let unitModelsFuture = try unit.models.query(on: conn).all()
         let unitKeywordsFuture = try unit.keywords.query(on: conn).all()
         let unitTypeFuture = unit.unitType.get(on: conn)
         let unitRulesFuture = try unit.rules.query(on: conn).all()
 
         return flatMap(to: UnitResponse.self,
-                       unitCharacteristicsFuture,
-                       unitWeaponsFuture,
+                       unitModelsFuture,
                        unitKeywordsFuture,
                        unitTypeFuture,
-                       unitRulesFuture) { (characteristics, weapons, keywords, unitType, rules) in
-                        let weaponController = WeaponController()
-                        return try weapons
-                            .map { try weaponController.weaponResponse(forWeapon: $0, unit: unit, conn: conn) }
+                       unitRulesFuture) { (models, keywords, unitType, rules) in
+                        return try models
+                            .map { try self.modelResponse(forModel: $0, conn: conn) }
                             .flatten(on: conn)
-                            .map(to: UnitResponse.self, { weaponResponses in
+                            .map(to: UnitResponse.self, { modelResponses in
+                                let keywordStrings = keywords.map { $0.name }
+                                let unitTypeString = unitType.name
                                 return try UnitResponse(unit: unit,
-                                                        unitType: unitType.name,
-                                                        characteristics: characteristics,
-                                                        weapons: weaponResponses,
-                                                        keywords: keywords.map { $0.name},
+                                                        unitType: unitTypeString,
+                                                        models: modelResponses,
+                                                        keywords: keywordStrings,
                                                         rules: rules)
                             })
         }
+    }
+
+    func modelResponse(forModel model: Model, conn: DatabaseConnectable) throws -> Future<ModelResponse> {
+        let characteristicsFuture = try model.characteristics.query(on: conn).first().unwrap(or: RoasterHammerError.characteristicsAreMissing)
+        let weaponsFuture = try model.weapons.query(on: conn).all()
+
+        return flatMap(to: ModelResponse.self,
+                       characteristicsFuture,
+                       weaponsFuture, { (characteristics, weapons) in
+                        let weaponController = WeaponController()
+                        return try weapons
+                            .map { try weaponController.weaponResponse(forWeapon: $0, model: model, conn: conn) }
+                            .flatten(on: conn)
+                            .map(to: ModelResponse.self, { (weaponResponses) in
+                                return try ModelResponse(model: model, characteristics: characteristics, weapons: weaponResponses)
+                            })
+        })
     }
 
     // MARK: - Private Functions
@@ -119,13 +134,12 @@ final class UnitController {
                     isUnique: request.isUnique,
                     minQuantity: request.minQuantity,
                     maxQuantity: request.maxQuantity,
-                    weaponQuantity: request.weaponQuantity,
                     unitTypeId: request.unitTypeId)
             .save(on: conn)
             .flatMap(to: Unit.self, { unit in
-                return try self.createCharacteristics(forUnit: unit,
-                                                      characteristics: request.characteristics,
-                                                      conn: conn)
+                return try self.createModels(forUnit: unit,
+                                             request: request.models,
+                                             conn: conn)
             })
             .flatMap(to: Unit.self, { unit in
                 return self.createKeywords(forUnit: unit,
@@ -139,10 +153,45 @@ final class UnitController {
             })
     }
 
-    private func createCharacteristics(forUnit unit: Unit,
-                                       characteristics: CharacteristicsRequest,
-                                       conn: DatabaseConnectable) throws -> Future<Unit> {
-        let unitId = try unit.requireID()
+    private func createModels(forUnit unit: Unit,
+                              request: [CreateModelRequest],
+                              conn: DatabaseConnectable) throws -> Future<Unit> {
+        return try request
+            .map { try self.createModel(forUnit: unit, request: $0, conn: conn) }
+            .flatten(on: conn)
+            .map(to: Unit.self, { _ in
+                return unit
+            })
+    }
+
+    private func createModel(forUnit unit: Unit,
+                             request: CreateModelRequest,
+                             conn: DatabaseConnectable) throws -> Future<Unit> {
+        return Model(name: request.name,
+                     minQuantity: request.minQuantity,
+                     maxQuantity: request.maxQuantity,
+                     weaponQuantity: request.weaponQuantity)
+            .save(on: conn)
+            .flatMap(to: Model.self, { model in
+                return unit.models.attach(model, on: conn)
+                    .map(to: Model.self, { _ in
+                        return model
+                    })
+            })
+            .flatMap(to: Characteristics.self, { model in
+                return try self.createCharacteristics(forModel: model,
+                                                      characteristics: request.characteristics,
+                                                      conn: conn)
+            })
+            .map(to: Unit.self, { _ in
+                return unit
+            })
+    }
+
+    private func createCharacteristics(forModel model: Model,
+                                       characteristics: CreateCharacteristicsRequest,
+                                       conn: DatabaseConnectable) throws -> Future<Characteristics> {
+        let modelId = try model.requireID()
         return Characteristics(movement: characteristics.movement,
                                weaponSkill: characteristics.weaponSkill,
                                balisticSkill: characteristics.balisticSkill,
@@ -152,15 +201,12 @@ final class UnitController {
                                attacks: characteristics.attacks,
                                leadership: characteristics.leadership,
                                save: characteristics.save,
-                               unitId: unitId)
+                               modelId: modelId)
             .save(on: conn)
-            .map(to: Unit.self, { _ in
-                return unit
-            })
     }
 
     private func createKeywords(forUnit unit: Unit,
-                                keywords: [UnitKeywordRequest],
+                                keywords: [CreateUnitKeywordRequest],
                                 conn: DatabaseConnectable) -> Future<Unit> {
         let keywordsFuture = keywords.map { Keyword(name: $0.name).save(on: conn) }.flatten(on: conn)
         return keywordsFuture

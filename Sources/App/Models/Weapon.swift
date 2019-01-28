@@ -10,7 +10,7 @@ final class Weapon: PostgreSQLModel {
     var armorPiercing: String
     var damage: String
     var cost: Int
-    var units: Siblings<Weapon, Unit, UnitWeapon> {
+    var models: Siblings<Weapon, Model, ModelWeapon> {
         return siblings()
     }
 

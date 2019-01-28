@@ -7,17 +7,14 @@ struct UnitResponse: Content {
     let isUnique: Bool
     let minQuantity: Int
     let maxQuantity: Int
-    let weaponQuantity: Int
     let unitType: String
-    let characteristics: Characteristics
-    let weapons: [WeaponResponse]
+    let models: [ModelResponse]
     let keywords: [String]
     let rules: [Rule]
 
     init(unit: Unit,
          unitType: String,
-         characteristics: Characteristics,
-         weapons: [WeaponResponse],
+         models: [ModelResponse],
          keywords: [String],
          rules: [Rule]) throws {
         self.id = try unit.requireID()
@@ -26,10 +23,8 @@ struct UnitResponse: Content {
         self.isUnique = unit.isUnique
         self.minQuantity = unit.minQuantity
         self.maxQuantity = unit.maxQuantity
-        self.weaponQuantity = unit.weaponQuantity
         self.unitType = unitType
-        self.characteristics = characteristics
-        self.weapons = weapons
+        self.models = models
         self.keywords = keywords
         self.rules = rules
     }

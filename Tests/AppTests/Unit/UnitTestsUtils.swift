@@ -5,7 +5,7 @@ import FluentPostgreSQL
 final class UnitTestsUtils {
 
     static func createUnit(app: Application) throws -> (request: CreateUnitRequest, response: UnitResponse) {
-        let characteristics = CharacteristicsRequest(movement: "6\"",
+        let characteristics = CreateCharacteristicsRequest(movement: "6\"",
                                                      weaponSkill: "2+",
                                                      balisticSkill: "2+",
                                                      strength: "5",
@@ -14,18 +14,23 @@ final class UnitTestsUtils {
                                                      attacks: "5",
                                                      leadership: "9",
                                                      save: "3+")
-        let keywords = [UnitKeywordRequest(name: "Chaos"), UnitKeywordRequest(name: "Khorne")]
+        let keywords = [CreateUnitKeywordRequest(name: "Chaos"), CreateUnitKeywordRequest(name: "Khorne")]
         let rules = [AddRuleRequest(name: "Blood for the Blood God", description: "This unit can attack twice during the fight phase")]
         let unitTypes = try app.getResponse(to: "unit-types", decodeTo: [UnitType].self)
         let hqUnitType = unitTypes.filter({$0.name == "HQ"}).first!
+        let createModelRequest = CreateModelRequest(name: "Kharn",
+                                                    minQuantity: 1,
+                                                    maxQuantity: 1,
+                                                    weaponQuantity: 1,
+                                                    characteristics: characteristics)
+
         let createUnitRequest = try CreateUnitRequest(name: "Kharn",
                                                       cost: 120,
                                                       isUnique: true,
                                                       minQuantity: 1,
                                                       maxQuantity: 1,
-                                                      weaponQuantity: 1,
                                                       unitTypeId: hqUnitType.requireID(),
-                                                      characteristics: characteristics,
+                                                      models: [createModelRequest],
                                                       keywords: keywords,
                                                       rules: rules)
         let unit = try app.getResponse(to: "units",

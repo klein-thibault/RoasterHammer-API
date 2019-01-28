@@ -6,14 +6,21 @@ struct CreateUnitRequest: Content {
     let isUnique: Bool
     let minQuantity: Int
     let maxQuantity: Int
-    let weaponQuantity: Int
     let unitTypeId: Int
-    let characteristics: CharacteristicsRequest
-    let keywords: [UnitKeywordRequest]
+    let models: [CreateModelRequest]
+    let keywords: [CreateUnitKeywordRequest]
     let rules: [AddRuleRequest]
 }
 
-struct CharacteristicsRequest: Content {
+struct CreateModelRequest: Content {
+    let name: String
+    let minQuantity: Int
+    let maxQuantity: Int
+    let weaponQuantity: Int
+    let characteristics: CreateCharacteristicsRequest
+}
+
+struct CreateCharacteristicsRequest: Content {
     let movement: String
     let weaponSkill: String
     let balisticSkill: String
@@ -25,6 +32,6 @@ struct CharacteristicsRequest: Content {
     let save: String
 }
 
-struct UnitKeywordRequest: Content {
+struct CreateUnitKeywordRequest: Content {
     let name: String
 }

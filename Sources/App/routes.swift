@@ -83,5 +83,11 @@ public func routes(_ router: Router) throws {
     router.post("weapons", use: weaponController.createWeapon)
     router.get("weapons", use: weaponController.getAllWeapons)
     router.get("weapons", Int.parameter, use: weaponController.getWeaponById)
-    router.post("units", Int.parameter, "weapons", Int.parameter, use: weaponController.addWeaponToUnit)
+    router.post("units",
+                Int.parameter,
+                "models",
+                Int.parameter,
+                "weapons",
+                Int.parameter,
+                use: weaponController.addWeaponToModel)
 }

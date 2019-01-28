@@ -28,20 +28,22 @@ final class WeaponController {
         return Weapon.find(weaponId, on: req).unwrap(or: RoasterHammerError.weaponIsMissing)
     }
 
-    func addWeaponToUnit(_ req: Request) throws -> Future<UnitResponse> {
+    func addWeaponToModel(_ req: Request) throws -> Future<UnitResponse> {
         let unitId = try req.parameters.next(Int.self)
+        let modelId = try req.parameters.next(Int.self)
         let weaponId = try req.parameters.next(Int.self)
 
-        let requestFuture = try req.content.decode(AddWeaponToUnitRequest.self)
+        let requestFuture = try req.content.decode(AddWeaponToModelRequest.self)
         let unitFuture = Unit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing)
+        let modelFuture = Model.find(modelId, on: req).unwrap(or: RoasterHammerError.modelIsMissing)
         let weaponFuture = Weapon.find(weaponId, on: req).unwrap(or: RoasterHammerError.weaponIsMissing)
 
-        return flatMap(unitFuture, weaponFuture, requestFuture, { (unit, weapon, request) in
-            return unit.weapons.attach(weapon, on: req)
-                .flatMap(to: UnitWeapon.self, { unitWeapon in
-                    unitWeapon.minQuantity = request.minQuantity
-                    unitWeapon.maxQuantity = request.maxQuantity
-                    return unitWeapon.update(on: req)
+        return flatMap(unitFuture, modelFuture, weaponFuture, requestFuture, { (unit, model, weapon, request) in
+            return model.weapons.attach(weapon, on: req)
+                .flatMap(to: ModelWeapon.self, { modelWeapon in
+                    modelWeapon.minQuantity = request.minQuantity
+                    modelWeapon.maxQuantity = request.maxQuantity
+                    return modelWeapon.update(on: req)
                 })
                 .flatMap(to: UnitResponse.self, { _ in
                     let unitController = UnitController()
@@ -52,8 +54,8 @@ final class WeaponController {
 
     // MARK: - Utils Functions
 
-    func weaponResponse(forWeapon weapon: Weapon, unit: Unit, conn: DatabaseConnectable) throws -> Future<WeaponResponse> {
-        let unitWeapon = try unit.weapons
+    func weaponResponse(forWeapon weapon: Weapon, model: Model, conn: DatabaseConnectable) throws -> Future<WeaponResponse> {
+        let unitWeapon = try model.weapons
             .pivots(on: conn)
             .filter(\.weaponId == weapon.requireID())
             .first()

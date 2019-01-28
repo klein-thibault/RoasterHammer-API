@@ -36,27 +36,29 @@ class WeaponControllerTests: BaseTests {
         XCTAssertEqual(weapon.cost, getWeapon.cost)
     }
 
-    func testAttachWeaponToUnit() throws {
+    func testAttachWeaponToModel() throws {
         let (_, unit) = try UnitTestsUtils.createUnit(app: app)
         let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
+        let model = unit.models[0]
 
-        let addWeaponToUnitRequest = AddWeaponToUnitRequest(minQuantity: 1, maxQuantity: 1)
-        let unitWithWeapon = try app.getResponse(to: "units/\(unit.id)/weapons/\(weapon.id!)",
+        let addWeaponToUnitRequest = AddWeaponToModelRequest(minQuantity: 1, maxQuantity: 1)
+        let unitWithWeapon = try app.getResponse(to: "units/\(unit.id)/models/\(model.id)/weapons/\(weapon.id!)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: addWeaponToUnitRequest,
             decodeTo: UnitResponse.self)
+        let modelWithWeapon = unitWithWeapon.models[0]
 
-        XCTAssertEqual(unitWithWeapon.weapons.count, 1)
-        XCTAssertEqual(unitWithWeapon.weapons[0].name, "Pistol")
-        XCTAssertEqual(unitWithWeapon.weapons[0].range, "12\"")
-        XCTAssertEqual(unitWithWeapon.weapons[0].type, "Pistol")
-        XCTAssertEqual(unitWithWeapon.weapons[0].strength, "3")
-        XCTAssertEqual(unitWithWeapon.weapons[0].armorPiercing, "0")
-        XCTAssertEqual(unitWithWeapon.weapons[0].damage, "1")
-        XCTAssertEqual(unitWithWeapon.weapons[0].cost, 15)
-        XCTAssertEqual(unitWithWeapon.weapons[0].minQuantity, 1)
-        XCTAssertEqual(unitWithWeapon.weapons[0].maxQuantity, 1)
+        XCTAssertEqual(modelWithWeapon.weapons.count, 1)
+        XCTAssertEqual(modelWithWeapon.weapons[0].name, "Pistol")
+        XCTAssertEqual(modelWithWeapon.weapons[0].range, "12\"")
+        XCTAssertEqual(modelWithWeapon.weapons[0].type, "Pistol")
+        XCTAssertEqual(modelWithWeapon.weapons[0].strength, "3")
+        XCTAssertEqual(modelWithWeapon.weapons[0].armorPiercing, "0")
+        XCTAssertEqual(modelWithWeapon.weapons[0].damage, "1")
+        XCTAssertEqual(modelWithWeapon.weapons[0].cost, 15)
+        XCTAssertEqual(modelWithWeapon.weapons[0].minQuantity, 1)
+        XCTAssertEqual(modelWithWeapon.weapons[0].maxQuantity, 1)
     }
 
 }
