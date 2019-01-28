@@ -6,6 +6,7 @@ struct CreateUnitRequest: Content {
     let isUnique: Bool
     let minQuantity: Int
     let maxQuantity: Int
+    let weaponQuantity: Int
     let unitTypeId: Int
     let characteristics: CharacteristicsRequest
     let keywords: [UnitKeywordRequest]

@@ -3,6 +3,8 @@ import FluentPostgreSQL
 
 final class WeaponController {
 
+    // MARK: - Public Functions
+
     func createWeapon(_ req: Request) throws -> Future<Weapon> {
         return try req.content.decode(CreateWeaponRequest.self)
             .flatMap(to: Weapon.self, { request in
@@ -26,15 +28,21 @@ final class WeaponController {
         return Weapon.find(weaponId, on: req).unwrap(or: RoasterHammerError.weaponIsMissing)
     }
 
-    func attachWeaponToUnit(_ req: Request) throws -> Future<UnitResponse> {
+    func addWeaponToUnit(_ req: Request) throws -> Future<UnitResponse> {
         let unitId = try req.parameters.next(Int.self)
         let weaponId = try req.parameters.next(Int.self)
 
+        let requestFuture = try req.content.decode(AddWeaponToUnitRequest.self)
         let unitFuture = Unit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing)
         let weaponFuture = Weapon.find(weaponId, on: req).unwrap(or: RoasterHammerError.weaponIsMissing)
 
-        return flatMap(unitFuture, weaponFuture, { (unit, weapon) -> EventLoopFuture<UnitResponse> in
+        return flatMap(unitFuture, weaponFuture, requestFuture, { (unit, weapon, request) in
             return unit.weapons.attach(weapon, on: req)
+                .flatMap(to: UnitWeapon.self, { unitWeapon in
+                    unitWeapon.minQuantity = request.minQuantity
+                    unitWeapon.maxQuantity = request.maxQuantity
+                    return unitWeapon.update(on: req)
+                })
                 .flatMap(to: UnitResponse.self, { _ in
                     let unitController = UnitController()
                     return try unitController.unitResponse(forUnit: unit, conn: req)
@@ -42,15 +50,20 @@ final class WeaponController {
         })
     }
 
-//    func updateUnitWeaponSelection(_ req: Request) throws -> Future<UnitResponse> {
-//        let unitId = try req.parameters.next(Int.self)
-//        let weaponId = try req.parameters.next(Int.self)
-//
-//        return try req.content.decode(UpdateUnitWeaponSelectionRequest.self)
-//            .flatMap(to: UnitResponse.self, { request in
-//                return UnitWeapon.query(on: req).filter(\.unitId == unitId).all().then({ unitWeapons in
-//                })
-//        })
-//    }
+    // MARK: - Utils Functions
+
+    func weaponResponse(forWeapon weapon: Weapon, unit: Unit, conn: DatabaseConnectable) throws -> Future<WeaponResponse> {
+        let unitWeapon = try unit.weapons
+            .pivots(on: conn)
+            .filter(\.weaponId == weapon.requireID())
+            .first()
+            .unwrap(or: RoasterHammerError.weaponIsMissing)
+
+        return unitWeapon.map(to: WeaponResponse.self, { unitWeapon in
+            return try WeaponResponse(weapon: weapon,
+                                      minQuantity: unitWeapon.minQuantity,
+                                      maxQuantity: unitWeapon.maxQuantity)
+        })
+    }
 
 }

@@ -8,6 +8,7 @@ final class Unit: PostgreSQLModel {
     var isUnique: Bool
     var minQuantity: Int
     var maxQuantity: Int
+    var weaponQuantity: Int
     var unitTypeId: Int
     var characteristics: Children<Unit, Characteristics> {
         return children(\.unitId)
@@ -30,6 +31,7 @@ final class Unit: PostgreSQLModel {
          isUnique: Bool,
          minQuantity: Int,
          maxQuantity: Int,
+         weaponQuantity: Int,
          unitTypeId: Int) {
         self.name = name
         self.cost = cost
@@ -37,6 +39,7 @@ final class Unit: PostgreSQLModel {
         self.minQuantity = minQuantity
         self.maxQuantity = maxQuantity
         self.unitTypeId = unitTypeId
+        self.weaponQuantity = weaponQuantity
     }
 
 }

@@ -9,14 +9,14 @@ struct UnitResponse: Content {
     let maxQuantity: Int
     let unitType: String
     let characteristics: Characteristics
-    let weapons: [Weapon]
+    let weapons: [WeaponResponse]
     let keywords: [String]
     let rules: [Rule]
 
     init(unit: Unit,
          unitType: String,
          characteristics: Characteristics,
-         weapons: [Weapon],
+         weapons: [WeaponResponse],
          keywords: [String],
          rules: [Rule]) throws {
         self.id = try unit.requireID()

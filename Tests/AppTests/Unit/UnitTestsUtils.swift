@@ -23,6 +23,7 @@ final class UnitTestsUtils {
                                                       isUnique: true,
                                                       minQuantity: 1,
                                                       maxQuantity: 1,
+                                                      weaponQuantity: 1,
                                                       unitTypeId: hqUnitType.requireID(),
                                                       characteristics: characteristics,
                                                       keywords: keywords,

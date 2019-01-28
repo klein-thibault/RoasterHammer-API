@@ -6,6 +6,8 @@ struct CreateUnitWeapon: PostgreSQLMigration {
             builder.field(for: \.id, isIdentifier: true)
             builder.field(for: \.unitId)
             builder.field(for: \.weaponId)
+            builder.field(for: \.minQuantity)
+            builder.field(for: \.maxQuantity)
             builder.reference(from: \.unitId, to: \Unit.id, onDelete: .cascade)
             builder.reference(from: \.weaponId, to: \Weapon.id, onDelete: .cascade)
         })

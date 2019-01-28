@@ -44,32 +44,6 @@ final class UnitController {
                     return try detachmentController.detachmentResponse(forDetachment: detachment, conn: req)
                 })
         })
-
-        //        return try req.content.decode(AddUnitToDetachmentRequest.self)
-        //            .flatMap(to: UnitRole.self, { request in
-        //                return Role.find(roleId, on: req)
-        //                    .unwrap(or: RoasterHammerError.roleIsMissing)
-        //                    .flatMap(to: UnitRole.self, { role in
-        //                        return Unit.find(unitId, on: req)
-        //                            .unwrap(or: RoasterHammerError.unitIsMissing)
-        //                            .flatMap(to: SelectedUnit.self, { unit in
-        //                                let selectedUnit = try SelectedUnit(unitId: unit.requireID(),
-        //                                                                    quantity: request.unitQuantity)
-        //                                return selectedUnit.save(on: req)
-        //                            })
-        //                            .flatMap(to: UnitRole.self, { unit in
-        //                                return role.units.attach(unit, on: req)
-        //                            })
-        //                    })
-        //            })
-        //            .flatMap(to: Detachment.self, { _ in
-        //                return Detachment.find(detachmentId, on: req)
-        //                    .unwrap(or: RoasterHammerError.detachmentIsMissing)
-        //            })
-        //            .flatMap(to: DetachmentResponse.self, { detachment in
-        //                let detachmentController = DetachmentController()
-        //                return try detachmentController.detachmentResponse(forDetachment: detachment, conn: req)
-        //            })
     }
     
     func attachWeaponToUnit(_ req: Request) throws -> Future<DetachmentResponse> {
@@ -115,19 +89,25 @@ final class UnitController {
         let unitKeywordsFuture = try unit.keywords.query(on: conn).all()
         let unitTypeFuture = unit.unitType.get(on: conn)
         let unitRulesFuture = try unit.rules.query(on: conn).all()
-        
-        return map(to: UnitResponse.self,
-                   unitCharacteristicsFuture,
-                   unitWeaponsFuture,
-                   unitKeywordsFuture,
-                   unitTypeFuture,
-                   unitRulesFuture) { (characteristics, weapons, keywords, unitType, rules) in
-                    return try UnitResponse(unit: unit,
-                                            unitType: unitType.name,
-                                            characteristics: characteristics,
-                                            weapons: weapons,
-                                            keywords: keywords.map { $0.name},
-                                            rules: rules)
+
+        return flatMap(to: UnitResponse.self,
+                       unitCharacteristicsFuture,
+                       unitWeaponsFuture,
+                       unitKeywordsFuture,
+                       unitTypeFuture,
+                       unitRulesFuture) { (characteristics, weapons, keywords, unitType, rules) in
+                        let weaponController = WeaponController()
+                        return try weapons
+                            .map { try weaponController.weaponResponse(forWeapon: $0, unit: unit, conn: conn) }
+                            .flatten(on: conn)
+                            .map(to: UnitResponse.self, { weaponResponses in
+                                return try UnitResponse(unit: unit,
+                                                        unitType: unitType.name,
+                                                        characteristics: characteristics,
+                                                        weapons: weaponResponses,
+                                                        keywords: keywords.map { $0.name},
+                                                        rules: rules)
+                            })
         }
     }
 
@@ -139,6 +119,7 @@ final class UnitController {
                     isUnique: request.isUnique,
                     minQuantity: request.minQuantity,
                     maxQuantity: request.maxQuantity,
+                    weaponQuantity: request.weaponQuantity,
                     unitTypeId: request.unitTypeId)
             .save(on: conn)
             .flatMap(to: Unit.self, { unit in

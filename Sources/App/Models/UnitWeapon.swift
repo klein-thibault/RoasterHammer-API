@@ -12,6 +12,8 @@ final class UnitWeapon: PostgreSQLPivot, ModifiablePivot {
     var id: Int?
     var unitId: Int
     var weaponId: Int
+    var minQuantity: Int = 1
+    var maxQuantity: Int = 1
 
     init(_ left: Unit, _ right: Weapon) throws {
         unitId = try left.requireID()
