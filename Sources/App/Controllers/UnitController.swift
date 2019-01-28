@@ -27,27 +27,49 @@ final class UnitController {
         let detachmentId = try req.parameters.next(Int.self)
         let roleId = try req.parameters.next(Int.self)
         let unitId = try req.parameters.next(Int.self)
-        
-        return Role.find(roleId, on: req)
-            .unwrap(or: RoasterHammerError.roleIsMissing)
-            .flatMap(to: UnitRole.self, { role in
-                return Unit.find(unitId, on: req)
-                    .unwrap(or: RoasterHammerError.unitIsMissing)
-                    .flatMap(to: SelectedUnit.self, { unit in
-                        return try SelectedUnit(unitId: unit.requireID()).save(on: req)
-                    })
-                    .flatMap(to: UnitRole.self, { unit in
-                        return role.units.attach(unit, on: req)
-                    })
-            })
-            .flatMap(to: Detachment.self, { _ in
-                return Detachment.find(detachmentId, on: req)
-                    .unwrap(or: RoasterHammerError.detachmentIsMissing)
-            })
-            .flatMap(to: DetachmentResponse.self, { detachment in
-                let detachmentController = DetachmentController()
-                return try detachmentController.detachmentResponse(forDetachment: detachment, conn: req)
-            })
+
+        let roleFuture = Role.find(roleId, on: req).unwrap(or: RoasterHammerError.roleIsMissing)
+        let unitFuture = Unit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing)
+        let detachmentFuture = Detachment.find(detachmentId, on: req).unwrap(or: RoasterHammerError.detachmentIsMissing)
+        let requestFuture = try req.content.decode(AddUnitToDetachmentRequest.self)
+
+        return flatMap(roleFuture, unitFuture, detachmentFuture, requestFuture, { (role, unit, detachment, request) in
+            return try SelectedUnit(unitId: unit.requireID(), quantity: request.unitQuantity)
+                .save(on: req)
+                .flatMap({ selectedUnit in
+                    return role.units.attach(selectedUnit, on: req)
+                })
+                .flatMap(to: DetachmentResponse.self, { _ in
+                    let detachmentController = DetachmentController()
+                    return try detachmentController.detachmentResponse(forDetachment: detachment, conn: req)
+                })
+        })
+
+        //        return try req.content.decode(AddUnitToDetachmentRequest.self)
+        //            .flatMap(to: UnitRole.self, { request in
+        //                return Role.find(roleId, on: req)
+        //                    .unwrap(or: RoasterHammerError.roleIsMissing)
+        //                    .flatMap(to: UnitRole.self, { role in
+        //                        return Unit.find(unitId, on: req)
+        //                            .unwrap(or: RoasterHammerError.unitIsMissing)
+        //                            .flatMap(to: SelectedUnit.self, { unit in
+        //                                let selectedUnit = try SelectedUnit(unitId: unit.requireID(),
+        //                                                                    quantity: request.unitQuantity)
+        //                                return selectedUnit.save(on: req)
+        //                            })
+        //                            .flatMap(to: UnitRole.self, { unit in
+        //                                return role.units.attach(unit, on: req)
+        //                            })
+        //                    })
+        //            })
+        //            .flatMap(to: Detachment.self, { _ in
+        //                return Detachment.find(detachmentId, on: req)
+        //                    .unwrap(or: RoasterHammerError.detachmentIsMissing)
+        //            })
+        //            .flatMap(to: DetachmentResponse.self, { detachment in
+        //                let detachmentController = DetachmentController()
+        //                return try detachmentController.detachmentResponse(forDetachment: detachment, conn: req)
+        //            })
     }
     
     func attachWeaponToUnit(_ req: Request) throws -> Future<DetachmentResponse> {
@@ -112,7 +134,12 @@ final class UnitController {
     // MARK: - Private Functions
 
     private func createUnit(request: CreateUnitRequest, conn: DatabaseConnectable) -> Future<Unit> {
-        return Unit(name: request.name, cost: request.cost, isUnique: request.isUnique, unitTypeId: request.unitTypeId)
+        return Unit(name: request.name,
+                    cost: request.cost,
+                    isUnique: request.isUnique,
+                    minQuantity: request.minQuantity,
+                    maxQuantity: request.maxQuantity,
+                    unitTypeId: request.unitTypeId)
             .save(on: conn)
             .flatMap(to: Unit.self, { unit in
                 return try self.createCharacteristics(forUnit: unit,

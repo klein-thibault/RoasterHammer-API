@@ -1,27 +1,29 @@
 import Vapor
 
 struct CreateUnitRequest: Content {
-    var name: String
-    var cost: Int
-    var isUnique: Bool
-    var unitTypeId: Int
-    var characteristics: CharacteristicsRequest
-    var keywords: [UnitKeywordRequest]
-    var rules: [AddRuleRequest]
+    let name: String
+    let cost: Int
+    let isUnique: Bool
+    let minQuantity: Int
+    let maxQuantity: Int
+    let unitTypeId: Int
+    let characteristics: CharacteristicsRequest
+    let keywords: [UnitKeywordRequest]
+    let rules: [AddRuleRequest]
 }
 
 struct CharacteristicsRequest: Content {
-    var movement: String
-    var weaponSkill: String
-    var balisticSkill: String
-    var strength: String
-    var toughness: String
-    var wounds: String
-    var attacks: String
-    var leadership: String
-    var save: String
+    let movement: String
+    let weaponSkill: String
+    let balisticSkill: String
+    let strength: String
+    let toughness: String
+    let wounds: String
+    let attacks: String
+    let leadership: String
+    let save: String
 }
 
 struct UnitKeywordRequest: Content {
-    var name: String
+    let name: String
 }

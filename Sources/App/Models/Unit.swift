@@ -6,6 +6,8 @@ final class Unit: PostgreSQLModel {
     var name: String
     var cost: Int
     var isUnique: Bool
+    var minQuantity: Int
+    var maxQuantity: Int
     var unitTypeId: Int
     var characteristics: Children<Unit, Characteristics> {
         return children(\.unitId)
@@ -23,10 +25,17 @@ final class Unit: PostgreSQLModel {
         return parent(\.unitTypeId)
     }
 
-    init(name: String, cost: Int, isUnique: Bool, unitTypeId: Int) {
+    init(name: String,
+         cost: Int,
+         isUnique: Bool,
+         minQuantity: Int,
+         maxQuantity: Int,
+         unitTypeId: Int) {
         self.name = name
         self.cost = cost
         self.isUnique = isUnique
+        self.minQuantity = minQuantity
+        self.maxQuantity = maxQuantity
         self.unitTypeId = unitTypeId
     }
 

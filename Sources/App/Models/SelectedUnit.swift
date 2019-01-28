@@ -4,6 +4,7 @@ import FluentPostgreSQL
 final class SelectedUnit: PostgreSQLModel {
     var id: Int?
     var unitId: Int
+    var quantity: Int
     var roles: Siblings<SelectedUnit, Role, UnitRole> {
         return siblings()
     }
@@ -11,8 +12,9 @@ final class SelectedUnit: PostgreSQLModel {
         return siblings()
     }
 
-    init(unitId: Int) {
+    init(unitId: Int, quantity: Int) {
         self.unitId = unitId
+        self.quantity = quantity
     }
 }
 

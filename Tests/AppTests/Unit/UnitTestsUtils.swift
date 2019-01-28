@@ -21,6 +21,8 @@ final class UnitTestsUtils {
         let createUnitRequest = try CreateUnitRequest(name: "Kharn",
                                                       cost: 120,
                                                       isUnique: true,
+                                                      minQuantity: 1,
+                                                      maxQuantity: 1,
                                                       unitTypeId: hqUnitType.requireID(),
                                                       characteristics: characteristics,
                                                       keywords: keywords,

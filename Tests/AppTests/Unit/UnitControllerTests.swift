@@ -52,12 +52,15 @@ class UnitControllerTests: BaseTests {
 
         let (createUnitRequest, unit) = try UnitTestsUtils.createUnit(app: app)
 
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
         let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(unit.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
             decodeTo: DetachmentResponse.self,
             loggedInRequest: true,
             loggedInCustomer: user)
+
         let updatedDetachmentRole = updatedDetachment.roles
         let addedUnit = updatedDetachmentRole[0].units
         let addedUnitCharacteristics = addedUnit[0].unit.characteristics

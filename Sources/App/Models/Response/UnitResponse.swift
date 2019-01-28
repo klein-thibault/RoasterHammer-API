@@ -5,6 +5,8 @@ struct UnitResponse: Content {
     let name: String
     let cost: Int
     let isUnique: Bool
+    let minQuantity: Int
+    let maxQuantity: Int
     let unitType: String
     let characteristics: Characteristics
     let weapons: [Weapon]
@@ -21,6 +23,8 @@ struct UnitResponse: Content {
         self.name = unit.name
         self.cost = unit.cost
         self.isUnique = unit.isUnique
+        self.minQuantity = unit.minQuantity
+        self.maxQuantity = unit.maxQuantity
         self.unitType = unitType
         self.characteristics = characteristics
         self.weapons = weapons
