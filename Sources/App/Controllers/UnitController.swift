@@ -37,15 +37,19 @@ final class UnitController {
                        unitFuture,
                        detachmentFuture,
                        requestFuture, { (role, unit, detachment, request) in
-            return try SelectedUnit(unitId: unit.requireID(), quantity: request.unitQuantity)
-                .save(on: req)
-                .flatMap({ selectedUnit in
-                    return role.units.attach(selectedUnit, on: req)
-                })
-                .flatMap(to: DetachmentResponse.self, { _ in
-                    let detachmentController = DetachmentController()
-                    return try detachmentController.detachmentResponse(forDetachment: detachment, conn: req)
-                })
+                        return try self.validateUnitInDetachment(detachment: detachment, role: role, unit: unit, conn: req)
+                            .flatMap(to: SelectedUnit.self, { _ in
+                                return try SelectedUnit(unitId: unit.requireID(),
+                                                        quantity: request.unitQuantity)
+                                    .save(on: req)
+                            })
+                            .flatMap({ selectedUnit in
+                                return role.units.attach(selectedUnit, on: req)
+                            })
+                            .flatMap(to: DetachmentResponse.self, { _ in
+                                let detachmentController = DetachmentController()
+                                return try detachmentController.detachmentResponse(forDetachment: detachment, conn: req)
+                            })
         })
     }
     
@@ -242,5 +246,24 @@ final class UnitController {
                 return unit
             })
     }
-    
+
+    private func validateUnitInDetachment(detachment: Detachment,
+                                          role: Role,
+                                          unit: Unit,
+                                          conn: DatabaseConnectable) throws -> Future<Void> {
+        let roleUnitsFuture = try role.units.query(on: conn).all()
+        let unitTypeFuture = unit.unitType.get(on: conn)
+
+        return map(roleUnitsFuture, unitTypeFuture, { (roleUnits, unitType) in
+            let isUnitCompatibleForRole = unitType.name == role.name
+            let detachmentController = DetachmentController()
+            let maxUnitsForRole = detachmentController.maxUnits(forDetachment: detachment, andRole: role)
+            let isDetachmentMaxedOut = roleUnits.count >= maxUnitsForRole
+
+            if !isUnitCompatibleForRole || isDetachmentMaxedOut {
+                throw RoasterHammerError.tooManyUnitsInDetachment.error()
+            }
+        })
+    }
+
 }

@@ -18,6 +18,7 @@ enum RoasterHammerError: Swift.Error {
     case unitTypeIsMissing
     case factionIsMissing
     case characteristicsAreMissing
+    case tooManyUnitsInDetachment
 
     func error() -> AbortError {
         switch self {
@@ -43,6 +44,8 @@ enum RoasterHammerError: Swift.Error {
             return Abort(.badRequest, reason: "The faction could not be found")
         case .characteristicsAreMissing:
             return Abort(.badRequest, reason: "The model characteristics could not be found")
+        case .tooManyUnitsInDetachment:
+            return Abort(.badRequest, reason: "There are too many units in this detachment")
         }
     }
 }

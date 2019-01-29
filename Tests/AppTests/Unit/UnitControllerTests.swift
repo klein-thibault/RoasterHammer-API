@@ -82,4 +82,8 @@ class UnitControllerTests: BaseTests {
         XCTAssertEqual(addedModelCharacteristics.save, createModelRequest.characteristics.save)
     }
 
+    func testAddUnitToDetachment_whenDetachmentHasTooManyUnits() throws {
+        // TODO
+    }
+
 }

@@ -131,17 +131,32 @@ final class DetachmentController {
 
     }
 
+    // TODO: add all cases from the rule book
+    func maxUnits(forDetachment detachment: Detachment, andRole role: Role) -> Int {
+        switch (detachment.name, role.name) {
+        case ("Patrol", _):
+            return 2
+        case ("Batallion", Constants.RoleName.troop):
+            return 5
+        case ("Batallion", _):
+            return 3
+        default:
+            return 0
+        }
+    }
+
     // MARK: - Private Functions
 
     private func generateRoles(forDetachment detachment: Detachment,
                                conn: DatabaseConnectable) throws -> Future<Detachment> {
         let detachmentId = try detachment.requireID()
         let rolesFutures = [
-            Role(name: "HQ", detachmentId: detachmentId).save(on: conn),
-            Role(name: "Troop", detachmentId: detachmentId).save(on: conn),
-            Role(name: "Elite", detachmentId: detachmentId).save(on: conn),
-            Role(name: "Fast Attack", detachmentId: detachmentId).save(on: conn),
-            Role(name: "Heavy Support", detachmentId: detachmentId).save(on: conn)
+            Role(name: Constants.RoleName.hq, detachmentId: detachmentId).save(on: conn),
+            Role(name: Constants.RoleName.troop, detachmentId: detachmentId).save(on: conn),
+            Role(name: Constants.RoleName.elite, detachmentId: detachmentId).save(on: conn),
+            Role(name: Constants.RoleName.fastAttack, detachmentId: detachmentId).save(on: conn),
+            Role(name: Constants.RoleName.heavySupport, detachmentId: detachmentId).save(on: conn),
+            Role(name: Constants.RoleName.flyer, detachmentId: detachmentId).save(on: conn)
         ]
 
         return rolesFutures.flatten(on: conn).then({ _ in

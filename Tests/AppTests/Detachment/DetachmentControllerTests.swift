@@ -11,12 +11,13 @@ class DetachmentControllerTests: BaseTests {
         XCTAssertEqual(detachment.commandPoints, request.commandPoints)
 
         let unitRoles = try detachment.roles.query(on: conn).all().wait()
-        XCTAssertEqual(unitRoles.count, 5)
-        XCTAssertEqual(unitRoles[0].name, "HQ")
-        XCTAssertEqual(unitRoles[1].name, "Troop")
-        XCTAssertEqual(unitRoles[2].name, "Elite")
-        XCTAssertEqual(unitRoles[3].name, "Fast Attack")
-        XCTAssertEqual(unitRoles[4].name, "Heavy Support")
+        XCTAssertEqual(unitRoles.count, 6)
+        XCTAssertEqual(unitRoles[0].name, Constants.RoleName.hq)
+        XCTAssertEqual(unitRoles[1].name, Constants.RoleName.troop)
+        XCTAssertEqual(unitRoles[2].name, Constants.RoleName.elite)
+        XCTAssertEqual(unitRoles[3].name, Constants.RoleName.fastAttack)
+        XCTAssertEqual(unitRoles[4].name, Constants.RoleName.heavySupport)
+        XCTAssertEqual(unitRoles[5].name, Constants.RoleName.flyer)
     }
 
     func testGetAllDetachments() throws {
