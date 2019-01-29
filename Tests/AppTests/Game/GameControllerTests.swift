@@ -7,14 +7,10 @@ class GameControllerTests: BaseTests {
 
     func testCreateGame() throws {
         let user = try app.createAndLogUser()
-        let response = try app.getResponse(to: "games",
-                                       method: .POST,
-                                       decodeTo: GameResponse.self,
-                                       loggedInRequest: true,
-                                       loggedInCustomer: user)
+        let response = try GameTestsUtils.createGame(user: user, app: app)
 
         let userId = try Customer.query(on: conn).filter(\.email == user.email).first().wait()?.id
-        let game = try Game.find(response.id, on: conn).unwrap(or: RoasterHammerError.gameIsMissing).wait()
+        let game = try Game.find(response.id, on: conn).unwrap(or: RoasterHammerError.gameIsMissing.error()).wait()
         let gameUser = try game.users.query(on: conn).filter(\.id == userId).first().wait()
         XCTAssertEqual(gameUser?.id, userId)
         XCTAssertEqual(gameUser?.email, user.email)
@@ -22,11 +18,7 @@ class GameControllerTests: BaseTests {
 
     func testGetGames() throws {
         let user = try app.createAndLogUser()
-        let response = try app.getResponse(to: "games",
-                                       method: .POST,
-                                       decodeTo: GameResponse.self,
-                                       loggedInRequest: true,
-                                       loggedInCustomer: user)
+        let response = try GameTestsUtils.createGame(user: user, app: app)
         let games = try app.getResponse(to: "games",
                                         method: .GET,
                                         decodeTo: [GameResponse].self,
@@ -40,11 +32,7 @@ class GameControllerTests: BaseTests {
 
     func testGetGameById() throws {
         let user = try app.createAndLogUser()
-        let response = try app.getResponse(to: "games",
-                                       method: .POST,
-                                       decodeTo: GameResponse.self,
-                                       loggedInRequest: true,
-                                       loggedInCustomer: user)
+        let response = try GameTestsUtils.createGame(user: user, app: app)
         let gameById = try app.getResponse(to: "games/\(response.id)",
             decodeTo: Game.self,
             loggedInRequest: true,

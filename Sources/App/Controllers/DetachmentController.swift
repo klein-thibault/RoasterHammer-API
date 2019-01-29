@@ -8,10 +8,13 @@ final class DetachmentController {
     func createDetachment(_ req: Request) throws -> Future<Detachment> {
         return try req.content.decode(CreateDetachmentRequest.self)
             .flatMap(to: Detachment.self, { request in
-                return Army.find(request.armyId, on: req).unwrap(or: RoasterHammerError.armyIsMissing)
+                return Army.find(request.armyId, on: req)
+                    .unwrap(or: RoasterHammerError.armyIsMissing.error())
                     .flatMap(to: Detachment.self, { army in
                         let armyId = try army.requireID()
-                        return Detachment(name: request.name, commandPoints: request.commandPoints, armyId: armyId)
+                        return Detachment(name: request.name,
+                                          commandPoints: request.commandPoints,
+                                          armyId: armyId)
                             .save(on: req)
                     })
                     .flatMap(to: Detachment.self, { detachment in
@@ -31,10 +34,13 @@ final class DetachmentController {
         return try req.content.decode(AddDetachmentToRoasterRequest.self)
             .flatMap(to: Detachment.self, { request in
                 // Might need to duplicate the detachment for the roaster to avoid collusion
-                return Detachment.find(request.detachmentId, on: req).unwrap(or: RoasterHammerError.detachmentIsMissing)
+                return Detachment
+                    .find(request.detachmentId, on: req)
+                    .unwrap(or: RoasterHammerError.detachmentIsMissing.error())
             })
             .flatMap(to: Roaster.self, { detachment in
-                return Roaster.find(roasterId, on: req).unwrap(or: RoasterHammerError.roasterIsMissing)
+                return Roaster.find(roasterId, on: req)
+                    .unwrap(or: RoasterHammerError.roasterIsMissing.error())
                     .then({ roaster in
                         return roaster.detachments.attach(detachment, on: req)
                             .then ({ _ in
@@ -54,13 +60,16 @@ final class DetachmentController {
         let detachmentId = try req.parameters.next(Int.self)
         let factionId = try req.parameters.next(Int.self)
 
-        return Detachment.find(detachmentId, on: req).unwrap(or: RoasterHammerError.detachmentIsMissing)
+        return Detachment
+            .find(detachmentId, on: req)
+            .unwrap(or: RoasterHammerError.detachmentIsMissing.error())
             .flatMap(to: Detachment.self, { detachment in
                 detachment.factionId = factionId
                 return detachment.update(on: req)
             })
             .flatMap(to: Roaster.self, { _ in
-                return Roaster.find(roasterId, on: req).unwrap(or: RoasterHammerError.roasterIsMissing)
+                return Roaster.find(roasterId, on: req)
+                    .unwrap(or: RoasterHammerError.roasterIsMissing.error())
             })
             .flatMap(to: RoasterResponse.self, { roaster in
                 let roasterController = RoasterController()
@@ -75,7 +84,9 @@ final class DetachmentController {
         return try role.units.query(on: conn).all()
             .flatMap(to: [SelectedUnitResponse].self, { units in
                 let unitController = UnitController()
-                return try units.map { try unitController.unitResponse(forSelectedUnit: $0, conn: conn) }.flatten(on: conn)
+                return try units
+                    .map { try unitController.unitResponse(forSelectedUnit: $0, conn: conn) }
+                    .flatten(on: conn)
             })
             .map(to: RoleResponse.self, { units in
                 return try RoleResponse(role: role, units: units)
@@ -88,19 +99,32 @@ final class DetachmentController {
         let armyFuture = detachment.army.get(on: conn)
         let selectedFactionFuture = Faction.find(detachment.factionId ?? -1, on: conn)
 
-        return flatMap(rolesFuture, armyFuture, selectedFactionFuture, { (roles, army, selectedFaction) in
-            let roleResponsesFuture = try roles.map { try self.roleResponse(forRole: $0, conn: conn) }.flatten(on: conn)
+        return flatMap(rolesFuture,
+                       armyFuture,
+                       selectedFactionFuture, { (roles, army, selectedFaction) in
+            let roleResponsesFuture = try roles
+                .map { try self.roleResponse(forRole: $0, conn: conn) }
+                .flatten(on: conn)
             let armyResponse = try ArmyController().armyResponse(forArmy: army, conn: conn)
 
             if let selectedFaction = selectedFaction {
-                let selectedFactionResponse = try FactionController().factionResponse(faction: selectedFaction, conn: conn)
+                let selectedFactionResponse = try FactionController().factionResponse(faction: selectedFaction,
+                                                                                      conn: conn)
 
-                return map(roleResponsesFuture, armyResponse, selectedFactionResponse, { (roleResponses, armyResponse, selectedFactionResponse) in
-                    return try DetachmentResponse(detachment: detachment, selectedFaction: selectedFactionResponse, roles: roleResponses, army: armyResponse)
+                return map(roleResponsesFuture,
+                           armyResponse,
+                           selectedFactionResponse, { (roleResponses, armyResponse, selectedFactionResponse) in
+                    return try DetachmentResponse(detachment: detachment,
+                                                  selectedFaction: selectedFactionResponse,
+                                                  roles: roleResponses,
+                                                  army: armyResponse)
                 })
             } else {
                 return map(roleResponsesFuture, armyResponse, { (roleResponses, armyResponse) in
-                    return try DetachmentResponse(detachment: detachment, selectedFaction: nil, roles: roleResponses, army: armyResponse)
+                    return try DetachmentResponse(detachment: detachment,
+                                                  selectedFaction: nil,
+                                                  roles: roleResponses,
+                                                  army: armyResponse)
                 })
             }
         })

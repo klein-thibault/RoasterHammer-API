@@ -37,7 +37,7 @@ final class GameController {
             .query(on: req)
             .filter(\.id == gameId)
             .first()
-            .unwrap(or: RoasterHammerError.gameIsMissing)
+            .unwrap(or: RoasterHammerError.gameIsMissing.error())
             .flatMap(to: GameResponse.self, { game in
                 return try self.gameResponse(forGame: game, conn: req)
             })

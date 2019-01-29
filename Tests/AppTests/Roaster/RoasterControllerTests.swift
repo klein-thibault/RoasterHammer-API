@@ -10,7 +10,7 @@ class RoasterControllerTests: BaseTests {
         let game = try GameTestsUtils.createGame(user: user, app: app)
         let (request, response) = try RoasterTestsUtils.createRoaster(user: user, gameId: game.id, app: app)
 
-        let roaster = try Roaster.find(response.id, on: conn).unwrap(or: RoasterHammerError.roasterIsMissing).wait()
+        let roaster = try Roaster.find(response.id, on: conn).unwrap(or: RoasterHammerError.roasterIsMissing.error()).wait()
         let roasterGame = try roaster.game.get(on: conn).wait()
 
         XCTAssertEqual(response.name, request.name)

@@ -69,7 +69,7 @@ class DetachmentControllerTests: BaseTests {
             loggedInCustomer: user)
 
         let army = try detachment.army.get(on: conn).wait()
-        let faction = try army.factions.query(on: conn).first().unwrap(or: RoasterHammerError.factionIsMissing).wait()
+        let faction = try army.factions.query(on: conn).first().unwrap(or: RoasterHammerError.factionIsMissing.error()).wait()
 
         let updatedRoaster = try app.getResponse(to: "roasters/\(roaster.id)/detachments/\(detachment.id!)/factions/\(faction.id!)",
             method: .POST,

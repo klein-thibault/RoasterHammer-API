@@ -25,7 +25,7 @@ final class WeaponController {
 
     func getWeaponById(_ req: Request) throws -> Future<Weapon> {
         let weaponId = try req.parameters.next(Int.self)
-        return Weapon.find(weaponId, on: req).unwrap(or: RoasterHammerError.weaponIsMissing)
+        return Weapon.find(weaponId, on: req).unwrap(or: RoasterHammerError.weaponIsMissing.error())
     }
 
     func addWeaponToModel(_ req: Request) throws -> Future<UnitResponse> {
@@ -34,9 +34,9 @@ final class WeaponController {
         let weaponId = try req.parameters.next(Int.self)
 
         let requestFuture = try req.content.decode(AddWeaponToModelRequest.self)
-        let unitFuture = Unit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing)
-        let modelFuture = Model.find(modelId, on: req).unwrap(or: RoasterHammerError.modelIsMissing)
-        let weaponFuture = Weapon.find(weaponId, on: req).unwrap(or: RoasterHammerError.weaponIsMissing)
+        let unitFuture = Unit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let modelFuture = Model.find(modelId, on: req).unwrap(or: RoasterHammerError.modelIsMissing.error())
+        let weaponFuture = Weapon.find(weaponId, on: req).unwrap(or: RoasterHammerError.weaponIsMissing.error())
 
         return flatMap(unitFuture, modelFuture, weaponFuture, requestFuture, { (unit, model, weapon, request) in
             return model.weapons.attach(weapon, on: req)
@@ -59,7 +59,7 @@ final class WeaponController {
             .pivots(on: conn)
             .filter(\.weaponId == weapon.requireID())
             .first()
-            .unwrap(or: RoasterHammerError.weaponIsMissing)
+            .unwrap(or: RoasterHammerError.weaponIsMissing.error())
 
         return unitWeapon.map(to: WeaponResponse.self, { unitWeapon in
             return try WeaponResponse(weapon: weapon,

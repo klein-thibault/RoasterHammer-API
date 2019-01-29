@@ -1,4 +1,4 @@
-import Foundation
+import Vapor
 
 enum RoasterHammerTreeError: Swift.Error {
     case nodeIsInvalid
@@ -18,4 +18,31 @@ enum RoasterHammerError: Swift.Error {
     case unitTypeIsMissing
     case factionIsMissing
     case characteristicsAreMissing
+
+    func error() -> AbortError {
+        switch self {
+        case .gameIsMissing:
+            return Abort(.badRequest, reason: "The game could not be found")
+        case .roasterIsMissing:
+            return Abort(.badRequest, reason: "The roaster could not be found")
+        case .armyIsMissing:
+            return Abort(.badRequest, reason: "The army could not be found")
+        case .detachmentIsMissing:
+            return Abort(.badRequest, reason: "The detachment could not be found")
+        case .roleIsMissing:
+            return Abort(.badRequest, reason: "The role could not be found")
+        case .unitIsMissing:
+            return Abort(.badRequest, reason: "The unit could not be found")
+        case .modelIsMissing:
+            return Abort(.badRequest, reason: "The model could not be found")
+        case .weaponIsMissing:
+            return Abort(.badRequest, reason: "The weapon could not be found")
+        case .unitTypeIsMissing:
+            return Abort(.badRequest, reason: "The unit type could not be found")
+        case .factionIsMissing:
+            return Abort(.badRequest, reason: "The faction could not be found")
+        case .characteristicsAreMissing:
+            return Abort(.badRequest, reason: "The model characteristics could not be found")
+        }
+    }
 }

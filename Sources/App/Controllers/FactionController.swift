@@ -20,7 +20,7 @@ final class FactionController {
     func deleteFaction(_ req: Request) throws -> Future<HTTPStatus> {
         let factionId = try req.parameters.next(Int.self)
         return Faction.find(factionId, on: req)
-            .unwrap(or: RoasterHammerError.factionIsMissing)
+            .unwrap(or: RoasterHammerError.factionIsMissing.error())
             .flatMap(to: HTTPStatus.self) { faction in
                 return faction.delete(on: req)
                     .map(to: HTTPStatus.self, { _ in

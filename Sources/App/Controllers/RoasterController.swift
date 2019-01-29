@@ -26,7 +26,7 @@ final class RoasterController {
             .query(on: req)
             .filter(\Game.id == gameId)
             .first()
-            .unwrap(or: RoasterHammerError.gameIsMissing)
+            .unwrap(or: RoasterHammerError.gameIsMissing.error())
             .flatMap(to: [Roaster].self, { game in
                 return try game.roasters.query(on: req).all()
             }).flatMap(to: [RoasterResponse].self, { roasters in
@@ -38,7 +38,7 @@ final class RoasterController {
     func getRoasterById(_ req: Request) throws -> Future<RoasterResponse> {
         let roasterId = try req.parameters.next(Int.self)
 
-        return Roaster.find(roasterId, on: req).unwrap(or: RoasterHammerError.roasterIsMissing)
+        return Roaster.find(roasterId, on: req).unwrap(or: RoasterHammerError.roasterIsMissing.error())
             .flatMap(to: RoasterResponse.self, { roaster in
                 return try self.roasterResponse(forRoaster: roaster, conn: req)
             })

@@ -28,12 +28,15 @@ final class UnitController {
         let roleId = try req.parameters.next(Int.self)
         let unitId = try req.parameters.next(Int.self)
 
-        let roleFuture = Role.find(roleId, on: req).unwrap(or: RoasterHammerError.roleIsMissing)
-        let unitFuture = Unit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing)
-        let detachmentFuture = Detachment.find(detachmentId, on: req).unwrap(or: RoasterHammerError.detachmentIsMissing)
+        let roleFuture = Role.find(roleId, on: req).unwrap(or: RoasterHammerError.roleIsMissing.error())
+        let unitFuture = Unit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let detachmentFuture = Detachment.find(detachmentId, on: req).unwrap(or: RoasterHammerError.detachmentIsMissing.error())
         let requestFuture = try req.content.decode(AddUnitToDetachmentRequest.self)
 
-        return flatMap(roleFuture, unitFuture, detachmentFuture, requestFuture, { (role, unit, detachment, request) in
+        return flatMap(roleFuture,
+                       unitFuture,
+                       detachmentFuture,
+                       requestFuture, { (role, unit, detachment, request) in
             return try SelectedUnit(unitId: unit.requireID(), quantity: request.unitQuantity)
                 .save(on: req)
                 .flatMap({ selectedUnit in
@@ -52,14 +55,14 @@ final class UnitController {
         let unitId = try req.parameters.next(Int.self)
         let weaponId = try req.parameters.next(Int.self)
         
-        let selectedUnitFuture = SelectedUnit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing)
-        let weaponFuture = Weapon.find(weaponId, on: req).unwrap(or: RoasterHammerError.weaponIsMissing)
+        let selectedUnitFuture = SelectedUnit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let weaponFuture = Weapon.find(weaponId, on: req).unwrap(or: RoasterHammerError.weaponIsMissing.error())
         
         return flatMap(selectedUnitFuture, weaponFuture, { (selectedUnit, weapon) in
             return selectedUnit.weapons.attach(weapon, on: req).save(on: req)
                 .flatMap(to: Detachment.self, { _ in
                     return Detachment.find(detachmentId, on: req)
-                        .unwrap(or: RoasterHammerError.detachmentIsMissing)
+                        .unwrap(or: RoasterHammerError.detachmentIsMissing.error())
                 })
                 .flatMap(to: DetachmentResponse.self, { detachment in
                     let detachmentController = DetachmentController()
@@ -70,8 +73,11 @@ final class UnitController {
     
     // MARK: - Utility Functions
     
-    func unitResponse(forSelectedUnit selectedUnit: SelectedUnit, conn: DatabaseConnectable) throws -> Future<SelectedUnitResponse> {
-        let unitFuture = Unit.find(selectedUnit.unitId, on: conn).unwrap(or: RoasterHammerError.unitIsMissing)
+    func unitResponse(forSelectedUnit selectedUnit: SelectedUnit,
+                      conn: DatabaseConnectable) throws -> Future<SelectedUnitResponse> {
+        let unitFuture = Unit
+            .find(selectedUnit.unitId, on: conn)
+            .unwrap(or: RoasterHammerError.unitIsMissing.error())
             .flatMap(to: UnitResponse.self) { (unit) in
                 return try self.unitResponse(forUnit: unit, conn: conn)
         }
@@ -79,7 +85,9 @@ final class UnitController {
         
         return map(unitFuture,
                    selectedWeaponsFuture, { (unit, selectedWeapons) in
-                    return try SelectedUnitResponse(selectedUnit: selectedUnit, unit: unit, selectedWeapons: selectedWeapons)
+                    return try SelectedUnitResponse(selectedUnit: selectedUnit,
+                                                    unit: unit,
+                                                    selectedWeapons: selectedWeapons)
         })
     }
     
@@ -110,7 +118,7 @@ final class UnitController {
     }
 
     func modelResponse(forModel model: Model, conn: DatabaseConnectable) throws -> Future<ModelResponse> {
-        let characteristicsFuture = try model.characteristics.query(on: conn).first().unwrap(or: RoasterHammerError.characteristicsAreMissing)
+        let characteristicsFuture = try model.characteristics.query(on: conn).first().unwrap(or: RoasterHammerError.characteristicsAreMissing.error())
         let weaponsFuture = try model.weapons.query(on: conn).all()
 
         return flatMap(to: ModelResponse.self,
@@ -121,7 +129,9 @@ final class UnitController {
                             .map { try weaponController.weaponResponse(forWeapon: $0, model: model, conn: conn) }
                             .flatten(on: conn)
                             .map(to: ModelResponse.self, { (weaponResponses) in
-                                return try ModelResponse(model: model, characteristics: characteristics, weapons: weaponResponses)
+                                return try ModelResponse(model: model,
+                                                         characteristics: characteristics,
+                                                         weapons: weaponResponses)
                             })
         })
     }
@@ -221,7 +231,9 @@ final class UnitController {
     private func createRules(forUnit unit: Unit,
                              rules: [AddRuleRequest],
                              conn: DatabaseConnectable) -> Future<Unit> {
-        let rulesFuture = rules.map { Rule(name: $0.name, description: $0.description).save(on: conn) }.flatten(on: conn)
+        let rulesFuture = rules
+            .map { Rule(name: $0.name, description: $0.description).save(on: conn) }
+            .flatten(on: conn)
         return rulesFuture
             .flatMap(to: [UnitRule].self, { rules in
                 return rules.map { unit.rules.attach($0, on: conn) }.flatten(on: conn)
