@@ -134,11 +134,11 @@ final class DetachmentController {
     // TODO: add all cases from the rule book
     func maxUnits(forDetachment detachment: Detachment, andRole role: Role) -> Int {
         switch (detachment.name, role.name) {
-        case ("Patrol", _):
+        case (Constants.DetachmentName.patrol, _):
             return 2
-        case ("Batallion", Constants.RoleName.troop):
+        case (Constants.DetachmentName.batallion, Constants.RoleName.troop):
             return 5
-        case ("Batallion", _):
+        case (Constants.DetachmentName.batallion, _):
             return 3
         default:
             return 0
