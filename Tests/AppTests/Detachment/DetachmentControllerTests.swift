@@ -6,7 +6,7 @@ import FluentPostgreSQL
 class DetachmentControllerTests: BaseTests {
 
     func testCreateDetachment() throws {
-        let (request, detachment) = try DetachmentTestsUtils.createDetachmentWithArmy(app: app)
+        let (request, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
         XCTAssertEqual(detachment.name, request.name)
         XCTAssertEqual(detachment.commandPoints, request.commandPoints)
 
@@ -21,7 +21,7 @@ class DetachmentControllerTests: BaseTests {
     }
 
     func testGetAllDetachments() throws {
-        let (request, _) = try DetachmentTestsUtils.createDetachmentWithArmy(app: app)
+        let (request, _) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
         let detachments = try app.getResponse(to: "detachments", decodeTo: [Detachment].self)
         XCTAssertEqual(detachments.count, 1)
         XCTAssertEqual(detachments[0].name, request.name)
@@ -32,7 +32,7 @@ class DetachmentControllerTests: BaseTests {
         let user = try app.createAndLogUser()
         let game = try GameTestsUtils.createGame(user: user, app: app)
         let (_, roaster) = try RoasterTestsUtils.createRoaster(user: user, gameId: game.id, app: app)
-        let (_, detachment) = try DetachmentTestsUtils.createDetachmentWithArmy(app: app)
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
 
         let addDetachmentRequest = AddDetachmentToRoasterRequest(detachmentId: detachment.id!)
         try app.sendRequest(to: "roasters/\(roaster.id)/detachments",
@@ -59,7 +59,7 @@ class DetachmentControllerTests: BaseTests {
         let user = try app.createAndLogUser()
         let game = try GameTestsUtils.createGame(user: user, app: app)
         let (_, roaster) = try RoasterTestsUtils.createRoaster(user: user, gameId: game.id, app: app)
-        let (_, detachment) = try DetachmentTestsUtils.createDetachmentWithArmy(app: app)
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
 
         let addDetachmentRequest = AddDetachmentToRoasterRequest(detachmentId: detachment.id!)
         try app.sendRequest(to: "roasters/\(roaster.id)/detachments",

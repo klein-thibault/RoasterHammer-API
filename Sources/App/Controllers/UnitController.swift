@@ -260,7 +260,10 @@ final class UnitController {
             let maxUnitsForRole = detachmentController.maxUnits(forDetachment: detachment, andRole: role)
             let isDetachmentMaxedOut = roleUnits.count >= maxUnitsForRole
 
-            if !isUnitCompatibleForRole || isDetachmentMaxedOut {
+            if !isUnitCompatibleForRole {
+                throw RoasterHammerError.addingUnitToWrongRole.error()
+            }
+            if isDetachmentMaxedOut {
                 throw RoasterHammerError.tooManyUnitsInDetachment.error()
             }
         })

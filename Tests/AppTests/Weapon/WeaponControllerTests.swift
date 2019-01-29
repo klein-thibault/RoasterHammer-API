@@ -37,7 +37,7 @@ class WeaponControllerTests: BaseTests {
     }
 
     func testAttachWeaponToModel() throws {
-        let (_, unit) = try UnitTestsUtils.createUnit(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(app: app)
         let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
         let model = unit.models[0]
 
