@@ -6,14 +6,19 @@ final class ArmyController {
     // MARK: - Public Functions
 
     func createArmy(_ req: Request) throws -> Future<Army> {
-        return try req.content.decode(Army.self)
-            .flatMap(to: Army.self, { army in
-                return army.save(on: req)
+        return try req.content.decode(CreateArmyRequest.self)
+            .flatMap(to: Army.self, { request in
+                return self.createArmy(request: request, conn: req)
             })
     }
 
-    func armies(_ req: Request) throws -> Future<[Army]> {
+    func armies(_ req: Request) throws -> Future<[ArmyResponse]> {
         return Army.query(on: req).all()
+            .flatMap(to: [ArmyResponse].self, { armies in
+                return try armies
+                    .map { try self.armyResponse(forArmy: $0, conn: req) }
+                    .flatten(on: req)
+            })
     }
 
     // MARK: - Utility Functions
@@ -31,6 +36,31 @@ final class ArmyController {
                     return try ArmyResponse(army: army, factions: factions, rules: rules)
                 })
         })
+    }
+
+    // MARK: - Private Functions
+
+    private func createArmy(request: CreateArmyRequest, conn: DatabaseConnectable) -> Future<Army> {
+        return Army(name: request.name)
+            .save(on: conn)
+            .flatMap(to: Army.self, { army in
+                return self.createRules(forArmy: army, rules: request.rules, conn: conn)
+            })
+    }
+
+    private func createRules(forArmy army: Army,
+                             rules: [AddRuleRequest],
+                             conn: DatabaseConnectable) -> Future<Army> {
+        let rulesFuture = rules
+            .map { Rule(name: $0.name, description: $0.description).save(on: conn) }
+            .flatten(on: conn)
+        return rulesFuture
+            .flatMap(to: [ArmyRule].self, { rules in
+                return rules.map { army.rules.attach($0, on: conn) }.flatten(on: conn)
+            })
+            .map(to: Army.self, { _ in
+                return army
+            })
     }
 
 }

@@ -1,5 +1,6 @@
 import Vapor
 
 struct CreateArmyRequest: Content {
-    var name: String
+    let name: String
+    let rules: [AddRuleRequest]
 }

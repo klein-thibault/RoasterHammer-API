@@ -13,9 +13,11 @@ class ArmyControllerTests: BaseTests {
 
     func testGetAllArmies() throws {
         let (request, _) = try ArmyTestsUtils.createArmyWithFaction(app: app)
-        let armies = try app.getResponse(to: "armies", decodeTo: [Army].self)
+        let armies = try app.getResponse(to: "armies", decodeTo: [ArmyResponse].self)
         XCTAssertEqual(armies.count, 1)
         XCTAssertEqual(armies[0].name, request.name)
+        XCTAssertEqual(armies[0].rules[0].name, request.rules[0].name)
+        XCTAssertEqual(armies[0].rules[0].description, request.rules[0].description)
     }
 
 }
