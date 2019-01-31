@@ -11,7 +11,8 @@ final class WeaponTestsUtils {
                                           strength: "3",
                                           armorPiercing: "0",
                                           damage: "1",
-                                          cost: 15)
+                                          cost: 15,
+                                          ability: "-")
         let weapon = try app.getResponse(to: "weapons",
                                          method: .POST,
                                          headers: ["Content-Type": "application/json"],

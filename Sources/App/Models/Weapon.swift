@@ -10,6 +10,7 @@ final class Weapon: PostgreSQLModel {
     var armorPiercing: String
     var damage: String
     var cost: Int
+    var ability: String
     var models: Siblings<Weapon, Model, ModelWeapon> {
         return siblings()
     }
@@ -20,7 +21,8 @@ final class Weapon: PostgreSQLModel {
         strength: String,
         armorPiercing: String,
         damage: String,
-        cost: Int) {
+        cost: Int,
+        ability: String) {
         self.name = name
         self.range = range
         self.type = type
@@ -28,6 +30,7 @@ final class Weapon: PostgreSQLModel {
         self.armorPiercing = armorPiercing
         self.damage = damage
         self.cost = cost
+        self.ability = ability
     }
 }
 

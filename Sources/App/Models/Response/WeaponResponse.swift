@@ -10,6 +10,7 @@ final class WeaponResponse: Content {
     let armorPiercing: String
     let damage: String
     let cost: Int
+    let ability: String
     let minQuantity: Int
     let maxQuantity: Int
 
@@ -22,6 +23,7 @@ final class WeaponResponse: Content {
         self.armorPiercing = weapon.armorPiercing
         self.damage = weapon.damage
         self.cost = weapon.cost
+        self.ability = weapon.ability
         self.minQuantity = minQuantity
         self.maxQuantity = maxQuantity
     }

@@ -1,11 +1,12 @@
 import Vapor
 
 struct CreateWeaponRequest: Content {
-    var name: String
-    var range: String
-    var type: String
-    var strength: String
-    var armorPiercing: String
-    var damage: String
-    var cost: Int
+    let name: String
+    let range: String
+    let type: String
+    let strength: String
+    let armorPiercing: String
+    let damage: String
+    let cost: Int
+    let ability: String
 }

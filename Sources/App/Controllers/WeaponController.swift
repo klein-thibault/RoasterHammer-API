@@ -14,7 +14,8 @@ final class WeaponController {
                               strength: request.strength,
                               armorPiercing: request.armorPiercing,
                               damage: request.damage,
-                              cost: request.cost)
+                              cost: request.cost,
+                              ability: request.ability)
                 .save(on: req)
             })
     }
@@ -54,7 +55,9 @@ final class WeaponController {
 
     // MARK: - Utils Functions
 
-    func weaponResponse(forWeapon weapon: Weapon, model: Model, conn: DatabaseConnectable) throws -> Future<WeaponResponse> {
+    func weaponResponse(forWeapon weapon: Weapon,
+                        model: Model,
+                        conn: DatabaseConnectable) throws -> Future<WeaponResponse> {
         let unitWeapon = try model.weapons
             .pivots(on: conn)
             .filter(\.weaponId == weapon.requireID())

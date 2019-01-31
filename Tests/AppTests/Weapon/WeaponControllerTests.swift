@@ -15,6 +15,7 @@ class WeaponControllerTests: BaseTests {
         XCTAssertEqual(weapon.armorPiercing, request.armorPiercing)
         XCTAssertEqual(weapon.damage, request.damage)
         XCTAssertEqual(weapon.cost, request.cost)
+        XCTAssertEqual(weapon.ability, request.ability)
     }
 
     func testGetAllWeapons() throws {
@@ -34,6 +35,7 @@ class WeaponControllerTests: BaseTests {
         XCTAssertEqual(weapon.armorPiercing, getWeapon.armorPiercing)
         XCTAssertEqual(weapon.damage, getWeapon.damage)
         XCTAssertEqual(weapon.cost, getWeapon.cost)
+        XCTAssertEqual(weapon.ability, getWeapon.ability)
     }
 
     func testAttachWeaponToModel() throws {
@@ -57,6 +59,7 @@ class WeaponControllerTests: BaseTests {
         XCTAssertEqual(modelWithWeapon.weapons[0].armorPiercing, "0")
         XCTAssertEqual(modelWithWeapon.weapons[0].damage, "1")
         XCTAssertEqual(modelWithWeapon.weapons[0].cost, 15)
+        XCTAssertEqual(modelWithWeapon.weapons[0].ability, "-")
         XCTAssertEqual(modelWithWeapon.weapons[0].minQuantity, 1)
         XCTAssertEqual(modelWithWeapon.weapons[0].maxQuantity, 1)
     }
