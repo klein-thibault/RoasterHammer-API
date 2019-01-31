@@ -3,7 +3,10 @@ struct Constants {
     struct DetachmentName {
         static let patrol = "Patrol"
         static let batallion = "Batallion"
+        static let brigade = "Bridage"
         static let spearhead = "Spearhead"
+        static let vanguard = "Vanguard"
+        static let outrider = "Outrider"
     }
     struct RoleName {
         static let hq = "HQ"

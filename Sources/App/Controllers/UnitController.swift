@@ -257,7 +257,7 @@ final class UnitController {
         return map(roleUnitsFuture, unitTypeFuture, { (roleUnits, unitType) in
             let isUnitCompatibleForRole = unitType.name == role.name
             let detachmentController = DetachmentController()
-            let maxUnitsForRole = detachmentController.maxUnits(forDetachment: detachment, andRole: role)
+            let maxUnitsForRole = detachmentController.minMaxUnits(forDetachment: detachment, andRole: role).max
             let isDetachmentMaxedOut = roleUnits.count >= maxUnitsForRole
 
             if !isUnitCompatibleForRole {

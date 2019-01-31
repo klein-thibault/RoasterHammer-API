@@ -131,17 +131,66 @@ final class DetachmentController {
 
     }
 
-    // TODO: add all cases from the rule book
-    func maxUnits(forDetachment detachment: Detachment, andRole role: Role) -> Int {
+    func minMaxUnits(forDetachment detachment: Detachment, andRole role: Role) -> (min: Int, max: Int) {
         switch (detachment.name, role.name) {
+            // Patrol
+        case (Constants.DetachmentName.patrol, Constants.RoleName.hq):
+            return (1, 2)
+        case (Constants.DetachmentName.patrol, Constants.RoleName.troop):
+            return (1, 3)
         case (Constants.DetachmentName.patrol, _):
-            return 2
+            return (0, 2)
+            // Batallion
+        case (Constants.DetachmentName.batallion, Constants.RoleName.hq):
+            return (2, 3)
         case (Constants.DetachmentName.batallion, Constants.RoleName.troop):
-            return 5
-        case (Constants.DetachmentName.batallion, _):
-            return 3
+            return (3, 6)
+        case (Constants.DetachmentName.batallion, Constants.RoleName.elite):
+            return (0, 6)
+        case (Constants.DetachmentName.batallion, Constants.RoleName.fastAttack),
+             (Constants.DetachmentName.batallion, Constants.RoleName.heavySupport):
+            return (0, 3)
+        case (Constants.DetachmentName.batallion, Constants.RoleName.flyer):
+            return (0, 2)
+            // Brigade
+        case (Constants.DetachmentName.brigade, Constants.RoleName.hq):
+            return (3, 5)
+        case (Constants.DetachmentName.brigade, Constants.RoleName.troop):
+            return (6, 12)
+        case (Constants.DetachmentName.brigade, Constants.RoleName.elite):
+            return (3, 8)
+        case (Constants.DetachmentName.brigade, Constants.RoleName.fastAttack),
+             (Constants.DetachmentName.brigade, Constants.RoleName.heavySupport):
+            return (3, 5)
+        case (Constants.DetachmentName.brigade, Constants.RoleName.flyer):
+            return (0, 2)
+            // Vanguard
+        case (Constants.DetachmentName.vanguard, Constants.RoleName.hq):
+            return (1, 2)
+        case (Constants.DetachmentName.vanguard, Constants.RoleName.troop):
+            return (0, 3)
+        case (Constants.DetachmentName.vanguard, Constants.RoleName.elite):
+            return (3, 6)
+        case (Constants.DetachmentName.vanguard, _):
+            return (0, 2)
+            // Spearhead
+        case (Constants.DetachmentName.spearhead, Constants.RoleName.hq):
+            return (1, 2)
+        case (Constants.DetachmentName.spearhead, Constants.RoleName.troop):
+            return (0, 3)
+        case (Constants.DetachmentName.spearhead, Constants.RoleName.heavySupport):
+            return (3, 6)
+        case (Constants.DetachmentName.spearhead, _):
+            return (0, 2)
+            // Outrider
+        case (Constants.DetachmentName.outrider, Constants.RoleName.hq):
+            return (1, 2)
+        case (Constants.DetachmentName.outrider, Constants.RoleName.fastAttack):
+            return (3, 6)
+        case (Constants.DetachmentName.outrider, _):
+            return (0, 2)
         default:
-            return 0
+            return (0, 0)
         }
     }
 
