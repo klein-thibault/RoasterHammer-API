@@ -43,6 +43,26 @@ final class UnitController {
                                                         quantity: request.unitQuantity)
                                     .save(on: req)
                             })
+                            .flatMap(to: SelectedUnit.self, { selectedUnit in
+                                return try unit.models.query(on: req).all()
+                                    .flatMap(to: [SelectedModel].self, { models in
+                                        return try models
+                                            .map {
+                                                try SelectedModel(modelId: $0.requireID(),
+                                                                  quantity: $0.minQuantity)
+                                                    .save(on: req)
+                                            }
+                                            .flatten(on: req)
+                                    })
+                                    .flatMap(to: [SelectedUnitModel].self, { selectedModels in
+                                        return selectedModels
+                                            .map { selectedUnit.models.attach($0, on: req) }
+                                            .flatten(on: req)
+                                    })
+                                    .map(to: SelectedUnit.self, { _ in
+                                        return selectedUnit
+                                    })
+                            })
                             .flatMap({ selectedUnit in
                                 return role.units.attach(selectedUnit, on: req)
                             })
@@ -53,17 +73,18 @@ final class UnitController {
         })
     }
     
-    func attachWeaponToUnit(_ req: Request) throws -> Future<DetachmentResponse> {
+    func attachWeaponToSelectedModel(_ req: Request) throws -> Future<DetachmentResponse> {
         _ = try req.requireAuthenticated(Customer.self)
         let detachmentId = try req.parameters.next(Int.self)
-        let unitId = try req.parameters.next(Int.self)
+        let modelId = try req.parameters.next(Int.self)
         let weaponId = try req.parameters.next(Int.self)
         
-        let selectedUnitFuture = SelectedUnit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let selectedModelFuture = SelectedModel.find(modelId, on: req).unwrap(or: RoasterHammerError.modelIsMissing.error())
         let weaponFuture = Weapon.find(weaponId, on: req).unwrap(or: RoasterHammerError.weaponIsMissing.error())
-        
-        return flatMap(selectedUnitFuture, weaponFuture, { (selectedUnit, weapon) in
-            return selectedUnit.weapons.attach(weapon, on: req).save(on: req)
+
+        return flatMap(selectedModelFuture, weaponFuture, { (selectedModel, weapon) in
+            return selectedModel.weapons.attach(weapon, on: req)
+                .save(on: req)
                 .flatMap(to: Detachment.self, { _ in
                     return Detachment.find(detachmentId, on: req)
                         .unwrap(or: RoasterHammerError.detachmentIsMissing.error())
@@ -76,22 +97,46 @@ final class UnitController {
     }
     
     // MARK: - Utility Functions
+
+    func selectedModelResponse(forSelectedModel selectedModel: SelectedModel,
+                               conn: DatabaseConnectable) throws -> Future<SelectedModelResponse> {
+        let modelFuture = Model
+            .find(selectedModel.modelId, on: conn)
+            .unwrap(or: RoasterHammerError.modelIsMissing.error())
+            .flatMap(to: ModelResponse.self) { model in
+                return try self.modelResponse(forModel: model, conn: conn)
+        }
+        let selectedWeaponsFuture = try selectedModel.weapons.query(on: conn).all()
+
+        return map(to: SelectedModelResponse.self,
+                   modelFuture,
+                   selectedWeaponsFuture, { model, weapons in
+                    return try SelectedModelResponse(selectedModel: selectedModel,
+                                                     model: model,
+                                                     selectedWeapons: weapons)
+        })
+    }
     
-    func unitResponse(forSelectedUnit selectedUnit: SelectedUnit,
-                      conn: DatabaseConnectable) throws -> Future<SelectedUnitResponse> {
+    func selectedUnitResponse(forSelectedUnit selectedUnit: SelectedUnit,
+                              conn: DatabaseConnectable) throws -> Future<SelectedUnitResponse> {
         let unitFuture = Unit
             .find(selectedUnit.unitId, on: conn)
             .unwrap(or: RoasterHammerError.unitIsMissing.error())
             .flatMap(to: UnitResponse.self) { (unit) in
                 return try self.unitResponse(forUnit: unit, conn: conn)
         }
-        let selectedWeaponsFuture = try selectedUnit.weapons.query(on: conn).all()
+        let selectedModels = try selectedUnit.models.query(on: conn).all()
         
-        return map(unitFuture,
-                   selectedWeaponsFuture, { (unit, selectedWeapons) in
-                    return try SelectedUnitResponse(selectedUnit: selectedUnit,
-                                                    unit: unit,
-                                                    selectedWeapons: selectedWeapons)
+        return flatMap(unitFuture,
+                       selectedModels, { (unit, selectedModels) in
+                        return try selectedModels.map { try self.selectedModelResponse(forSelectedModel: $0,
+                                                                                       conn: conn) }
+                            .flatten(on: conn)
+                            .map(to: SelectedUnitResponse.self, { selectedModels in
+                                return try SelectedUnitResponse(selectedUnit: selectedUnit,
+                                                                unit: unit,
+                                                                models: selectedModels)
+                            })
         })
     }
     

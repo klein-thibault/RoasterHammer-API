@@ -6,6 +6,7 @@ struct CreateSelectedUnit: PostgreSQLMigration {
         return PostgreSQLDatabase.create(SelectedUnit.self, on: conn, closure: { (builder) in
             builder.field(for: \.id, isIdentifier: true)
             builder.field(for: \.unitId)
+            builder.field(for: \.quantity)
             builder.reference(from: \.unitId, to: \Unit.id, onDelete: .cascade)
         })
     }

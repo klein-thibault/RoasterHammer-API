@@ -43,10 +43,13 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     UnitRule.defaultDatabase = .psql
     UnitRole.defaultDatabase = .psql
     ModelWeapon.defaultDatabase = .psql
-    SelectedUnitWeapon.defaultDatabase = .psql
     UnitKeyword.defaultDatabase = .psql
     FactionRule.defaultDatabase = .psql
     UnitModel.defaultDatabase = .psql
+    SelectedUnit.defaultDatabase = .psql
+    SelectedModel.defaultDatabase = .psql
+    SelectedModelWeapon.defaultDatabase = .psql
+    SelectedUnitModel.defaultDatabase = .psql
     migrations.add(model: Customer.self, database: .psql)
     migrations.add(model: UserToken.self, database: .psql)
     migrations.add(model: NodeElement.self, database: .psql)
@@ -59,7 +62,6 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: Unit.self, database: .psql)
     migrations.add(model: Characteristics.self, database: .psql)
     migrations.add(model: Weapon.self, database: .psql)
-    migrations.add(model: SelectedUnit.self, database: .psql)
     migrations.add(model: Keyword.self, database: .psql)
     migrations.add(model: UnitType.self, database: .psql)
     migrations.add(model: Faction.self, database: .psql)
@@ -70,10 +72,13 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(migration: CreateUserGame.self, database: .psql)
     migrations.add(migration: CreateArmyRule.self, database: .psql)
     migrations.add(migration: CreateRoasterDetachment.self, database: .psql)
+    migrations.add(migration: CreateSelectedUnit.self, database: .psql)
+    migrations.add(migration: CreateSelectedModel.self, database: .psql)
+    migrations.add(migration: CreateSelectedUnitModel.self, database: .psql)
+    migrations.add(migration: CreateSelectedModelWeapon.self, database: .psql)
     migrations.add(migration: CreateUnitRule.self, database: .psql)
     migrations.add(migration: CreateUnitRole.self, database: .psql)
     migrations.add(migration: CreateModelWeapon.self, database: .psql)
-    migrations.add(migration: CreateSelectedUnitWeapon.self, database: .psql)
     migrations.add(migration: CreateUnitKeyword.self, database: .psql)
     migrations.add(migration: CreateFactionRule.self, database: .psql)
     migrations.add(migration: CreateUnitModel.self, database: .psql)

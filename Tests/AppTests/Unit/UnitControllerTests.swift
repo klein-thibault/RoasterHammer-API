@@ -138,4 +138,40 @@ class UnitControllerTests: BaseTests {
         }
     }
 
+    func testSelectWeaponForSelectedModel() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = try detachment.roles.query(on: conn).all().wait()
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(app: app)
+        let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
+        let model = unit.models[0]
+
+        let addWeaponToUnitRequest = AddWeaponToModelRequest(minQuantity: 1, maxQuantity: 1)
+        try app.sendRequest(to: "units/\(unit.id)/models/\(model.id)/weapons/\(weapon.id!)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addWeaponToUnitRequest)
+
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+        let updatedDetachmentRole = updatedDetachment.roles
+        let addedUnit = updatedDetachmentRole[0].units
+        let addedModels = addedUnit[0].models
+        let modelWeapon = addedModels[0].model.weapons[0]
+
+        let updatedDetachmentWithWeapon = try app.getResponse(to: "detachments/\(detachment.id!)/models/\(addedModels[0].id)/weapons/\(modelWeapon.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+        XCTAssertEqual(updatedDetachmentWithWeapon.roles[0].units[0].models[0].selectedWeapons[0].name, modelWeapon.name)
+    }
+
 }

@@ -8,7 +8,7 @@ final class SelectedUnit: PostgreSQLModel {
     var roles: Siblings<SelectedUnit, Role, UnitRole> {
         return siblings()
     }
-    var weapons: Siblings<SelectedUnit, Weapon, SelectedUnitWeapon> {
+    var models: Siblings<SelectedUnit, SelectedModel, SelectedUnitModel> {
         return siblings()
     }
 
@@ -19,4 +19,3 @@ final class SelectedUnit: PostgreSQLModel {
 }
 
 extension SelectedUnit: Content { }
-extension SelectedUnit: PostgreSQLMigration { }

@@ -20,7 +20,10 @@ enum RoasterHammerError: Swift.Error {
     case characteristicsAreMissing
     case addingUnitToWrongRole
     case tooManyUnitsInDetachment
+    case tooManyWeaponsForModel
+}
 
+extension RoasterHammerError {
     func error() -> AbortError {
         switch self {
         case .gameIsMissing:
@@ -49,6 +52,8 @@ enum RoasterHammerError: Swift.Error {
             return Abort(.badRequest, reason: "Can't add this unit to this detachment role")
         case .tooManyUnitsInDetachment:
             return Abort(.badRequest, reason: "There are too many units in this detachment")
+        case .tooManyWeaponsForModel:
+            return Abort(.badRequest, reason: "The model has reached its maximum of weapons")
         }
     }
 }

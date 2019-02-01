@@ -85,7 +85,7 @@ final class DetachmentController {
             .flatMap(to: [SelectedUnitResponse].self, { units in
                 let unitController = UnitController()
                 return try units
-                    .map { try unitController.unitResponse(forSelectedUnit: $0, conn: conn) }
+                    .map { try unitController.selectedUnitResponse(forSelectedUnit: $0, conn: conn) }
                     .flatten(on: conn)
             })
             .map(to: RoleResponse.self, { units in
