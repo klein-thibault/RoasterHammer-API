@@ -307,6 +307,9 @@ final class UnitController {
             let maxUnitsForRole = detachmentController.minMaxUnits(forDetachment: detachment, andRole: role).max
             let isDetachmentMaxedOut = roleUnits.count >= maxUnitsForRole
 
+            if roleUnits.filter({ $0.unitId == unit.id }).first != nil && unit.isUnique {
+                throw RoasterHammerError.addingUniqueUnitMoreThanOnce.error()
+            }
             if !isUnitCompatibleForRole {
                 throw RoasterHammerError.addingUnitToWrongRole.error()
             }

@@ -19,6 +19,7 @@ enum RoasterHammerError: Swift.Error {
     case factionIsMissing
     case characteristicsAreMissing
     case addingUnitToWrongRole
+    case addingUniqueUnitMoreThanOnce
     case tooManyUnitsInDetachment
     case tooManyWeaponsForModel
 }
@@ -50,6 +51,8 @@ extension RoasterHammerError {
             return Abort(.badRequest, reason: "The model characteristics could not be found")
         case .addingUnitToWrongRole:
             return Abort(.badRequest, reason: "Can't add this unit to this detachment role")
+        case .addingUniqueUnitMoreThanOnce:
+            return Abort(.badRequest, reason: "Can't add a unique unit more than once")
         case .tooManyUnitsInDetachment:
             return Abort(.badRequest, reason: "There are too many units in this detachment")
         case .tooManyWeaponsForModel:

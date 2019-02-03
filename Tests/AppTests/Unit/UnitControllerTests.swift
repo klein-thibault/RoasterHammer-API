@@ -73,6 +73,35 @@ class UnitControllerTests: BaseTests {
         XCTAssertEqual(addedModelCharacteristics.save, createModelRequest.characteristics.save)
     }
 
+    func testAddUnitToDetachment_whenUniqueUnitWasAddedOnce() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = try detachment.roles.query(on: conn).all().wait()
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(app: app)
+
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        _ = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        do {
+            _ = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(unit.id)",
+                method: .POST,
+                headers: ["Content-Type": "application/json"],
+                data: addUnitToDetachmentRequest,
+                decodeTo: DetachmentResponse.self,
+                loggedInRequest: true,
+                loggedInCustomer: user)
+            XCTFail("Should have received an error")
+        } catch {
+            XCTAssertNotNil(error)
+        }
+    }
+
     func testAddUnitToDetachment_whenAddingToWrongRole() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
