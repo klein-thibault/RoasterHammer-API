@@ -83,8 +83,10 @@ final class UnitController {
         let weaponFuture = Weapon.find(weaponId, on: req).unwrap(or: RoasterHammerError.weaponIsMissing.error())
 
         return flatMap(selectedModelFuture, weaponFuture, { (selectedModel, weapon) in
-            return selectedModel.weapons.attach(weapon, on: req)
-                .save(on: req)
+            return try self.validateWeaponsForSelectedModel(selectedModel: selectedModel, conn: req)
+                .flatMap({ _ in
+                    selectedModel.weapons.attach(weapon, on: req).save(on: req)
+                })
                 .flatMap(to: Detachment.self, { _ in
                     return Detachment.find(detachmentId, on: req)
                         .unwrap(or: RoasterHammerError.detachmentIsMissing.error())
@@ -312,6 +314,18 @@ final class UnitController {
                 throw RoasterHammerError.tooManyUnitsInDetachment.error()
             }
         })
+    }
+
+    private func validateWeaponsForSelectedModel(selectedModel: SelectedModel,
+                                                 conn: DatabaseConnectable) throws -> Future<Void> {
+        let modelFuture = Model.find(selectedModel.modelId, on: conn).unwrap(or: RoasterHammerError.modelIsMissing.error())
+        let attachedWeaponsFuture = try selectedModel.weapons.query(on: conn).all()
+
+        return map(modelFuture, attachedWeaponsFuture) { model, attachedWeapons in
+            if attachedWeapons.count >= model.weaponQuantity {
+                throw RoasterHammerError.tooManyWeaponsForModel.error()
+            }
+        }
     }
 
 }
