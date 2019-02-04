@@ -16,8 +16,15 @@ final class UnitController {
     }
     
     func units(_ req: Request) throws -> Future<[UnitResponse]> {
-        return Unit.query(on: req).all()
-            .flatMap(to: [UnitResponse].self, { units in
+        let filters = try req.query.decode(UnitFilters.self)
+        let unitQuery: EventLoopFuture<[Unit]>
+        if let armyId = filters.armyId {
+            unitQuery = Unit.query(on: req).filter(\.armyId == armyId).all()
+        } else {
+            unitQuery = Unit.query(on: req).all()
+        }
+
+        return unitQuery.flatMap(to: [UnitResponse].self, { units in
                 return try units.map { try self.unitResponse(forUnit: $0, conn: req) }.flatten(on: req)
             })
     }
