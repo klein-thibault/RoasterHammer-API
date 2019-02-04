@@ -1,13 +1,22 @@
-<!DOCTYPE html>
-#// 1
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        #// 2
-        <title>Hello World</title>
-    </head>
-    <body>
-        #// 3
-        <h1>Hello World</h1>
-    </body>
-</html>
+#set("content") {
+    <h1>Armies</h1>
+    #if(armies) {
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            #for(army in armies) {
+            <tr>
+                <td>#(army.name)</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+    } else {
+    <h2>There aren’t any armies yet.</h2>
+    }
+}
+#embed("base")
