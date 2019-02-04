@@ -12,6 +12,11 @@ final class ArmyController {
             })
     }
 
+    func getArmy(_ req: Request) throws -> Future<ArmyResponse> {
+        let armyId = try req.parameters.next(Int.self)
+        return try getArmy(byID: armyId, conn: req)
+    }
+
     func armies(_ req: Request) throws -> Future<[ArmyResponse]> {
         return Army.query(on: req).all()
             .flatMap(to: [ArmyResponse].self, { armies in
@@ -22,6 +27,14 @@ final class ArmyController {
     }
 
     // MARK: - Utility Functions
+
+    func getArmy(byID id: Int, conn: DatabaseConnectable) throws -> Future<ArmyResponse> {
+        return Army.find(id, on: conn)
+            .unwrap(or: RoasterHammerError.armyIsMissing.error())
+            .flatMap(to: ArmyResponse.self, { army in
+            return try self.armyResponse(forArmy: army, conn: conn)
+        })
+    }
 
     func armyResponse(forArmy army: Army,
                       conn: DatabaseConnectable) throws -> Future<ArmyResponse> {

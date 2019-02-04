@@ -4,6 +4,9 @@ import FluentPostgreSQL
 final class Army: PostgreSQLModel {
     var id: Int?
     var name: String
+    var units: Children<Army, Unit> {
+        return children(\.armyId)
+    }
     var detachments: Children<Army, Detachment> {
         return children(\.armyId)
     }

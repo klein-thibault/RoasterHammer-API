@@ -4,7 +4,7 @@ import FluentPostgreSQL
 
 final class UnitTestsUtils {
 
-    static func createHQUniqueUnit(app: Application) throws -> (request: CreateUnitRequest, response: UnitResponse) {
+    static func createHQUniqueUnit(armyId: Int, app: Application) throws -> (request: CreateUnitRequest, response: UnitResponse) {
         let characteristics = CreateCharacteristicsRequest(movement: "6\"",
                                                      weaponSkill: "2+",
                                                      balisticSkill: "2+",
@@ -14,7 +14,7 @@ final class UnitTestsUtils {
                                                      attacks: "5",
                                                      leadership: "9",
                                                      save: "3+")
-        let keywords = [CreateUnitKeywordRequest(name: "Chaos"), CreateUnitKeywordRequest(name: "Khorne")]
+        let keywords = ["Chaos", "Khorne"]
         let rules = [AddRuleRequest(name: "Blood for the Blood God", description: "This unit can attack twice during the fight phase")]
         let unitTypes = try app.getResponse(to: "unit-types", decodeTo: [UnitType].self)
         let hqUnitType = unitTypes.filter({$0.name == "HQ"}).first!
@@ -30,6 +30,7 @@ final class UnitTestsUtils {
                                                       minQuantity: 1,
                                                       maxQuantity: 1,
                                                       unitTypeId: hqUnitType.requireID(),
+                                                      armyId: armyId,
                                                       models: [createModelRequest],
                                                       keywords: keywords,
                                                       rules: rules)
@@ -42,7 +43,7 @@ final class UnitTestsUtils {
         return (createUnitRequest, unit)
     }
 
-    static func createHQUnit(app: Application) throws -> (request: CreateUnitRequest, response: UnitResponse) {
+    static func createHQUnit(armyId: Int, app: Application) throws -> (request: CreateUnitRequest, response: UnitResponse) {
         let characteristics = CreateCharacteristicsRequest(movement: "6\"",
                                                            weaponSkill: "2+",
                                                            balisticSkill: "2+",
@@ -52,7 +53,7 @@ final class UnitTestsUtils {
                                                            attacks: "5",
                                                            leadership: "9",
                                                            save: "3+")
-        let keywords = [CreateUnitKeywordRequest(name: "Chaos"), CreateUnitKeywordRequest(name: "Khorne")]
+        let keywords = ["Chaos", "Khorne"]
         let rules = [AddRuleRequest(name: "Blood for the Blood God", description: "This unit can attack twice during the fight phase")]
         let unitTypes = try app.getResponse(to: "unit-types", decodeTo: [UnitType].self)
         let hqUnitType = unitTypes.filter({$0.name == "HQ"}).first!
@@ -68,6 +69,7 @@ final class UnitTestsUtils {
                                                       minQuantity: 1,
                                                       maxQuantity: 1,
                                                       unitTypeId: hqUnitType.requireID(),
+                                                      armyId: armyId,
                                                       models: [createModelRequest],
                                                       keywords: keywords,
                                                       rules: rules)

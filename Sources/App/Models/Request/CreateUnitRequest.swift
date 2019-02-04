@@ -7,8 +7,9 @@ struct CreateUnitRequest: Content {
     let minQuantity: Int
     let maxQuantity: Int
     let unitTypeId: Int
+    let armyId: Int
     let models: [CreateModelRequest]
-    let keywords: [CreateUnitKeywordRequest]
+    let keywords: [String]
     let rules: [AddRuleRequest]
 }
 
@@ -30,8 +31,4 @@ struct CreateCharacteristicsRequest: Content {
     let attacks: String
     let leadership: String
     let save: String
-}
-
-struct CreateUnitKeywordRequest: Content {
-    let name: String
 }

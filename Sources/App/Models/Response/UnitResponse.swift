@@ -8,12 +8,14 @@ struct UnitResponse: Content {
     let minQuantity: Int
     let maxQuantity: Int
     let unitType: String
+    let army: ArmyResponse
     let models: [ModelResponse]
     let keywords: [String]
     let rules: [Rule]
 
     init(unit: Unit,
          unitType: String,
+         army: ArmyResponse,
          models: [ModelResponse],
          keywords: [String],
          rules: [Rule]) throws {
@@ -24,6 +26,7 @@ struct UnitResponse: Content {
         self.minQuantity = unit.minQuantity
         self.maxQuantity = unit.maxQuantity
         self.unitType = unitType
+        self.army = army
         self.models = models
         self.keywords = keywords
         self.rules = rules

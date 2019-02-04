@@ -44,6 +44,7 @@ public func routes(_ router: Router) throws {
     let detachmentController = DetachmentController()
     router.post("detachments", use: detachmentController.createDetachment)
     router.get("detachments", use: detachmentController.detachments)
+    router.get("detachment-types", use: detachmentController.detachmentTypes)
     protectedAuthRouter.post("roasters",
                              Int.parameter,
                              "detachments",

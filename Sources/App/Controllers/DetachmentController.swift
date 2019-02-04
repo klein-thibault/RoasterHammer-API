@@ -27,6 +27,19 @@ final class DetachmentController {
         return Detachment.query(on: req).all()
     }
 
+    func detachmentTypes(_ req: Request) throws -> Future<[DetachmentShortResponse]> {
+        let detachmentTypes = [
+            (Constants.DetachmentName.patrol, 0),
+            (Constants.DetachmentName.batallion, 5),
+            (Constants.DetachmentName.brigade, 12),
+            (Constants.DetachmentName.spearhead, 1),
+            (Constants.DetachmentName.vanguard, 1),
+            (Constants.DetachmentName.outrider, 1)
+        ].map { DetachmentShortResponse(name: $0.0, commandPoints: $0.1)}
+
+        return req.eventLoop.future(detachmentTypes)
+    }
+
     func addDetachmentToRoaster(_ req: Request) throws -> Future<RoasterResponse> {
         _ = try req.requireAuthenticated(Customer.self)
         let roasterId = try req.parameters.next(Int.self)

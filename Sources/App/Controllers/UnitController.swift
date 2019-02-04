@@ -147,12 +147,15 @@ final class UnitController {
         let unitKeywordsFuture = try unit.keywords.query(on: conn).all()
         let unitTypeFuture = unit.unitType.get(on: conn)
         let unitRulesFuture = try unit.rules.query(on: conn).all()
+        let armyController = ArmyController()
+        let unitArmyFuture = try armyController.getArmy(byID: unit.armyId, conn: conn)
 
         return flatMap(to: UnitResponse.self,
                        unitModelsFuture,
                        unitKeywordsFuture,
                        unitTypeFuture,
-                       unitRulesFuture) { (models, keywords, unitType, rules) in
+                       unitRulesFuture,
+                       unitArmyFuture) { (models, keywords, unitType, rules, army) in
                         return try models
                             .map { try self.modelResponse(forModel: $0, conn: conn) }
                             .flatten(on: conn)
@@ -161,6 +164,7 @@ final class UnitController {
                                 let unitTypeString = unitType.name
                                 return try UnitResponse(unit: unit,
                                                         unitType: unitTypeString,
+                                                        army: army,
                                                         models: modelResponses,
                                                         keywords: keywordStrings,
                                                         rules: rules)
@@ -195,7 +199,8 @@ final class UnitController {
                     isUnique: request.isUnique,
                     minQuantity: request.minQuantity,
                     maxQuantity: request.maxQuantity,
-                    unitTypeId: request.unitTypeId)
+                    unitTypeId: request.unitTypeId,
+                    armyId: request.armyId)
             .save(on: conn)
             .flatMap(to: Unit.self, { unit in
                 return try self.createModels(forUnit: unit,
@@ -267,9 +272,9 @@ final class UnitController {
     }
 
     private func createKeywords(forUnit unit: Unit,
-                                keywords: [CreateUnitKeywordRequest],
+                                keywords: [String],
                                 conn: DatabaseConnectable) -> Future<Unit> {
-        let keywordsFuture = keywords.map { Keyword(name: $0.name).save(on: conn) }.flatten(on: conn)
+        let keywordsFuture = keywords.map { Keyword(name: $0).save(on: conn) }.flatten(on: conn)
         return keywordsFuture
             .flatMap(to: [UnitKeyword].self) { keywords in
                 return keywords.map { unit.keywords.attach($0, on: conn) }.flatten(on: conn)

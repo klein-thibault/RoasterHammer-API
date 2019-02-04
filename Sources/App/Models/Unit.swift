@@ -9,6 +9,10 @@ final class Unit: PostgreSQLModel {
     var minQuantity: Int
     var maxQuantity: Int
     var unitTypeId: Int
+    var armyId: Int
+    var army: Parent<Unit, Army> {
+        return parent(\.armyId)
+    }
     var models: Siblings<Unit, Model, UnitModel> {
         return siblings()
     }
@@ -27,13 +31,15 @@ final class Unit: PostgreSQLModel {
          isUnique: Bool,
          minQuantity: Int,
          maxQuantity: Int,
-         unitTypeId: Int) {
+         unitTypeId: Int,
+         armyId: Int) {
         self.name = name
         self.cost = cost
         self.isUnique = isUnique
         self.minQuantity = minQuantity
         self.maxQuantity = maxQuantity
         self.unitTypeId = unitTypeId
+        self.armyId = armyId
     }
 
 }

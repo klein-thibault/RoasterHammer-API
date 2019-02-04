@@ -6,7 +6,8 @@ import FluentPostgreSQL
 class UnitControllerTests: BaseTests {
 
     func testCreateUnit() throws {
-        let (createUnitRequest, unit) = try UnitTestsUtils.createHQUniqueUnit(app: app)
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (createUnitRequest, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
         let createModelRequest = createUnitRequest.models[0]
         let modelCharacteristics = unit.models[0].characteristics
 
@@ -28,14 +29,15 @@ class UnitControllerTests: BaseTests {
         XCTAssertEqual(modelCharacteristics.leadership, createModelRequest.characteristics.leadership)
         XCTAssertEqual(modelCharacteristics.save, createModelRequest.characteristics.save)
         XCTAssertEqual(unit.keywords.count, createUnitRequest.keywords.count)
-        XCTAssertEqual(unit.keywords[0], createUnitRequest.keywords[0].name)
+        XCTAssertEqual(unit.keywords[0], createUnitRequest.keywords[0])
         XCTAssertEqual(unit.rules.count, 1)
         XCTAssertEqual(unit.rules[0].name, createUnitRequest.rules[0].name)
         XCTAssertEqual(unit.rules[0].description, createUnitRequest.rules[0].description)
     }
 
     func testGettingAllUnits() throws {
-        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(app: app)
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
         let units = try app.getResponse(to: "units", decodeTo: [UnitResponse].self)
         XCTAssertEqual(units.count, 1)
         XCTAssertEqual(units[0].id, unit.id)
@@ -45,7 +47,8 @@ class UnitControllerTests: BaseTests {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
         let unitRoles = try detachment.roles.query(on: conn).all().wait()
-        let (createUnitRequest, unit) = try UnitTestsUtils.createHQUniqueUnit(app: app)
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (createUnitRequest, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
         let createModelRequest = createUnitRequest.models[0]
 
         let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
@@ -77,7 +80,8 @@ class UnitControllerTests: BaseTests {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
         let unitRoles = try detachment.roles.query(on: conn).all().wait()
-        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(app: app)
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
 
         let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
         _ = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(unit.id)",
@@ -106,7 +110,8 @@ class UnitControllerTests: BaseTests {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
         let unitRoles = try detachment.roles.query(on: conn).all().wait()
-        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(app: app)
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
 
         do {
             let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
@@ -128,9 +133,10 @@ class UnitControllerTests: BaseTests {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
         let unitRoles = try detachment.roles.query(on: conn).all().wait()
-        let (_, uniqueUnit) = try UnitTestsUtils.createHQUniqueUnit(app: app)
-        let (_, hqUnit1) = try UnitTestsUtils.createHQUnit(app: app)
-        let (_, hqUnit2) = try UnitTestsUtils.createHQUnit(app: app)
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, uniqueUnit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+        let (_, hqUnit1) = try UnitTestsUtils.createHQUnit(armyId: army.requireID(), app: app)
+        let (_, hqUnit2) = try UnitTestsUtils.createHQUnit(armyId: army.requireID(), app: app)
 
         // Add unique HQ
         let addUniqueUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: uniqueUnit.maxQuantity)
@@ -171,7 +177,8 @@ class UnitControllerTests: BaseTests {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
         let unitRoles = try detachment.roles.query(on: conn).all().wait()
-        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(app: app)
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
         let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
         let model = unit.models[0]
 
@@ -207,7 +214,8 @@ class UnitControllerTests: BaseTests {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
         let unitRoles = try detachment.roles.query(on: conn).all().wait()
-        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(app: app)
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
         let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
         let model = unit.models[0]
 

@@ -20,3 +20,13 @@ struct DetachmentResponse: Content {
         self.army = army
     }
 }
+
+struct DetachmentShortResponse: Content {
+    let name: String
+    let commandPoints: Int
+
+    init(name: String, commandPoints: Int) {
+        self.name = name
+        self.commandPoints = commandPoints
+    }
+}
