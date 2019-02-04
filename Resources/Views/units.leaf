@@ -1,0 +1,22 @@
+#set("content") {
+<h1>Units</h1>
+#if(units) {
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+        <tr>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        #for(unit in units) {
+        <tr>
+            <td>#(unit.name)</td>
+        </tr>
+        }
+    </tbody>
+</table>
+} else {
+<h2>There are no units in this army.</h2>
+}
+}
+#embed("base")

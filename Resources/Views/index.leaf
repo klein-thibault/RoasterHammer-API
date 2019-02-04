@@ -10,7 +10,7 @@
         <tbody>
             #for(army in armies) {
             <tr>
-                <td>#(army.name)</td>
+                <td><a href="/roasterhammer/units/#(army.id)">#(army.name)</a></td>
             </tr>
             }
         </tbody>

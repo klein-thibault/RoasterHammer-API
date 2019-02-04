@@ -17,16 +17,7 @@ final class UnitController {
     
     func units(_ req: Request) throws -> Future<[UnitResponse]> {
         let filters = try req.query.decode(UnitFilters.self)
-        let unitQuery: EventLoopFuture<[Unit]>
-        if let armyId = filters.armyId {
-            unitQuery = Unit.query(on: req).filter(\.armyId == armyId).all()
-        } else {
-            unitQuery = Unit.query(on: req).all()
-        }
-
-        return unitQuery.flatMap(to: [UnitResponse].self, { units in
-                return try units.map { try self.unitResponse(forUnit: $0, conn: req) }.flatten(on: req)
-            })
+        return getUnits(armyId: filters.armyId, conn: req)
     }
     
     func addUnitToDetachmentUnitRole(_ req: Request) throws -> Future<DetachmentResponse> {
@@ -106,6 +97,21 @@ final class UnitController {
     }
     
     // MARK: - Utility Functions
+
+    func getUnits(armyId: Int?, conn: DatabaseConnectable) -> Future<[UnitResponse]> {
+        let unitQuery: EventLoopFuture<[Unit]>
+        if let armyId = armyId {
+            unitQuery = Unit.query(on: conn).filter(\.armyId == armyId).all()
+        } else {
+            unitQuery = Unit.query(on: conn).all()
+        }
+
+        return unitQuery.flatMap(to: [UnitResponse].self, { units in
+            return try units
+                .map { try self.unitResponse(forUnit: $0, conn: conn) }
+                .flatten(on: conn)
+        })
+    }
 
     func selectedModelResponse(forSelectedModel selectedModel: SelectedModel,
                                conn: DatabaseConnectable) throws -> Future<SelectedModelResponse> {

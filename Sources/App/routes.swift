@@ -96,4 +96,5 @@ public func routes(_ router: Router) throws {
     // Website
     let websiteController = WebsiteController()
     router.get("roasterhammer", use: websiteController.indexHandler)
+    router.get("roasterhammer/units", Int.parameter, use: websiteController.unitsHandler)
 }
