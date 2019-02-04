@@ -11,10 +11,13 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-postgresql.git", from: "1.0.0"),
 
         // Swift package to handle authentication.
-        .package(url: "https://github.com/vapor/auth.git", from: "2.0.1")
+        .package(url: "https://github.com/vapor/auth.git", from: "2.0.1"),
+
+        // Web templating language framework package
+        .package(url: "https://github.com/vapor/leaf.git", from: "3.0.2")
     ],
     targets: [
-        .target(name: "App", dependencies: ["FluentPostgreSQL", "Vapor", "Authentication"]),
+        .target(name: "App", dependencies: ["FluentPostgreSQL", "Vapor", "Authentication", "Leaf"]),
         .target(name: "Run", dependencies: ["App"]),
         .testTarget(name: "AppTests", dependencies: ["App"])
     ]

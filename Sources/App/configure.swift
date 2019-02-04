@@ -1,4 +1,5 @@
 import Vapor
+import Leaf
 import FluentPostgreSQL
 import Authentication
 
@@ -19,18 +20,22 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(middlewares)
 
     // Configure a PostgreSQL database
-    let config = PostgreSQLDatabaseConfig(hostname: "localhost",
-                                          port: 5432,
-                                          username: "postgres",
-                                          database: "postgres",
-                                          password: "vPYZxUmZLxYMNiRrkrVX",
-                                          transport: .cleartext)
-    let postgresql = PostgreSQLDatabase(config: config)
+    let databaseConfiguration = PostgreSQLDatabaseConfig(hostname: "localhost",
+                                                         port: 5432,
+                                                         username: "postgres",
+                                                         database: "postgres",
+                                                         password: "vPYZxUmZLxYMNiRrkrVX",
+                                                         transport: .cleartext)
+    let postgresql = PostgreSQLDatabase(config: databaseConfiguration)
 
     /// Register the configured PostgreSQL database to the database config.
     var databases = DatabasesConfig()
     databases.add(database: postgresql, as: .psql)
     services.register(databases)
+
+    // Configure templating framework for the website
+    try services.register(LeafProvider())
+    config.prefer(LeafRenderer.self, for: ViewRenderer.self)
 
     /// Configure migrations
     var migrations = MigrationConfig()

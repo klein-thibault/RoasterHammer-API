@@ -1,4 +1,5 @@
 import Vapor
+import Leaf
 import Authentication
 
 /// Register your application's routes here.
@@ -90,4 +91,8 @@ public func routes(_ router: Router) throws {
                 "weapons",
                 Int.parameter,
                 use: weaponController.addWeaponToModel)
+
+    // Website
+    let websiteController = WebsiteController()
+    router.get("roasterhammer", use: websiteController.indexHandler)
 }
