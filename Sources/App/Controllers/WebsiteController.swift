@@ -22,7 +22,8 @@ struct WebsiteController {
     }
 
     func createArmyHandler(_ req: Request) throws -> Future<View> {
-        return try req.view().render("createArmy")
+        let context = CreateArmyContext(title: "Create An Army")
+        return try req.view().render("createArmy", context)
     }
 
     func createArmyPostHandler(_ req: Request, createArmyRequest: CreateArmyRequest) throws -> Future<Response> {
@@ -43,4 +44,8 @@ struct IndexContext: Encodable {
 struct UnitsContext: Encodable {
     let title: String
     let units: [UnitResponse]
+}
+
+struct CreateArmyContext: Encodable {
+    let title: String
 }

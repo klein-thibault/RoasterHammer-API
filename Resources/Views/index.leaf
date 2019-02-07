@@ -1,5 +1,6 @@
 #set("content") {
-    <h1>Armies</h1>
+<h1>#(title)</h1>
+<h2>Armies</h1>
     #if(armies) {
     <table class="table table-bordered table-hover">
         <thead class="thead-light">
@@ -18,5 +19,5 @@
     } else {
     <h2>There aren’t any armies yet.</h2>
     }
-}
-#embed("base")
+    }
+    #embed("base")
