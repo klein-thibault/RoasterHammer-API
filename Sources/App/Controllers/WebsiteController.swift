@@ -26,12 +26,14 @@ struct WebsiteController {
         return try req.view().render("createArmy", context)
     }
 
-    func createArmyPostHandler(_ req: Request, createArmyRequest: CreateArmyRequest) throws -> Future<Response> {
-        return ArmyController()
-            .createArmy(request: createArmyRequest, conn: req)
-            .map(to: Response.self, { _ in
-                return req.redirect(to: "/roasterhammer")
-            })
+    func createArmyPostHandler(_ req: Request, createArmyRequest: CreateArmyAndRulesData) throws -> Future<Response> {
+        print(createArmyRequest)
+        return req.eventLoop.future(req.redirect(to: "/roasterhammer"))
+//        return ArmyController()
+//            .createArmy(request: createArmyRequest, conn: req)
+//            .map(to: Response.self, { _ in
+//                return req.redirect(to: "/roasterhammer")
+//            })
     }
 
 }
@@ -48,4 +50,14 @@ struct UnitsContext: Encodable {
 
 struct CreateArmyContext: Encodable {
     let title: String
+}
+
+struct CreateArmyAndRulesData: Content {
+    let armyName: String
+    let demo: [DemoData]
+}
+
+struct DemoData: Content {
+    let name: String
+    let type: String
 }
