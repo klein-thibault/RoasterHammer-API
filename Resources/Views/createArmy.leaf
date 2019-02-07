@@ -1,0 +1,25 @@
+#set("content") {
+<h1>#(title)</h1>
+<form method="post">
+    <div class="form-group">
+        <label for="short">Army Name</label>
+        <input type="text" name="name" class="form-control"
+        id="army-name"/>
+    </div>
+    <div class="form-group">
+        <label for="long">Rule Name</label>
+        <input type="text" name="rules[name]" class="form-control"
+        id="rule-name"/>
+    </div>
+    <div class="form-group">
+        <label for="long">Rule Description</label>
+        <input type="text" name="rules[description]" class="form-control"
+        id="rule-description"/>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Submit
+    </button>
+</form>
+}
+#embed("base")

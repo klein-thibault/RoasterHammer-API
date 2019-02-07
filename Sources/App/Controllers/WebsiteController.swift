@@ -21,6 +21,18 @@ struct WebsiteController {
         })
     }
 
+    func createArmyHandler(_ req: Request) throws -> Future<View> {
+        return try req.view().render("createArmy")
+    }
+
+    func createArmyPostHandler(_ req: Request, createArmyRequest: CreateArmyRequest) throws -> Future<Response> {
+        return ArmyController()
+            .createArmy(request: createArmyRequest, conn: req)
+            .map(to: Response.self, { _ in
+                return req.redirect(to: "/roasterhammer")
+            })
+    }
+
 }
 
 struct IndexContext: Encodable {

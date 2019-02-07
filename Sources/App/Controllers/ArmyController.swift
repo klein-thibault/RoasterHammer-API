@@ -51,15 +51,15 @@ final class ArmyController {
         })
     }
 
-    // MARK: - Private Functions
-
-    private func createArmy(request: CreateArmyRequest, conn: DatabaseConnectable) -> Future<Army> {
+    func createArmy(request: CreateArmyRequest, conn: DatabaseConnectable) -> Future<Army> {
         return Army(name: request.name)
             .save(on: conn)
             .flatMap(to: Army.self, { army in
                 return self.createRules(forArmy: army, rules: request.rules, conn: conn)
             })
     }
+
+    // MARK: - Private Functions
 
     private func createRules(forArmy army: Army,
                              rules: [AddRuleRequest],
