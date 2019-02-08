@@ -1,4 +1,4 @@
-$('.example').repeater({
+$('.army-rules').repeater({
                        btnAddClass: 'r-btnAdd',
                        btnRemoveClass: 'r-btnRemove',
                        groupClass: 'r-group',

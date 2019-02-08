@@ -27,12 +27,10 @@ struct WebsiteController {
     }
 
     func createArmyPostHandler(_ req: Request, createArmyRequest: CreateArmyAndRulesData) throws -> Future<Response> {
-        print(createArmyRequest)
-
         var rules: [AddRuleRequest] = []
-        for ruleDictionary in createArmyRequest.demo.values {
+        for ruleDictionary in createArmyRequest.rules.values {
             if let ruleName = ruleDictionary["name"],
-                let ruleDescription = ruleDictionary["type"] {
+                let ruleDescription = ruleDictionary["description"] {
                 let rule = AddRuleRequest(name: ruleName,
                                           description: ruleDescription)
                 rules.append(rule)
@@ -65,12 +63,9 @@ struct CreateArmyContext: Encodable {
     let title: String
 }
 
+typealias NewRuleContext = [String: String]
+
 struct CreateArmyAndRulesData: Content {
     let armyName: String
-    let demo: [String: [String: String]]
-}
-
-struct DemoData: Content {
-    let name: String
-    let type: String
+    let rules: [String: NewRuleContext]
 }
