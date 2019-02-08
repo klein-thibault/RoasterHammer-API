@@ -28,12 +28,25 @@ struct WebsiteController {
 
     func createArmyPostHandler(_ req: Request, createArmyRequest: CreateArmyAndRulesData) throws -> Future<Response> {
         print(createArmyRequest)
-        return req.eventLoop.future(req.redirect(to: "/roasterhammer"))
-//        return ArmyController()
-//            .createArmy(request: createArmyRequest, conn: req)
-//            .map(to: Response.self, { _ in
-//                return req.redirect(to: "/roasterhammer")
-//            })
+
+        var rules: [AddRuleRequest] = []
+        for ruleDictionary in createArmyRequest.demo.values {
+            if let ruleName = ruleDictionary["name"],
+                let ruleDescription = ruleDictionary["type"] {
+                let rule = AddRuleRequest(name: ruleName,
+                                          description: ruleDescription)
+                rules.append(rule)
+            }
+        }
+
+        let createArmyRequest = CreateArmyRequest(name: createArmyRequest.armyName,
+                                                  rules: rules)
+
+        return ArmyController()
+            .createArmy(request: createArmyRequest, conn: req)
+            .map(to: Response.self, { _ in
+                return req.redirect(to: "/roasterhammer")
+            })
     }
 
 }
