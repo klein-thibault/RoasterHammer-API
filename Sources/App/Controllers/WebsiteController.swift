@@ -54,7 +54,7 @@ struct CreateArmyContext: Encodable {
 
 struct CreateArmyAndRulesData: Content {
     let armyName: String
-    let demo: [DemoData]
+    let demo: [String: [String: String]]
 }
 
 struct DemoData: Content {
