@@ -10,19 +10,13 @@ final class QAController {
         let node = Node(label: "User", properties: ["email": "test@test.com"])
         let promise = req.eventLoop.newPromise(HTTPStatus.self)
 
-//        graphClient.client.createNode(node: node) { (result) in
-//            switch result {
-//            case let .failure(error):
-//                promise.fail(error: error)
-//            case .success(_):
-//                promise.succeed(result: .ok)
-//            }
-//        }
-//
-//        return promise.futureResult
-
-        _ = graphClient.client.createNodeSync(node: node)
-        promise.succeed(result: .ok)
+        let result = graphClient.client.createNodeSync(node: node)
+        switch result {
+        case .success(_):
+            promise.succeed(result: .ok)
+        case .failure(let error):
+            promise.fail(error: error)
+        }
 
         return promise.futureResult
     }
