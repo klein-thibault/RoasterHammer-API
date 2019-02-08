@@ -29,8 +29,8 @@ struct WebsiteController {
     func createArmyPostHandler(_ req: Request, createArmyRequest: CreateArmyAndRulesData) throws -> Future<Response> {
         var rules: [AddRuleRequest] = []
         for ruleDictionary in createArmyRequest.rules.values {
-            if let ruleName = ruleDictionary["name"],
-                let ruleDescription = ruleDictionary["description"] {
+            if let ruleName = ruleDictionary["name"], ruleName.count > 0,
+                let ruleDescription = ruleDictionary["description"], ruleDescription.count > 0 {
                 let rule = AddRuleRequest(name: ruleName,
                                           description: ruleDescription)
                 rules.append(rule)

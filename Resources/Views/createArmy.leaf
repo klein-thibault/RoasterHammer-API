@@ -3,27 +3,28 @@
 <form method="post">
     <div class="form-group">
         <label for="short">Army Name</label>
-        <input type="text" name="armyName" class="form-control"
-        id="army-name"/>
+        <input type="text" name="armyName" class="form-control" id="army-name"/>
     </div>
 
     <h3>Army Rules</h3>
     <div class="army-rules">
         <!-- The add button -->
-        <button type="button" class="r-btnAdd">Add +</button>
+        <button type="button" class="r-btnAdd btn btn-secondary">Add</button>
 
         <div class="r-group">
-            <p>
-            <label for="rules_0_0" data-pattern-text="Rule Name +=1:">Rule Name 1:</label>
-            <input type="text" name="rules[0][name]" id="rules_0_name" data-pattern-name="rules[++][name]" data-pattern-id="rules++_name" />
-            </p>
-            <p>
-            <label for="rules_0_0" data-pattern-text="Rule Description +=1:">Rule Description 1:</label>
-            <input type="text" name="rules[0][description]" id="rules_0_description" data-pattern-name="rules[++][description]" data-pattern-id="rules_++_description"/>
-            </p>
+            <div class="row">
+                <div class="col">
+                    <label for="rules_0_0" data-pattern-text="Rule Name +=1:">Rule Name 1:</label>
+                    <input type="text" class="form-control" name="rules[0][name]" id="rules_0_name" data-pattern-name="rules[++][name]" data-pattern-id="rules++_name" />
+                </div>
+                <div class="col">
+                    <label for="rules_0_0" data-pattern-text="Rule Description +=1:">Rule Description 1:</label>
+                    <input type="text" class="form-control" name="rules[0][description]" id="rules_0_description" data-pattern-name="rules[++][description]" data-pattern-id="rules_++_description"/>
+                </div>
+            </div>
             <p>
             <!-- Add a remove button for the item. If one didn't exist, it would be added to overall group -->
-            <button type="button" class="r-btnRemove">Remove -</button>
+            <button type="button" class="r-btnRemove btn btn-secondary">Remove</button>
             </p>
         </div>
     </div>
