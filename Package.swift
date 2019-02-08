@@ -20,7 +20,7 @@ let package = Package(
         .package(url: "https://github.com/Neo4j-Swift/Neo4j-Swift.git", from: "4.0.2")
     ],
     targets: [
-        .target(name: "App", dependencies: ["FluentPostgreSQL", "Vapor", "Authentication", "Leaf"]),
+        .target(name: "App", dependencies: ["FluentPostgreSQL", "Vapor", "Authentication", "Leaf", "Theo"]),
         .target(name: "Run", dependencies: ["App"]),
         .testTarget(name: "AppTests", dependencies: ["App"])
     ]
