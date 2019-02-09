@@ -20,6 +20,16 @@ struct WebsiteController {
             })
     }
 
+    func armyHandler(_ req: Request) throws -> Future<View> {
+        let armyId = try req.parameters.next(Int.self)
+        return try ArmyController()
+            .getArmy(byID: armyId, conn: req)
+            .flatMap(to: View.self, { army in
+                let context = ArmyContext(army: army)
+                return try req.view().render("army", context)
+            })
+    }
+
     func createArmyHandler(_ req: Request) throws -> Future<View> {
         let context = CreateArmyContext(title: "Create An Army")
         return try req.view().render("createArmy", context)
@@ -113,4 +123,8 @@ struct CreateFactionAndRulesData: AddRuleData, Content {
     let factionName: String
     let armyId: Int
     let rules: [String: NewRuleContext]
+}
+
+struct ArmyContext: Encodable {
+    let army: ArmyResponse
 }

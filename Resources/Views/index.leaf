@@ -11,7 +11,7 @@
         <tbody>
             #for(army in armies) {
             <tr>
-                <td><a href="/roasterhammer/units/#(army.id)">#(army.name)</a></td>
+                <td><a href="/roasterhammer/armies/#(army.id)">#(army.name)</a></td>
             </tr>
             }
         </tbody>
@@ -19,5 +19,5 @@
     } else {
     <h2>There aren’t any armies yet.</h2>
     }
-    }
-    #embed("base")
+}
+#embed("base")

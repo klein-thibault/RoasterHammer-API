@@ -1,0 +1,48 @@
+#set("content") {
+#if(army) {
+<h1>#(army.name)</h1>
+
+<h2>Army Factions</h2>
+#for(faction in army.factions) {
+<h3>#(faction.name)</h3>
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        #for(rule in faction.rules) {
+        <tr>
+            <td>#(rule.name)</td>
+            <td>#(rule.description)</td>
+        </tr>
+        }
+    </tbody>
+</table>
+}
+
+
+<h2>Army Rules</h2>
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        #for(rule in army.rules) {
+        <tr>
+            <td>#(rule.name)</td>
+            <td>#(rule.description)</td>
+        </tr>
+        }
+    </tbody>
+</table>
+} else {
+<h2>Army not found</h2>
+}
+}
+#embed("base")
