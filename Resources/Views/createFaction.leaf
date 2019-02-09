@@ -1,0 +1,29 @@
+#set("content") {
+<h1>#(title)</h1>
+<form method="post">
+    <div class="form-group">
+        <label for="short">Faction Name</label>
+        <input type="text" name="factionName" class="form-control" id="faction-name"/>
+    </div>
+
+    <h3>Faction Rules</h3>
+
+    #embed("addRuleForms")
+
+    <div class="form-group">
+        <label for="armyId">Army</label>
+        <select name="armyId" class="form-control" id="armyId">
+            #for(army in armies) {
+                <option value="#(army.id)">
+                    #(army.name)
+                </option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Submit
+    </button>
+</form>
+}
+#embed("base")

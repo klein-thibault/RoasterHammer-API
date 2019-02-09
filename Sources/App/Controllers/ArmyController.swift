@@ -32,15 +32,15 @@ final class ArmyController {
         return Army.find(id, on: conn)
             .unwrap(or: RoasterHammerError.armyIsMissing.error())
             .flatMap(to: ArmyResponse.self, { army in
-            return try self.armyResponse(forArmy: army, conn: conn)
-        })
+                return try self.armyResponse(forArmy: army, conn: conn)
+            })
     }
 
     func armyResponse(forArmy army: Army,
                       conn: DatabaseConnectable) throws -> Future<ArmyResponse> {
         let factionsFuture = try army.factions.query(on: conn).all()
         let rulesFuture = try army.rules.query(on: conn).all()
-
+        
         return flatMap(to: ArmyResponse.self, factionsFuture, rulesFuture, { (factions, rules) in
             let factionController = FactionController()
             return try factions.map { try factionController.factionResponse(faction: $0, conn: conn) }

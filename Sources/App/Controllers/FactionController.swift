@@ -38,9 +38,7 @@ final class FactionController {
             })
     }
 
-    // MARK: - Private Functions
-
-    private func createFaction(armyId: Int, request: CreateFactionRequest, conn: DatabaseConnectable) -> Future<Faction> {
+    func createFaction(armyId: Int, request: CreateFactionRequest, conn: DatabaseConnectable) -> Future<Faction> {
         return Faction(name: request.name, armyId: armyId).save(on: conn)
             .flatMap(to: Faction.self, { faction in
                 return request.rules.map { Rule(name: $0.name, description: $0.description).save(on: conn) }
