@@ -18,6 +18,9 @@ class BaseTests: XCTestCase {
 
     override func tearDown() {
         conn.close()
+        // Prevent an exception of too many clients with PostgreSQL
+        try! app.syncShutdownGracefully()
+
         super.tearDown()
     }
 
