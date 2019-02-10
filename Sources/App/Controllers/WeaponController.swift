@@ -8,20 +8,12 @@ final class WeaponController {
     func createWeapon(_ req: Request) throws -> Future<Weapon> {
         return try req.content.decode(CreateWeaponRequest.self)
             .flatMap(to: Weapon.self, { request in
-                return Weapon(name: request.name,
-                              range: request.range,
-                              type: request.type,
-                              strength: request.strength,
-                              armorPiercing: request.armorPiercing,
-                              damage: request.damage,
-                              cost: request.cost,
-                              ability: request.ability)
-                .save(on: req)
+                return self.createWeapon(request: request, conn: req)
             })
     }
 
     func getAllWeapons(_ req: Request) throws -> Future<[Weapon]> {
-        return Weapon.query(on: req).all()
+        return getAllWeapons(conn: req)
     }
 
     func getWeaponById(_ req: Request) throws -> Future<Weapon> {
@@ -69,6 +61,22 @@ final class WeaponController {
                                       minQuantity: unitWeapon.minQuantity,
                                       maxQuantity: unitWeapon.maxQuantity)
         })
+    }
+
+    func getAllWeapons(conn: DatabaseConnectable) -> Future<[Weapon]> {
+        return Weapon.query(on: conn).all()
+    }
+
+    func createWeapon(request: CreateWeaponRequest, conn: DatabaseConnectable) -> Future<Weapon> {
+        return Weapon(name: request.name,
+                      range: request.range,
+                      type: request.type,
+                      strength: request.strength,
+                      armorPiercing: request.armorPiercing,
+                      damage: request.damage,
+                      cost: request.cost,
+                      ability: request.ability)
+            .save(on: conn)
     }
 
 }

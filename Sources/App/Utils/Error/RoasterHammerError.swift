@@ -22,6 +22,7 @@ enum RoasterHammerError: Swift.Error {
     case addingUniqueUnitMoreThanOnce
     case tooManyUnitsInDetachment
     case tooManyWeaponsForModel
+    case costIsNotANumber
 }
 
 extension RoasterHammerError {
@@ -57,6 +58,8 @@ extension RoasterHammerError {
             return Abort(.badRequest, reason: "There are too many units in this detachment")
         case .tooManyWeaponsForModel:
             return Abort(.badRequest, reason: "The model has reached its maximum of weapons")
+        case .costIsNotANumber:
+            return Abort(.badRequest, reason: "The cost must be a number")
         }
     }
 }

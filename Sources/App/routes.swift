@@ -96,12 +96,21 @@ public func routes(_ router: Router) throws {
     // Website
     let websiteController = WebsiteController()
     router.get("roasterhammer", use: websiteController.indexHandler)
+    // - Units
     router.get("roasterhammer", "units", Int.parameter, use: websiteController.unitsHandler)
+    // - Weapons
+    router.get("roasterhammer", "weapons", use: websiteController.weaponsHandler)
+    router.get("roasterhammer", "weapons", "create", use: websiteController.createWeaponHandler)
+    router.post(CreateWeaponData.self,
+                at: "roasterhammer", "weapons", "create",
+                use: websiteController.createWeaponPostHandler)
+    // - Armies
     router.get("roasterhammer", "armies", Int.parameter, use: websiteController.armyHandler)
     router.get("roasterhammer", "armies", "create", use: websiteController.createArmyHandler)
     router.post(CreateArmyAndRulesData.self,
                 at: "roasterhammer", "armies", "create",
                 use: websiteController.createArmyPostHandler)
+    // - Factions
     router.get("roasterhammer", "factions", "create", use: websiteController.createFactionHandler)
     router.post(CreateFactionAndRulesData.self,
                 at: "roasterhammer", "factions", "create",

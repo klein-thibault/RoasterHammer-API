@@ -1,0 +1,32 @@
+#set("content") {
+<h1>#(title)</h1>
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+        <tr>
+            <th>Name</th>
+            <th>Range</th>
+            <th>Type</th>
+            <th>S</th>
+            <th>AP</th>
+            <th>D</th>
+            <th>Cost</th>
+            <th>Ability</th>
+        </tr>
+    </thead>
+    <tbody>
+        #for(weapon in weapons) {
+        <tr>
+            <td>#(weapon.name)</td>
+            <td>#(weapon.range)</td>
+            <td>#(weapon.type)</td>
+            <td>#(weapon.strength)</td>
+            <td>#(weapon.armorPiercing)</td>
+            <td>#(weapon.damage)</td>
+            <td>#(weapon.cost)</td>
+            <td>#(weapon.ability)</td>
+        </tr>
+        }
+    </tbody>
+</table>
+}
+#embed("base")
