@@ -11,9 +11,8 @@ struct WebsiteController {
     }
 
     func unitsHandler(_ req: Request) throws -> Future<View> {
-        let armyId = try req.parameters.next(Int.self)
         return UnitController()
-            .getUnits(armyId: armyId, conn: req)
+            .getUnits(armyId: nil, conn: req)
             .flatMap(to: View.self, { units in
                 let context = UnitsContext(title: "Units", units: units)
                 return try req.view().render("units", context)

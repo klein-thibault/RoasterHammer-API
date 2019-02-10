@@ -39,6 +39,11 @@
                             Create A Weapon
                         </a>
                     </li>
+                    <li class="nav-item #if(title == "Units"){active}">
+                        <a href="/roasterhammer/units" class="nav-link">
+                            Units
+                        </a>
+                    </li>
                     <li class="nav-item #if(title == "Weapons"){active}">
                         <a href="/roasterhammer/weapons" class="nav-link">
                             Weapons
