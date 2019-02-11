@@ -98,6 +98,10 @@ public func routes(_ router: Router) throws {
     router.get("roasterhammer", use: websiteController.indexHandler)
     // - Units
     router.get("roasterhammer", "units", use: websiteController.unitsHandler)
+    router.get("roasterhammer", "units", "create", use: websiteController.createUnitHandler)
+    router.post(CreateUnitData.self,
+                at: "roasterhammer", "units", "create",
+                use: websiteController.createUnitPostHandler)
     // - Weapons
     router.get("roasterhammer", "weapons", use: websiteController.weaponsHandler)
     router.get("roasterhammer", "weapons", "create", use: websiteController.createWeaponHandler)

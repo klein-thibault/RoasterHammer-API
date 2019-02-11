@@ -18,15 +18,19 @@ final class ArmyController {
     }
 
     func armies(_ req: Request) throws -> Future<[ArmyResponse]> {
-        return Army.query(on: req).all()
-            .flatMap(to: [ArmyResponse].self, { armies in
-                return try armies
-                    .map { try self.armyResponse(forArmy: $0, conn: req) }
-                    .flatten(on: req)
-            })
+        return try getAllArmies(conn: req)
     }
 
     // MARK: - Utility Functions
+
+    func getAllArmies(conn: DatabaseConnectable) throws -> Future<[ArmyResponse]> {
+        return Army.query(on: conn).all()
+            .flatMap(to: [ArmyResponse].self, { armies in
+                return try armies
+                    .map { try self.armyResponse(forArmy: $0, conn: conn) }
+                    .flatten(on: conn)
+            })
+    }
 
     func getArmy(byID id: Int, conn: DatabaseConnectable) throws -> Future<ArmyResponse> {
         return Army.find(id, on: conn)

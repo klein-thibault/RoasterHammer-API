@@ -19,6 +19,49 @@ struct WebsiteController {
             })
     }
 
+    func createUnitHandler(_ req: Request) throws -> Future<View> {
+        let armiesFuture = try ArmyController().getAllArmies(conn: req)
+        let unitTypesFuture = UnitTypeController().getAllUnitTypes(conn: req)
+
+        return flatMap(to: View.self, armiesFuture, unitTypesFuture) { (armies, unitTypes) in
+            let context = CreateUnitContext(title: "Create A Unit", armies: armies, unitTypes: unitTypes)
+            return try req.view().render("createUnit", context)
+        }
+    }
+
+    func createUnitPostHandler(_ req: Request,
+                               createUnitRequest: CreateUnitData) throws -> Future<Response> {
+        guard let cost = createUnitRequest.unitCost.intValue,
+            let minQuantity = createUnitRequest.unitMinQuantity.intValue,
+            let maxQuantity = createUnitRequest.unitMaxQuantity.intValue,
+            let unitTypeId = createUnitRequest.unitTypeId.intValue,
+            let armyId = createUnitRequest.armyId.intValue else {
+                throw Abort(.badRequest)
+        }
+
+        let isUnique = createUnitRequest.isUniqueCheckbox?.isCheckboxOn ?? false
+        let models = addModelRequest(forModelData: createUnitRequest.models)
+        let rules = addRuleRequest(forRuleData: createUnitRequest.rules)
+
+        // TODO: Add keyword management
+        let newUnitRequest = CreateUnitRequest(name: createUnitRequest.unitName,
+                                               cost: Int(cost),
+                                               isUnique: isUnique,
+                                               minQuantity: Int(minQuantity),
+                                               maxQuantity: Int(maxQuantity),
+                                               unitTypeId: Int(unitTypeId),
+                                               armyId: Int(armyId),
+                                               models: models,
+                                               keywords: ["Chaos"],
+                                               rules: rules)
+
+        return UnitController()
+            .createUnit(request: newUnitRequest, conn: req)
+            .map(to: Response.self, { _ in
+                return req.redirect(to: "/roasterhammer/units")
+            })
+    }
+
     func weaponsHandler(_ req: Request) throws -> Future<View> {
         return WeaponController()
             .getAllWeapons(conn: req)
@@ -101,7 +144,7 @@ struct WebsiteController {
 
     // MARK: - Private Functions
 
-    private func addRuleRequest(forRuleData ruleData: [String: NewRuleContext]) -> [AddRuleRequest] {
+    private func addRuleRequest(forRuleData ruleData: DynamicFormData) -> [AddRuleRequest] {
         var rules: [AddRuleRequest] = []
         for ruleDictionary in ruleData.values {
             if let ruleName = ruleDictionary["name"], ruleName.count > 0,
@@ -115,14 +158,57 @@ struct WebsiteController {
         return rules
     }
 
+    private func addModelRequest(forModelData modelData: DynamicFormData) -> [CreateModelRequest] {
+        var models: [CreateModelRequest] = []
+        for modelDictionary in modelData.values {
+            if let modelName = modelDictionary["name"], modelName.count > 0,
+                let modelMinQuantityString = modelDictionary["minQuantity"],
+                let modelMaxQuantityString = modelDictionary["maxQuantity"],
+                let modelWeaponQuantityString = modelDictionary["weaponQuantity"],
+                let modelMovement = modelDictionary["movement"],
+                let modelWeaponSkill = modelDictionary["weaponSkill"],
+                let modelBalisticSkill = modelDictionary["balisticSkill"],
+                let modelStrength = modelDictionary["strength"],
+                let modelToughness = modelDictionary["toughness"],
+                let modelWounds = modelDictionary["wounds"],
+                let modelAttacks = modelDictionary["attacks"],
+                let modelLeadership = modelDictionary["leadership"],
+                let modelSave = modelDictionary["save"] {
+                let modelMinQuantity = Int(modelMinQuantityString) ?? 0
+                let modelMaxQuantity = Int(modelMaxQuantityString) ?? 0
+                let modelWeaponQuantity = Int(modelWeaponQuantityString) ?? 0
+
+                let modelCharacteristics = CreateCharacteristicsRequest(movement: modelMovement,
+                                                                        weaponSkill: modelWeaponSkill,
+                                                                        balisticSkill: modelBalisticSkill,
+                                                                        strength: modelStrength,
+                                                                        toughness: modelToughness,
+                                                                        wounds: modelWounds,
+                                                                        attacks: modelAttacks,
+                                                                        leadership: modelLeadership,
+                                                                        save: modelSave)
+                let model = CreateModelRequest(name: modelName,
+                                               minQuantity: modelMinQuantity,
+                                               maxQuantity: modelMaxQuantity,
+                                               weaponQuantity: modelWeaponQuantity,
+                                               characteristics: modelCharacteristics)
+                models.append(model)
+            }
+        }
+
+        return models
+    }
+
 }
+
+typealias DynamicFormData = [String: [String: String]]
 
 protocol WebContextTitle {
     var title: String { get }
 }
 
 protocol AddRuleData {
-    var rules: [String: NewRuleContext] { get }
+    var rules: DynamicFormData { get }
 }
 
 struct IndexContext: WebContextTitle, Encodable {
@@ -139,11 +225,9 @@ struct CreateArmyContext: WebContextTitle, Encodable {
     let title: String
 }
 
-typealias NewRuleContext = [String: String]
-
 struct CreateArmyAndRulesData: AddRuleData, Content {
     let armyName: String
-    let rules: [String: NewRuleContext]
+    let rules: DynamicFormData
 }
 
 struct CreateFactionContext: WebContextTitle, Encodable {
@@ -154,7 +238,7 @@ struct CreateFactionContext: WebContextTitle, Encodable {
 struct CreateFactionAndRulesData: AddRuleData, Content {
     let factionName: String
     let armyId: Int
-    let rules: [String: NewRuleContext]
+    let rules: DynamicFormData
 }
 
 struct ArmyContext: Encodable {
@@ -179,4 +263,22 @@ struct CreateWeaponData: Content {
     let damage: String
     let cost: String
     let ability: String
+}
+
+struct CreateUnitContext: WebContextTitle, Encodable {
+    let title: String
+    let armies: [ArmyResponse]
+    let unitTypes: [UnitType]
+}
+
+struct CreateUnitData: Content {
+    let unitName: String
+    let unitCost: String
+    let isUniqueCheckbox: String?
+    let unitMinQuantity: String
+    let unitMaxQuantity: String
+    let unitTypeId: String
+    let armyId: String
+    let models: DynamicFormData
+    let rules: DynamicFormData
 }

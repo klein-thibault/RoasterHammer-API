@@ -1,0 +1,58 @@
+#set("content") {
+<h1>#(title)</h1>
+<form method="post">
+    <div class="form-group">
+        <label for="short">Unit Name</label>
+        <input type="text" name="unitName" class="form-control" id="unit-name"/>
+        <small id="unitNameHelp" class="form-text text-muted">e.g. Space Marines Tactical Squad</small>
+    </div>
+    <div class="form-group">
+        <label for="short">Unit Cost</label>
+        <input type="text" name="unitCost" class="form-control" id="unit-cost"/>
+        <small id="unitCostHelp" class="form-text text-muted">e.g. 120</small>
+    </div>
+    <div class="form-group form-check">
+        <input type="checkbox" class="form-check-input" name="isUniqueCheckbox" id="isUniqueCheckbox">
+        <label class="form-check-label" for="isUniqueCheckbox">Is Named Character</label>
+    </div>
+    <div class="form-group">
+        <label for="short">Unit Minimum Quantity</label>
+        <input type="text" name="unitMinQuantity" class="form-control" id="unit-min-quantity"/>
+    </div>
+    <div class="form-group">
+        <label for="short">Unit Maximum Quantity</label>
+        <input type="text" name="unitMaxQuantity" class="form-control" id="unit-max-quantity"/>
+    </div>
+    <div class="form-group">
+        <label for="unitTypeId">Unit Type</label>
+        <select name="unitTypeId" class="form-control" id="unitTypeId">
+            #for(unitType in unitTypes) {
+                <option value="#(unitType.id)">
+                    #(unitType.name)
+                </option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="armyId">Army</label>
+        <select name="armyId" class="form-control" id="armyId">
+            #for(army in armies) {
+                <option value="#(army.id)">
+                    #(army.name)
+                </option>
+            }
+        </select>
+    </div>
+
+    <h3>Unit Models</h3>
+    #embed("addModelForms")
+
+    <h3>Unit Rules</h3>
+    #embed("addRuleForms")
+
+    <button type="submit" class="btn btn-primary">
+        Submit
+    </button>
+</form>
+}
+#embed("base")

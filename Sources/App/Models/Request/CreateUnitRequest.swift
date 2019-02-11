@@ -11,6 +11,28 @@ struct CreateUnitRequest: Content {
     let models: [CreateModelRequest]
     let keywords: [String]
     let rules: [AddRuleRequest]
+
+    init(name: String,
+         cost: Int,
+         isUnique: Bool,
+         minQuantity: Int,
+         maxQuantity: Int,
+         unitTypeId: Int,
+         armyId: Int,
+         models: [CreateModelRequest],
+         keywords: [String],
+         rules: [AddRuleRequest]) {
+        self.name = name
+        self.cost = cost
+        self.isUnique = isUnique
+        self.minQuantity = minQuantity
+        self.maxQuantity = maxQuantity
+        self.unitTypeId = unitTypeId
+        self.armyId = armyId
+        self.models = models
+        self.keywords = keywords
+        self.rules = rules
+    }
 }
 
 struct CreateModelRequest: Content {
@@ -19,6 +41,18 @@ struct CreateModelRequest: Content {
     let maxQuantity: Int
     let weaponQuantity: Int
     let characteristics: CreateCharacteristicsRequest
+
+    init(name: String,
+         minQuantity: Int,
+         maxQuantity: Int,
+         weaponQuantity: Int,
+         characteristics: CreateCharacteristicsRequest) {
+        self.name = name
+        self.minQuantity = minQuantity
+        self.maxQuantity = maxQuantity
+        self.weaponQuantity = weaponQuantity
+        self.characteristics = characteristics
+    }
 }
 
 struct CreateCharacteristicsRequest: Content {
@@ -31,4 +65,24 @@ struct CreateCharacteristicsRequest: Content {
     let attacks: String
     let leadership: String
     let save: String
+
+    init(movement: String,
+         weaponSkill: String,
+         balisticSkill: String,
+         strength: String,
+         toughness: String,
+         wounds: String,
+         attacks: String,
+         leadership: String,
+         save: String) {
+        self.movement = movement
+        self.weaponSkill = weaponSkill
+        self.balisticSkill = balisticSkill
+        self.strength = strength
+        self.toughness = toughness
+        self.wounds = wounds
+        self.attacks = attacks
+        self.leadership = leadership
+        self.save = save
+    }
 }

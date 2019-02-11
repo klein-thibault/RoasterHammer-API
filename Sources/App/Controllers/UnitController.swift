@@ -204,9 +204,7 @@ final class UnitController {
         })
     }
 
-    // MARK: - Private Functions
-
-    private func createUnit(request: CreateUnitRequest, conn: DatabaseConnectable) -> Future<Unit> {
+    func createUnit(request: CreateUnitRequest, conn: DatabaseConnectable) -> Future<Unit> {
         return Unit(name: request.name,
                     cost: request.cost,
                     isUnique: request.isUnique,
@@ -231,6 +229,8 @@ final class UnitController {
                                         conn: conn)
             })
     }
+
+    // MARK: - Private Functions
 
     private func createModels(forUnit unit: Unit,
                               request: [CreateModelRequest],

@@ -1,0 +1,75 @@
+<div class="models">
+    <!-- The add button -->
+    <button type="button" class="r-btnAdd-models btn btn-secondary">Add</button>
+
+    <div class="r-group-models">
+        <div class="form-group">
+            <label for="models_0_0" data-pattern-text="Model Name +=1:">Model Name 1</label>
+            <input type="text" class="form-control" name="models[0][name]" id="models_0_name" data-pattern-name= "models[++][name]" data-pattern-id="models++_name"/>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="models_0_0" data-pattern-text="Model Min Quantity +=1:">Model Min Quantity 1:</label>
+                <input type="text" class="form-control" name="models[0][minQuantity]" id="models_0_minQuantity" data-pattern-name="models[++][minQuantity]" data-pattern-id="models++_minQuantity" />
+            </div>
+            <div class="col">
+                <label for="models_0_0" data-pattern-text="Model Max Quantity +=1:">Model Max Quantity 1:</label>
+                <input type="text" class="form-control" name="models[0][maxQuantity]" id="models_0_maxQuantity" data-pattern-name="models[++][maxQuantity]" data-pattern-id="models++_maxQuantity" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="models_0_0" data-pattern-text="Model Weapon Max Quantity +=1:">Model Weapon Max Quantity 1</label>
+            <input type="text" class="form-control" name="models[0][weaponQuantity]" id="models_0_weaponQuantity" data-pattern-name= "models[++][weaponQuantity]" data-pattern-id="models++_weaponQuantity"/>
+            <small id="modelWeaponMaxQuantityHelp" class="form-text text-muted">How many weapons the model can carry at once</small>
+        </div>
+        <div class="form-group">
+            <label for="models_0_0" data-pattern-text="Model Movement +=1:">Model Movement 1</label>
+            <input type="text" class="form-control" name="models[0][movement]" id="models_0_movement" data-pattern-name= "models[++][movement]" data-pattern-id="models++_movement"/>
+            <small id="modelMovementHelp" class="form-text text-muted">e.g. 6"</small>
+        </div>
+        <div class="form-group">
+            <label for="models_0_0" data-pattern-text="Model Weapon Skill +=1:">Model Weapon Skill 1</label>
+            <input type="text" class="form-control" name="models[0][weaponSkill]" id="models_0_weaponSkill" data-pattern-name= "models[++][weaponSkill]" data-pattern-id="models++_weaponSkill"/>
+            <small id="modelWeaponSkillHelp" class="form-text text-muted">e.g. 3+</small>
+        </div>
+        <div class="form-group">
+            <label for="models_0_0" data-pattern-text="Model Balistic Skill +=1:">Model Balistic Skill 1</label>
+            <input type="text" class="form-control" name="models[0][balisticSkill]" id="models_0_balisticSkill" data-pattern-name= "models[++][balisticSkill]" data-pattern-id="models++_balisticSkill"/>
+            <small id="modelBalisticSkillHelp" class="form-text text-muted">e.g. 3+</small>
+        </div>
+        <div class="form-group">
+            <label for="models_0_0" data-pattern-text="Model Strength +=1:">Model Strength 1</label>
+            <input type="text" class="form-control" name="models[0][strength]" id="models_0_strength" data-pattern-name= "models[++][strength]" data-pattern-id="models++_strength"/>
+            <small id="modelStrengthHelp" class="form-text text-muted">e.g. 4</small>
+        </div>
+        <div class="form-group">
+            <label for="models_0_0" data-pattern-text="Model Toughness +=1:">Model Toughness 1</label>
+            <input type="text" class="form-control" name="models[0][toughness]" id="models_0_toughness" data-pattern-name= "models[++][toughness]" data-pattern-id="models++_toughness"/>
+            <small id="modelToughnessHelp" class="form-text text-muted">e.g. 4</small>
+        </div>
+        <div class="form-group">
+            <label for="models_0_0" data-pattern-text="Model Wounds +=1:">Model Wounds 1</label>
+            <input type="text" class="form-control" name="models[0][wounds]" id="models_0_wounds" data-pattern-name= "models[++][wounds]" data-pattern-id="models++_wounds"/>
+            <small id="modelWoundsHelp" class="form-text text-muted">e.g. 1</small>
+        </div>
+        <div class="form-group">
+            <label for="models_0_0" data-pattern-text="Model Attacks +=1:">Model Attacks 1</label>
+            <input type="text" class="form-control" name="models[0][attacks]" id="models_0_attacks" data-pattern-name= "models[++][attacks]" data-pattern-id="models++_attacks"/>
+            <small id="modelAttacksHelp" class="form-text text-muted">e.g. 1</small>
+        </div>
+        <div class="form-group">
+            <label for="models_0_0" data-pattern-text="Model Leadership +=1:">Model Leadership 1</label>
+            <input type="text" class="form-control" name="models[0][leadership]" id="models_0_leadership" data-pattern-name= "models[++][leadership]" data-pattern-id="models++_leadership"/>
+            <small id="modelLeadershipHelp" class="form-text text-muted">e.g. 7</small>
+        </div>
+        <div class="form-group">
+            <label for="models_0_0" data-pattern-text="Model Save +=1:">Model Save 1</label>
+            <input type="text" class="form-control" name="models[0][save]" id="models_0_save" data-pattern-name= "models[++][save]" data-pattern-id="models++_save"/>
+            <small id="modelSaveHelp" class="form-text text-muted">e.g. 3+</small>
+        </div>
+        <p>
+        <!-- Add a remove button for the item. If one didn't exist, it would be added to overall group -->
+        <button type="button" class="r-btnRemove-models btn btn-secondary">Remove</button>
+        </p>
+    </div>
+</div>
