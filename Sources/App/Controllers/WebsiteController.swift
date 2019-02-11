@@ -40,10 +40,10 @@ struct WebsiteController {
         }
 
         let isUnique = createUnitRequest.isUniqueCheckbox?.isCheckboxOn ?? false
+        let keywords: [String] = createUnitRequest.keywords ?? []
         let models = addModelRequest(forModelData: createUnitRequest.models)
         let rules = addRuleRequest(forRuleData: createUnitRequest.rules)
 
-        // TODO: Add keyword management
         let newUnitRequest = CreateUnitRequest(name: createUnitRequest.unitName,
                                                cost: Int(cost),
                                                isUnique: isUnique,
@@ -52,7 +52,7 @@ struct WebsiteController {
                                                unitTypeId: Int(unitTypeId),
                                                armyId: Int(armyId),
                                                models: models,
-                                               keywords: ["Chaos"],
+                                               keywords: keywords,
                                                rules: rules)
 
         return UnitController()
@@ -78,7 +78,7 @@ struct WebsiteController {
 
     func createWeaponPostHandler(_ req: Request,
                                  createWeaponRequest: CreateWeaponData) throws -> Future<Response> {
-        let cost = Int(createWeaponRequest.cost) ?? 0
+        let cost = createWeaponRequest.cost.intValue ?? 0
         let newWeaponRequest = CreateWeaponRequest(name: createWeaponRequest.name,
                                                    range: createWeaponRequest.range,
                                                    type: createWeaponRequest.type,
@@ -173,11 +173,10 @@ struct WebsiteController {
                 let modelWounds = modelDictionary["wounds"],
                 let modelAttacks = modelDictionary["attacks"],
                 let modelLeadership = modelDictionary["leadership"],
-                let modelSave = modelDictionary["save"] {
-                let modelMinQuantity = Int(modelMinQuantityString) ?? 0
-                let modelMaxQuantity = Int(modelMaxQuantityString) ?? 0
-                let modelWeaponQuantity = Int(modelWeaponQuantityString) ?? 0
-
+                let modelSave = modelDictionary["save"],
+                let modelMinQuantity = modelMinQuantityString.intValue,
+                let modelMaxQuantity = modelMaxQuantityString.intValue,
+                let modelWeaponQuantity = modelWeaponQuantityString.intValue {
                 let modelCharacteristics = CreateCharacteristicsRequest(movement: modelMovement,
                                                                         weaponSkill: modelWeaponSkill,
                                                                         balisticSkill: modelBalisticSkill,
@@ -279,6 +278,7 @@ struct CreateUnitData: Content {
     let unitMaxQuantity: String
     let unitTypeId: String
     let armyId: String
+    let keywords: [String]?
     let models: DynamicFormData
     let rules: DynamicFormData
 }
