@@ -41,6 +41,28 @@
         }
     </tbody>
 </table>
+
+#if(units) {
+<h2>Army Units</h2>
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Cost</th>
+        </tr>
+    </thead>
+    <tbody>
+        #for(unit in units) {
+        <tr>
+            <td>#(unit.name)</td>
+            <td>#(unit.unitType)</td>
+            <td>#(unit.cost)</td>
+        </tr>
+        }
+    </tbody>
+</table>
+}
 } else {
 <h2>Army not found</h2>
 }

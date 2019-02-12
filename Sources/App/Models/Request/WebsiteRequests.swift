@@ -42,6 +42,7 @@ struct CreateFactionAndRulesData: AddRuleData, Content {
 
 struct ArmyContext: Encodable {
     let army: ArmyResponse
+    let units: [UnitResponse]
 }
 
 struct WeaponsContext: Encodable {

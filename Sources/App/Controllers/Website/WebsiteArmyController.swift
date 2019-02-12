@@ -5,12 +5,13 @@ struct WebsiteArmyController {
 
     func armyHandler(_ req: Request) throws -> Future<View> {
         let armyId = try req.parameters.next(Int.self)
-        return try ArmyController()
-            .getArmy(byID: armyId, conn: req)
-            .flatMap(to: View.self, { army in
-                let context = ArmyContext(army: army)
-                return try req.view().render("army", context)
-            })
+        let armyFuture = try ArmyController().getArmy(byID: armyId, conn: req)
+        let unitsFuture = UnitController().getUnits(armyId: armyId, conn: req)
+
+        return flatMap(to: View.self, armyFuture, unitsFuture, { (army, units) in
+            let context = ArmyContext(army: army, units: units)
+            return try req.view().render("army", context)
+        })
     }
 
     func createArmyHandler(_ req: Request) throws -> Future<View> {
