@@ -97,28 +97,32 @@ public func routes(_ router: Router) throws {
     let websiteController = WebsiteController()
     router.get("roasterhammer", use: websiteController.indexHandler)
     // - Units
-    router.get("roasterhammer", "units", use: websiteController.unitsHandler)
-    router.get("roasterhammer", "units", "create", use: websiteController.createUnitHandler)
+    let websiteUnitController = WebsiteUnitController()
+    router.get("roasterhammer", "units", use: websiteUnitController.unitsHandler)
+    router.get("roasterhammer", "units", "create", use: websiteUnitController.createUnitHandler)
     router.post(CreateUnitData.self,
                 at: "roasterhammer", "units", "create",
-                use: websiteController.createUnitPostHandler)
+                use: websiteUnitController.createUnitPostHandler)
     // - Weapons
-    router.get("roasterhammer", "weapons", use: websiteController.weaponsHandler)
-    router.get("roasterhammer", "weapons", "create", use: websiteController.createWeaponHandler)
+    let websiteWeaponController = WebsiteWeaponController()
+    router.get("roasterhammer", "weapons", use: websiteWeaponController.weaponsHandler)
+    router.get("roasterhammer", "weapons", "create", use: websiteWeaponController.createWeaponHandler)
     router.post(CreateWeaponData.self,
                 at: "roasterhammer", "weapons", "create",
-                use: websiteController.createWeaponPostHandler)
+                use: websiteWeaponController.createWeaponPostHandler)
     // - Armies
-    router.get("roasterhammer", "armies", Int.parameter, use: websiteController.armyHandler)
-    router.get("roasterhammer", "armies", "create", use: websiteController.createArmyHandler)
+    let websiteArmyController = WebsiteArmyController()
+    router.get("roasterhammer", "armies", Int.parameter, use: websiteArmyController.armyHandler)
+    router.get("roasterhammer", "armies", "create", use: websiteArmyController.createArmyHandler)
     router.post(CreateArmyAndRulesData.self,
                 at: "roasterhammer", "armies", "create",
-                use: websiteController.createArmyPostHandler)
+                use: websiteArmyController.createArmyPostHandler)
     // - Factions
-    router.get("roasterhammer", "factions", "create", use: websiteController.createFactionHandler)
+    let websiteFactionController = WebsiteFactionController()
+    router.get("roasterhammer", "factions", "create", use: websiteFactionController.createFactionHandler)
     router.post(CreateFactionAndRulesData.self,
                 at: "roasterhammer", "factions", "create",
-                use: websiteController.createFactionPostHandler)
+                use: websiteFactionController.createFactionPostHandler)
 
     // QA
     let qaController = QAController()
