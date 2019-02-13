@@ -31,8 +31,52 @@ class ArmyControllerTests: BaseTests {
                                              data: editRequest,
                                              decodeTo: ArmyResponse.self)
         XCTAssertEqual(editedArmy.name, newName)
-        XCTAssertEqual(editedArmy.rules[0].name, newRules[0].name)
-        XCTAssertEqual(editedArmy.rules[0].description, newRules[0].description)
+        XCTAssertEqual(editedArmy.rules.count, newRules.count)
+        for editedArmyRule in editedArmy.rules {
+            for newRule in newRules {
+                XCTAssertEqual(editedArmyRule.name, newRule.name)
+                XCTAssertEqual(editedArmyRule.description, newRule.description)
+            }
+        }
+    }
+
+    func testEditArmy_nameOnly() throws {
+        let (_, army) = try ArmyTestsUtils.createArmyWithFaction(app: app)
+        let currentArmyRules = try army.rules.query(on: conn).all().wait()
+        let newName = "New Army Name"
+        let editRequest = EditArmyRequest(name: newName, rules: nil)
+        let editedArmy = try app.getResponse(to: "armies/\(army.requireID())",
+            method: .PATCH,
+            headers: ["Content-Type": "application/json"],
+            data: editRequest,
+            decodeTo: ArmyResponse.self)
+        XCTAssertEqual(editedArmy.name, newName)
+        XCTAssertEqual(editedArmy.rules.count, currentArmyRules.count)
+        for editedArmyRule in editedArmy.rules {
+            for currentArmyRule in currentArmyRules {
+                XCTAssertEqual(editedArmyRule.name, currentArmyRule.name)
+                XCTAssertEqual(editedArmyRule.description, currentArmyRule.description)
+            }
+        }
+    }
+
+    func testEditArmy_rulesOnly() throws {
+        let (_, army) = try ArmyTestsUtils.createArmyWithFaction(app: app)
+        let newRules = [AddRuleRequest(name: "rule", description: "desc")]
+        let editRequest = EditArmyRequest(name: nil, rules: newRules)
+        let editedArmy = try app.getResponse(to: "armies/\(army.requireID())",
+            method: .PATCH,
+            headers: ["Content-Type": "application/json"],
+            data: editRequest,
+            decodeTo: ArmyResponse.self)
+        XCTAssertEqual(editedArmy.name, army.name)
+        XCTAssertEqual(editedArmy.rules.count, newRules.count)
+        for editedArmyRule in editedArmy.rules {
+            for newRule in newRules {
+                XCTAssertEqual(editedArmyRule.name, newRule.name)
+                XCTAssertEqual(editedArmyRule.description, newRule.description)
+            }
+        }
     }
 
 }
