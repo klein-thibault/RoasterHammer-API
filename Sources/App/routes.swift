@@ -33,6 +33,7 @@ public func routes(_ router: Router) throws {
     let armyController = ArmyController()
     router.post("armies", use: armyController.createArmy)
     router.get("armies", use: armyController.armies)
+    router.patch("armies", Int.parameter, use: armyController.editArmy)
 
     // Faction
     let factionController = FactionController()

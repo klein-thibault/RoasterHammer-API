@@ -21,6 +21,17 @@ final class ArmyController {
         return try getAllArmies(conn: req)
     }
 
+    func editArmy(_ req: Request) throws -> Future<ArmyResponse> {
+        let armyId = try req.parameters.next(Int.self)
+        return try req.content.decode(EditArmyRequest.self)
+            .flatMap(to: Army.self, { request in
+                return self.editArmy(armyId: armyId, request: request, conn: req)
+            })
+            .flatMap(to: ArmyResponse.self, { army in
+                return try self.armyResponse(forArmy: army, conn: req)
+            })
+    }
+
     // MARK: - Utility Functions
 
     func getAllArmies(conn: DatabaseConnectable) throws -> Future<[ArmyResponse]> {
@@ -63,6 +74,26 @@ final class ArmyController {
             })
     }
 
+    func editArmy(armyId: Int, request: EditArmyRequest, conn: DatabaseConnectable) -> Future<Army> {
+        return Army.find(armyId, on: conn)
+        .unwrap(or: RoasterHammerError.armyIsMissing.error())
+        .flatMap(to: Army.self, { army in
+                if let name = request.name {
+                    army.name = name
+                }
+                return army.save(on: conn)
+            })
+            .flatMap(to: Army.self, { army in
+                if let rules = request.rules {
+                    return self.editRules(forArmy: army,
+                                          updatedRules: rules,
+                                          conn: conn)
+                }
+
+                return conn.eventLoop.future(army)
+            })
+    }
+
     // MARK: - Private Functions
 
     private func createRules(forArmy army: Army,
@@ -77,6 +108,15 @@ final class ArmyController {
             })
             .map(to: Army.self, { _ in
                 return army
+            })
+    }
+
+    private func editRules(forArmy army: Army,
+                           updatedRules: [AddRuleRequest],
+                           conn: DatabaseConnectable) -> Future<Army> {
+        return army.rules.detachAll(on: conn)
+            .flatMap(to: Army.self, { _ in
+                return self.createRules(forArmy: army, rules: updatedRules, conn: conn)
             })
     }
 
