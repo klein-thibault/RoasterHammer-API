@@ -31,4 +31,22 @@ struct WebsiteArmyController {
             })
     }
 
+    func editArmyHandler(_ req: Request) throws -> Future<View> {
+        let armyId = try req.parameters.next(Int.self)
+
+        return try ArmyController().getArmy(byID: armyId, conn: req)
+            .flatMap(to: View.self, { army in
+                let context = EditArmyContext(title: "Edit Army", army: army)
+                return try req.view().render("createArmy", context)
+            })
+    }
+
+    func editArmyPostHandler(_ req: Request) throws -> Future<Response> {
+        return flatMap(to: Response.self,
+                       req.parameters.next(ArmyResponse.self),
+                       req.content.decode(ArmyResponse.self), { (army, data) in
+                        <#code#>
+        })
+    }
+
 }

@@ -119,6 +119,8 @@ public func routes(_ router: Router) throws {
     router.post(CreateArmyAndRulesData.self,
                 at: "roasterhammer", "armies", "create",
                 use: websiteArmyController.createArmyPostHandler)
+    router.get("roasterhammer", "armies", Int.parameter, "edit", use: websiteArmyController.editArmyHandler)
+    router.post("roasterhammer", "armies", Int.parameter, "edit", use: websiteArmyController.editArmyPostHandler)
     // - Factions
     let websiteFactionController = WebsiteFactionController()
     router.get("roasterhammer", "factions", "create", use: websiteFactionController.createFactionHandler)

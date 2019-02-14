@@ -24,6 +24,12 @@ struct CreateArmyContext: WebContextTitle, Encodable {
     let title: String
 }
 
+struct EditArmyContext: WebContextTitle, Encodable {
+    let title: String
+    let army: ArmyResponse
+    let editing: Bool = true
+}
+
 struct CreateArmyAndRulesData: AddRuleData, Content {
     let armyName: String
     let rules: DynamicFormData
