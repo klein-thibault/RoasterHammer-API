@@ -20,12 +20,19 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(middlewares)
 
     // Configure a PostgreSQL database
-    let databaseConfiguration = PostgreSQLDatabaseConfig(hostname: "localhost",
+    let databaseConfiguration: PostgreSQLDatabaseConfig
+
+    if let databaseURL = Environment.get("DATABASE_URL") {
+        databaseConfiguration = PostgreSQLDatabaseConfig(url: databaseURL)!
+    } else {
+        databaseConfiguration = PostgreSQLDatabaseConfig(hostname: "localhost",
                                                          port: 5432,
                                                          username: "postgres",
                                                          database: "postgres",
                                                          password: "vPYZxUmZLxYMNiRrkrVX",
                                                          transport: .cleartext)
+    }
+
     let postgresql = PostgreSQLDatabase(config: databaseConfiguration)
 
     /// Register the configured PostgreSQL database to the database config.
@@ -99,5 +106,5 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     try services.register(AuthenticationProvider())
 
     // Graph database provider
-//    try services.register(GraphDatabaseProvider())
+    //    try services.register(GraphDatabaseProvider())
 }
