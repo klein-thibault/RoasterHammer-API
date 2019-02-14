@@ -26,10 +26,10 @@ class ArmyControllerTests: BaseTests {
         let newRules = [AddRuleRequest(name: "rule", description: "desc")]
         let editRequest = EditArmyRequest(name: newName, rules: newRules)
         let editedArmy = try app.getResponse(to: "armies/\(army.requireID())",
-                                             method: .PATCH,
-                                             headers: ["Content-Type": "application/json"],
-                                             data: editRequest,
-                                             decodeTo: ArmyResponse.self)
+            method: .PATCH,
+            headers: ["Content-Type": "application/json"],
+            data: editRequest,
+            decodeTo: ArmyResponse.self)
         XCTAssertEqual(editedArmy.name, newName)
         XCTAssertEqual(editedArmy.rules.count, newRules.count)
         for editedArmyRule in editedArmy.rules {
@@ -77,6 +77,34 @@ class ArmyControllerTests: BaseTests {
                 XCTAssertEqual(editedArmyRule.description, newRule.description)
             }
         }
+    }
+
+    func testDeleteArmy() throws {
+        let (_, army) = try ArmyTestsUtils.createArmyWithFaction(app: app)
+        let armyRules = try army.rules.query(on: conn).all().wait()
+        let ruleId = try armyRules[0].requireID()
+        let armyId = try army.requireID()
+        _ = try app.sendRequest(to: "armies/\(armyId)", method: .DELETE)
+
+        do {
+            _ = try app.getResponse(to: "armies/\(armyId)", decodeTo: ArmyResponse.self)
+            XCTFail("Should have received a missing army error")
+        } catch {
+            print(error)
+            XCTAssertNotNil(error)
+        }
+
+        let ruleFromDeletedArmy = try Rule
+            .find(ruleId, on: conn)
+            .unwrap(or: RoasterHammerError.ruleIsMissing)
+            .wait()
+        let armyFromRule = try ruleFromDeletedArmy
+            .armies
+            .query(on: conn)
+            .filter(\.id == armyId)
+            .all()
+            .wait()
+        XCTAssertEqual(armyFromRule.count, 0)
     }
 
 }

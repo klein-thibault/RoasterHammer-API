@@ -32,6 +32,11 @@ final class ArmyController {
             })
     }
 
+    func deleteArmy(_ req: Request) throws -> Future<HTTPStatus> {
+        let armyId = try req.parameters.next(Int.self)
+        return deleteArmy(armyId: armyId, conn: req)
+    }
+
     // MARK: - Utility Functions
 
     func getAllArmies(conn: DatabaseConnectable) throws -> Future<[ArmyResponse]> {
@@ -91,6 +96,17 @@ final class ArmyController {
                 }
 
                 return conn.eventLoop.future(army)
+            })
+    }
+
+    func deleteArmy(armyId: Int, conn: DatabaseConnectable) -> Future<HTTPStatus> {
+        return Army.find(armyId, on: conn)
+            .unwrap(or: RoasterHammerError.armyIsMissing)
+            .flatMap(to: HTTPStatus.self, { army in
+                return army.delete(on: conn)
+                    .map(to: HTTPStatus.self, { _ in
+                        return .ok
+                    })
             })
     }
 

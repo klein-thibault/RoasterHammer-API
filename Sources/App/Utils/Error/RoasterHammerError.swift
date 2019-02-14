@@ -7,6 +7,7 @@ enum RoasterHammerTreeError: Swift.Error {
 }
 
 enum RoasterHammerError: Swift.Error {
+    case ruleIsMissing
     case gameIsMissing
     case roasterIsMissing
     case armyIsMissing
@@ -28,6 +29,8 @@ enum RoasterHammerError: Swift.Error {
 extension RoasterHammerError {
     func error() -> AbortError {
         switch self {
+        case .ruleIsMissing:
+            return Abort(.badRequest, reason: "The rule could not be found")
         case .gameIsMissing:
             return Abort(.badRequest, reason: "The game could not be found")
         case .roasterIsMissing:
