@@ -41,12 +41,16 @@ struct WebsiteArmyController {
             })
     }
 
-    func editArmyPostHandler(_ req: Request) throws -> Future<Response> {
-        return flatMap(to: Response.self,
-                       req.parameters.next(ArmyResponse.self),
-                       req.content.decode(ArmyResponse.self), { (army, data) in
-                        <#code#>
-        })
+    func editArmyPostHandler(_ req: Request, editArmyRequest: CreateArmyAndRulesData) throws -> Future<Response> {
+        let armyId = try req.parameters.next(Int.self)
+        // TODO: Handle updating the army rules
+        let editArmy = EditArmyRequest(name: editArmyRequest.armyName, rules: nil)
+
+        return ArmyController()
+            .editArmy(armyId: armyId, request: editArmy, conn: req)
+            .map({ _ in
+                return req.redirect(to: "/roasterhammer/armies/\(armyId)")
+            })
     }
 
 }

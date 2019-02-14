@@ -3,7 +3,7 @@
 <form method="post">
     <div class="form-group">
         <label for="short">Army Name</label>
-        <input type="text" name="armyName" class="form-control" id="army-name"/>
+        <input type="text" name="armyName" class="form-control" id="army-name" #if(editing) { value=#(army.name) }/>
     </div>
 
     <h3>Army Rules</h3>
@@ -11,7 +11,7 @@
     #embed("addRuleForms")
 
     <button type="submit" class="btn btn-primary">
-        Submit
+        #if(editing) { Update } else { Submit }
     </button>
 </form>
 }

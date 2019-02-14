@@ -62,6 +62,8 @@
     </tbody>
 </table>
 }
+
+<a class="btn btn-primary" href="/roasterhammer/armies/#(army.id)/edit" role="button">Edit</a>
 } else {
 <h2>Army not found</h2>
 }
