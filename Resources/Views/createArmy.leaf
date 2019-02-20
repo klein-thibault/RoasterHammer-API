@@ -8,7 +8,33 @@
 
     <h3>Army Rules</h3>
 
-    #embed("addRuleForms")
+    #if(editing) {
+        <div class="rules">
+            <div class="r-group">
+            #for(rule in army.rules) {
+                <div class="row">
+                    <div class="col">
+                        <label for="rules_#(index)_#(index)" data-pattern-text="Rule Name +=1:">Rule Name 1:</label>
+                        <input type="text" class="form-control" name="rules[#(index)][name]" id="rules_#(index)_name" data-pattern-name="rules[++][name]" data-pattern-id="rules++_name" value=#(rule.name) />
+                    </div>
+                    <div class="col">
+                        <label for="rules_#(index)_#(index)" data-pattern-text="Rule Description +=1:">Rule Description 1:</label>
+                        <input type="text" class="form-control" name="rules[#(index)][description]" id="rules_#(index)_description" data-pattern-name="rules[++][description]" data-pattern-id="rules_++_description" value=#(rule.description)/>
+                    </div>
+                </div>
+                <p>
+                <!-- Add a remove button for the item. If one didn't exist, it would be added to overall group -->
+                <button type="button" class="r-btnRemove btn btn-secondary">Remove</button>
+                </p>
+            }
+            </div>
+
+            <!-- The add button -->
+            <button type="button" class="r-btnAdd btn btn-secondary">Add</button>
+        </div>
+    } else {
+        #embed("addRuleForms")
+    }
 
     <button type="submit" class="btn btn-primary">
         #if(editing) { Update } else { Submit }

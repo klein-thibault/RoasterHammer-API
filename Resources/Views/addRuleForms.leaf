@@ -1,7 +1,4 @@
 <div class="rules">
-    <!-- The add button -->
-    <button type="button" class="r-btnAdd btn btn-secondary">Add</button>
-
     <div class="r-group">
         <div class="row">
             <div class="col">
@@ -18,4 +15,7 @@
         <button type="button" class="r-btnRemove btn btn-secondary">Remove</button>
         </p>
     </div>
+
+    <!-- The add button -->
+    <button type="button" class="r-btnAdd btn btn-secondary">Add</button>
 </div>

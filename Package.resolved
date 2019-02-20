@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/vapor/auth.git",
         "state": {
           "branch": null,
-          "revision": "9c71c8a6c021601d981305987e8e95fd36fd0c56",
-          "version": "2.0.2"
+          "revision": "ed402783942af1d40b5c9e537e956aea51618f0e",
+          "version": "2.0.3"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/vapor/postgresql.git",
         "state": {
           "branch": null,
-          "revision": "cbe5505f6f15c69f569ec939cf7e7cc8be61857c",
-          "version": "1.2.1"
+          "revision": "d34cf720a43ea2ef8dbf2ba7d9f18d39bb1eb795",
+          "version": "1.2.2"
         }
       },
       {
@@ -213,8 +213,8 @@
         "repositoryURL": "https://github.com/vapor/vapor.git",
         "state": {
           "branch": null,
-          "revision": "93a2370a6a7d50fe6f23abd7c15d2fc06886cba5",
-          "version": "3.2.1"
+          "revision": "6c7284681c3432fee29c268babf954be6816cbfb",
+          "version": "3.2.2"
         }
       },
       {
