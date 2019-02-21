@@ -3,7 +3,7 @@
 <form method="post">
     <div class="form-group">
         <label for="short">Army Name</label>
-        <input type="text" name="armyName" class="form-control" id="army-name" #if(editing) { value=#(army.name) }/>
+        <input type="text" name="armyName" class="form-control" id="army-name" #if(editing) { value="#(army.name)" }/>
     </div>
 
     <h3>Army Rules</h3>
@@ -15,11 +15,11 @@
                 <div class="row">
                     <div class="col">
                         <label for="rules_#(index)_#(index)" data-pattern-text="Rule Name +=1:">Rule Name 1:</label>
-                        <input type="text" class="form-control" name="rules[#(index)][name]" id="rules_#(index)_name" data-pattern-name="rules[++][name]" data-pattern-id="rules++_name" value=#(rule.name) />
+                        <input type="text" class="form-control" name="rules[#(index)][name]" id="rules_#(index)_name" data-pattern-name="rules[++][name]" data-pattern-id="rules++_name" value="#(rule.name)" />
                     </div>
                     <div class="col">
                         <label for="rules_#(index)_#(index)" data-pattern-text="Rule Description +=1:">Rule Description 1:</label>
-                        <input type="text" class="form-control" name="rules[#(index)][description]" id="rules_#(index)_description" data-pattern-name="rules[++][description]" data-pattern-id="rules_++_description" value=#(rule.description)/>
+                        <input type="text" class="form-control" name="rules[#(index)][description]" id="rules_#(index)_description" data-pattern-name="rules[++][description]" data-pattern-id="rules_++_description" value="#(rule.description)"/>
                     </div>
                 </div>
                 <p>
