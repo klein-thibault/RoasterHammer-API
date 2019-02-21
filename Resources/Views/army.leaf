@@ -63,7 +63,15 @@
 </table>
 }
 
-<a class="btn btn-primary" href="/roasterhammer/armies/#(army.id)/edit" role="button">Edit</a>
+#/*
+It’s good practice to use a POST request for actions that modify the database, such as create or delete.
+This enables you to protect them with CSRF (Cross Site Request Forgery) tokens in the future, for example.
+*/
+<form method="post" action="/roasterhammer/armies/#(army.id)/delete">
+    <a class="btn btn-primary" href="/roasterhammer/armies/#(army.id)/edit" role="button">Edit</a>
+    <input class="btn btn-danger" type="submit" value="Delete"/>
+</form>
+
 } else {
 <h2>Army not found</h2>
 }

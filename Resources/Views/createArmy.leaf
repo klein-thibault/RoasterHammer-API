@@ -29,7 +29,7 @@
                 <!-- Add a remove button for the item. If one didn't exist, it would be added to overall group -->
                 <button type="button" class="r-btnRemove btn btn-secondary">Remove</button>
                 </p>
-                </div>
+            </div>
             }
         </div>
     } else {

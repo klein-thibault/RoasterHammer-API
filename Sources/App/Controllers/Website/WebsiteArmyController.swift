@@ -53,4 +53,11 @@ struct WebsiteArmyController {
             })
     }
 
+    func deleteArmyHandler(_ req: Request) throws -> Future<Response> {
+        let armyId = try req.parameters.next(Int.self)
+        return ArmyController()
+            .deleteArmy(armyId: armyId, conn: req)
+            .transform(to: req.redirect(to: "/roasterhammer"))
+    }
+
 }
