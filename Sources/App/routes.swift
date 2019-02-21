@@ -40,6 +40,7 @@ public func routes(_ router: Router) throws {
     let factionController = FactionController()
     router.post("armies", Int.parameter, "factions", use: factionController.createFaction)
     router.get("factions", use: factionController.getAllFactions)
+    router.patch("factions", Int.parameter, use: factionController.editFaction)
     router.delete("factions", Int.parameter, use: factionController.deleteFaction)
 
     // Detachment
@@ -130,6 +131,10 @@ public func routes(_ router: Router) throws {
     router.post(CreateFactionAndRulesData.self,
                 at: "roasterhammer", "factions", "create",
                 use: websiteFactionController.createFactionPostHandler)
+    router.get("roasterhammer", "factions", Int.parameter, "edit", use: websiteFactionController.editFactionHandler)
+    router.post(CreateFactionAndRulesData.self,
+                at: "roasterhammer", "factions", Int.parameter, "edit",
+                use: websiteFactionController.editFactionPostHandler)
 
     // QA
 //    let qaController = QAController()

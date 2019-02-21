@@ -40,6 +40,13 @@ struct CreateFactionContext: WebContextTitle, Encodable {
     let armies: [ArmyResponse]
 }
 
+struct EditFactionContext: WebContextTitle, Encodable {
+    let title: String
+    let faction: FactionResponse
+    let armies: [ArmyResponse]
+    let editing: Bool = true
+}
+
 struct CreateFactionAndRulesData: AddRuleData, Content {
     let factionName: String
     let armyId: Int

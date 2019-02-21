@@ -21,6 +21,7 @@
         }
     </tbody>
 </table>
+<a class="btn btn-primary" href="/roasterhammer/factions/#(faction.id)/edit" role="button">Edit</a>
 }
 
 <h2>Army Rules</h2>

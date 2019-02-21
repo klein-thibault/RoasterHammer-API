@@ -26,6 +26,33 @@ class FactionControllerTests: BaseTests {
         XCTAssertEqual(allFactions[0].name, createFactionRequest.name)
     }
 
+    func testEditFaction() throws {
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, faction) = try FactionTestsUtils.createFaction(armyId: army.requireID(), app: app)
+        let (_, newArmy) = try ArmyTestsUtils.createArmy(app: app)
+        let newName = "New Faction Name"
+        let newRules = [AddRuleRequest(name: "rule", description: "desc")]
+        let editRequest = try EditFactionRequest(name: newName,
+                                                 rules: newRules,
+                                                 armyId: newArmy.requireID())
+        let editedFaction = try app.getResponse(to: "factions/\(faction.requireID())",
+            method: .PATCH,
+            headers: ["Content-Type": "application/json"],
+            data: editRequest,
+            decodeTo: FactionResponse.self)
+        XCTAssertEqual(editedFaction.name, newName)
+        XCTAssertEqual(editedFaction.rules.count, newRules.count)
+        for editedFactionRule in editedFaction.rules {
+            for newRule in newRules {
+                XCTAssertEqual(editedFactionRule.name, newRule.name)
+                XCTAssertEqual(editedFactionRule.description, newRule.description)
+            }
+        }
+
+        let newArmyFactions = try newArmy.factions.query(on: conn).all().wait().filter { $0.id == faction.id! }
+        XCTAssertEqual(newArmyFactions.count, 1)
+    }
+
     func testDeleteFaction() throws {
         let (_, army) = try ArmyTestsUtils.createArmy(app: app)
         let (_, faction) = try FactionTestsUtils.createFaction(armyId: army.requireID(), app: app)

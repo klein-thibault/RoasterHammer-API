@@ -48,9 +48,7 @@ struct WebsiteArmyController {
 
         return ArmyController()
             .editArmy(armyId: armyId, request: editArmy, conn: req)
-            .map({ _ in
-                return req.redirect(to: "/roasterhammer/armies/\(armyId)")
-            })
+            .transform(to: req.redirect(to: "/roasterhammer/armies/\(armyId)"))
     }
 
     func deleteArmyHandler(_ req: Request) throws -> Future<Response> {

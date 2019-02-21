@@ -81,21 +81,21 @@ final class ArmyController {
 
     func editArmy(armyId: Int, request: EditArmyRequest, conn: DatabaseConnectable) -> Future<Army> {
         return Army.find(armyId, on: conn)
-        .unwrap(or: RoasterHammerError.armyIsMissing.error())
-        .flatMap(to: Army.self, { army in
-                if let name = request.name {
-                    army.name = name
+            .unwrap(or: RoasterHammerError.armyIsMissing.error())
+            .flatMap(to: Army.self, { army in
+                guard let name = request.name else {
+                    return conn.eventLoop.future(army)
                 }
+                army.name = name
                 return army.save(on: conn)
             })
             .flatMap(to: Army.self, { army in
-                if let rules = request.rules {
-                    return self.editRules(forArmy: army,
-                                          updatedRules: rules,
-                                          conn: conn)
+                guard let rules = request.rules else {
+                    return conn.eventLoop.future(army)
                 }
-
-                return conn.eventLoop.future(army)
+                return self.editRules(forArmy: army,
+                                      updatedRules: rules,
+                                      conn: conn)
             })
     }
 
