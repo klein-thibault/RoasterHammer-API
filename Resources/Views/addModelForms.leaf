@@ -1,4 +1,7 @@
 <div class="models">
+    <!-- The add button -->
+    <button type="button" class="r-btnAdd-models btn btn-secondary">Add</button>
+
     <div class="r-group-models">
         <div class="form-group">
             <label for="models_0_0" data-pattern-text="Model Name +=1:">Model Name 1</label>
@@ -69,7 +72,4 @@
         <button type="button" class="r-btnRemove-models btn btn-secondary">Remove</button>
         </p>
     </div>
-
-    <!-- The add button -->
-    <button type="button" class="r-btnAdd-models btn btn-secondary">Add</button>
 </div>

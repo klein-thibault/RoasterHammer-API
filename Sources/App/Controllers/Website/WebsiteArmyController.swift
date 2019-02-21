@@ -43,8 +43,8 @@ struct WebsiteArmyController {
 
     func editArmyPostHandler(_ req: Request, editArmyRequest: CreateArmyAndRulesData) throws -> Future<Response> {
         let armyId = try req.parameters.next(Int.self)
-        // TODO: Handle updating the army rules
-        let editArmy = EditArmyRequest(name: editArmyRequest.armyName, rules: nil)
+        let rules = WebRequestUtils().addRuleRequest(forRuleData: editArmyRequest.rules)
+        let editArmy = EditArmyRequest(name: editArmyRequest.armyName, rules: rules)
 
         return ArmyController()
             .editArmy(armyId: armyId, request: editArmy, conn: req)

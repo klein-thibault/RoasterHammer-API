@@ -10,8 +10,11 @@
 
     #if(editing) {
         <div class="rules">
-            <div class="r-group">
+            <!-- The add button -->
+            <button type="button" class="r-btnAdd btn btn-secondary">Add</button>
+
             #for(rule in army.rules) {
+            <div class="r-group">
                 <div class="row">
                     <div class="col">
                         <label for="rules_#(index)_#(index)" data-pattern-text="Rule Name +=1:">Rule Name 1:</label>
@@ -26,11 +29,8 @@
                 <!-- Add a remove button for the item. If one didn't exist, it would be added to overall group -->
                 <button type="button" class="r-btnRemove btn btn-secondary">Remove</button>
                 </p>
+                </div>
             }
-            </div>
-
-            <!-- The add button -->
-            <button type="button" class="r-btnAdd btn btn-secondary">Add</button>
         </div>
     } else {
         #embed("addRuleForms")
