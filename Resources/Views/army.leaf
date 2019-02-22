@@ -21,7 +21,10 @@
         }
     </tbody>
 </table>
-<a class="btn btn-primary" href="/roasterhammer/factions/#(faction.id)/edit" role="button">Edit</a>
+<form method="post" action="/roasterhammer/factions/#(faction.id)/delete">
+    <a class="btn btn-primary" href="/roasterhammer/factions/#(faction.id)/edit" role="button">Edit</a>
+    <input class="btn btn-danger" type="submit" value="Delete"/>
+</form>
 }
 
 <h2>Army Rules</h2>

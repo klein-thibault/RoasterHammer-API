@@ -135,6 +135,7 @@ public func routes(_ router: Router) throws {
     router.post(CreateFactionAndRulesData.self,
                 at: "roasterhammer", "factions", Int.parameter, "edit",
                 use: websiteFactionController.editFactionPostHandler)
+    router.post("roasterhammer", "factions", Int.parameter, "delete", use: websiteFactionController.deleteFactionHandler)
 
     // QA
 //    let qaController = QAController()

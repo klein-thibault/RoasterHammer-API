@@ -30,14 +30,7 @@ final class FactionController {
 
     func deleteFaction(_ req: Request) throws -> Future<HTTPStatus> {
         let factionId = try req.parameters.next(Int.self)
-        return Faction.find(factionId, on: req)
-            .unwrap(or: RoasterHammerError.factionIsMissing.error())
-            .flatMap(to: HTTPStatus.self) { faction in
-                return faction.delete(on: req)
-                    .map(to: HTTPStatus.self, { _ in
-                        return HTTPStatus.ok
-                    })
-        }
+        return deleteFaction(factionId: factionId, conn: req)
     }
 
     // MARK: - Utility Functions
@@ -89,6 +82,15 @@ final class FactionController {
                                       updatedRules: rules,
                                       conn: conn)
             })
+    }
+
+    func deleteFaction(factionId: Int, conn: DatabaseConnectable) -> Future<HTTPStatus> {
+        return Faction.find(factionId, on: conn)
+            .unwrap(or: RoasterHammerError.factionIsMissing.error())
+            .flatMap(to: HTTPStatus.self) { faction in
+                return faction.delete(on: conn)
+                    .transform(to: HTTPStatus.ok)
+        }
     }
 
     // MARK: - Private Functions

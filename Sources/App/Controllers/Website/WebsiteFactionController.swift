@@ -46,4 +46,11 @@ struct WebsiteFactionController {
             .transform(to: req.redirect(to: "/roasterhammer"))
     }
 
+    func deleteFactionHandler(_ req: Request) throws -> Future<Response> {
+        let factionId = try req.parameters.next(Int.self)
+        return FactionController()
+        .deleteFaction(factionId: factionId, conn: req)
+        .transform(to: req.redirect(to: "/roasterhammer"))
+    }
+
 }
