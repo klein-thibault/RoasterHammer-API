@@ -206,7 +206,6 @@ final class UnitController {
 
     func createUnit(request: CreateUnitRequest, conn: DatabaseConnectable) -> Future<Unit> {
         return Unit(name: request.name,
-                    cost: request.cost,
                     isUnique: request.isUnique,
                     minQuantity: request.minQuantity,
                     maxQuantity: request.maxQuantity,
@@ -247,6 +246,7 @@ final class UnitController {
                              request: CreateModelRequest,
                              conn: DatabaseConnectable) throws -> Future<Unit> {
         return Model(name: request.name,
+                     cost: request.cost,
                      minQuantity: request.minQuantity,
                      maxQuantity: request.maxQuantity,
                      weaponQuantity: request.weaponQuantity)

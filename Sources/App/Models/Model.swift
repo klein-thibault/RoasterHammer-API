@@ -7,6 +7,7 @@ final class Model: PostgreSQLModel {
     var minQuantity: Int
     var maxQuantity: Int
     var weaponQuantity: Int
+    var cost: Int
     var characteristics: Children<Model, Characteristics> {
         return children(\.modelId)
     }
@@ -15,6 +16,7 @@ final class Model: PostgreSQLModel {
     }
 
     init(name: String,
+         cost: Int,
          minQuantity: Int,
          maxQuantity: Int,
          weaponQuantity: Int) {
@@ -22,6 +24,7 @@ final class Model: PostgreSQLModel {
         self.minQuantity = minQuantity
         self.maxQuantity = maxQuantity
         self.weaponQuantity = weaponQuantity
+        self.cost = cost
     }
 }
 

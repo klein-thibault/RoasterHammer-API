@@ -13,12 +13,13 @@ class UnitControllerTests: BaseTests {
 
         XCTAssertNotNil(unit.id)
         XCTAssertEqual(unit.name, createUnitRequest.name)
-        XCTAssertEqual(unit.cost, createUnitRequest.cost)
         XCTAssertEqual(unit.minQuantity, createUnitRequest.minQuantity)
         XCTAssertEqual(unit.maxQuantity, createUnitRequest.maxQuantity)
         XCTAssertEqual(unit.models[0].weaponQuantity, createUnitRequest.models[0].weaponQuantity)
         XCTAssertEqual(unit.isUnique, createUnitRequest.isUnique)
         XCTAssertEqual(unit.unitType, "HQ")
+        XCTAssertEqual(unit.cost, 120)
+        XCTAssertEqual(unit.models[0].cost, createUnitRequest.models[0].cost)
         XCTAssertEqual(modelCharacteristics.movement, createModelRequest.characteristics.movement)
         XCTAssertEqual(modelCharacteristics.weaponSkill, createModelRequest.characteristics.weaponSkill)
         XCTAssertEqual(modelCharacteristics.balisticSkill, createModelRequest.characteristics.balisticSkill)
@@ -224,6 +225,7 @@ class UnitControllerTests: BaseTests {
             loggedInRequest: true,
             loggedInCustomer: user)
         XCTAssertEqual(updatedDetachmentWithWeapon.roles[0].units[0].models[0].selectedWeapons[0].name, modelWeapon.name)
+        XCTAssertEqual(updatedDetachmentWithWeapon.roles[0].units[0].unit.cost, unit.cost + weapon.cost)
     }
 
     func testSelectWeaponForSelectedModel_whenModelWeaponsAreMaxedOut() throws {

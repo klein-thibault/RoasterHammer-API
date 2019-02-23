@@ -19,13 +19,13 @@ final class UnitTestsUtils {
         let unitTypes = try app.getResponse(to: "unit-types", decodeTo: [UnitType].self)
         let hqUnitType = unitTypes.filter({$0.name == "HQ"}).first!
         let createModelRequest = CreateModelRequest(name: "Kharn",
+                                                    cost: 120,
                                                     minQuantity: 1,
                                                     maxQuantity: 1,
                                                     weaponQuantity: 1,
                                                     characteristics: characteristics)
 
         let createUnitRequest = try CreateUnitRequest(name: "Kharn",
-                                                      cost: 120,
                                                       isUnique: true,
                                                       minQuantity: 1,
                                                       maxQuantity: 1,
@@ -58,13 +58,13 @@ final class UnitTestsUtils {
         let unitTypes = try app.getResponse(to: "unit-types", decodeTo: [UnitType].self)
         let hqUnitType = unitTypes.filter({$0.name == "HQ"}).first!
         let createModelRequest = CreateModelRequest(name: "Chaos Lord",
+                                                    cost: 70,
                                                     minQuantity: 1,
                                                     maxQuantity: 1,
                                                     weaponQuantity: 1,
                                                     characteristics: characteristics)
 
         let createUnitRequest = try CreateUnitRequest(name: "Chaos Lord",
-                                                      cost: 70,
                                                       isUnique: false,
                                                       minQuantity: 1,
                                                       maxQuantity: 1,

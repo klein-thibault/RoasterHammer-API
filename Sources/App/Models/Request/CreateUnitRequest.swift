@@ -2,7 +2,6 @@ import Vapor
 
 struct CreateUnitRequest: Content {
     let name: String
-    let cost: Int
     let isUnique: Bool
     let minQuantity: Int
     let maxQuantity: Int
@@ -13,7 +12,6 @@ struct CreateUnitRequest: Content {
     let rules: [AddRuleRequest]
 
     init(name: String,
-         cost: Int,
          isUnique: Bool,
          minQuantity: Int,
          maxQuantity: Int,
@@ -23,7 +21,6 @@ struct CreateUnitRequest: Content {
          keywords: [String],
          rules: [AddRuleRequest]) {
         self.name = name
-        self.cost = cost
         self.isUnique = isUnique
         self.minQuantity = minQuantity
         self.maxQuantity = maxQuantity
@@ -37,17 +34,20 @@ struct CreateUnitRequest: Content {
 
 struct CreateModelRequest: Content {
     let name: String
+    let cost: Int
     let minQuantity: Int
     let maxQuantity: Int
     let weaponQuantity: Int
     let characteristics: CreateCharacteristicsRequest
 
     init(name: String,
+         cost: Int,
          minQuantity: Int,
          maxQuantity: Int,
          weaponQuantity: Int,
          characteristics: CreateCharacteristicsRequest) {
         self.name = name
+        self.cost = cost
         self.minQuantity = minQuantity
         self.maxQuantity = maxQuantity
         self.weaponQuantity = weaponQuantity

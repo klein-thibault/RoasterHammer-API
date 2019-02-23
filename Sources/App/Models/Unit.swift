@@ -4,7 +4,6 @@ import FluentPostgreSQL
 final class Unit: PostgreSQLModel {
     var id: Int?
     var name: String
-    var cost: Int
     var isUnique: Bool
     var minQuantity: Int
     var maxQuantity: Int
@@ -27,14 +26,12 @@ final class Unit: PostgreSQLModel {
     }
 
     init(name: String,
-         cost: Int,
          isUnique: Bool,
          minQuantity: Int,
          maxQuantity: Int,
          unitTypeId: Int,
          armyId: Int) {
         self.name = name
-        self.cost = cost
         self.isUnique = isUnique
         self.minQuantity = minQuantity
         self.maxQuantity = maxQuantity

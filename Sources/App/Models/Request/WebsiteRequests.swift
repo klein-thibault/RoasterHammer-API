@@ -92,7 +92,6 @@ struct CreateUnitContext: WebContextTitle, Encodable {
 
 struct CreateUnitData: Content {
     let unitName: String
-    let unitCost: String
     let isUniqueCheckbox: String?
     let unitMinQuantity: String
     let unitMaxQuantity: String

@@ -6,11 +6,6 @@
         <input type="text" name="unitName" class="form-control" id="unit-name"/>
         <small id="unitNameHelp" class="form-text text-muted">e.g. Space Marines Tactical Squad</small>
     </div>
-    <div class="form-group">
-        <label for="short">Unit Cost</label>
-        <input type="text" name="unitCost" class="form-control" id="unit-cost"/>
-        <small id="unitCostHelp" class="form-text text-muted">e.g. 120</small>
-    </div>
     <div class="form-group form-check">
         <input type="checkbox" class="form-check-input" name="isUniqueCheckbox" id="isUniqueCheckbox">
         <label class="form-check-label" for="isUniqueCheckbox">Is Named Character</label>

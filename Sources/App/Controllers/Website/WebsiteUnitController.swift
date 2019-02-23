@@ -26,8 +26,7 @@ struct WebsiteUnitController {
 
     func createUnitPostHandler(_ req: Request,
                                createUnitRequest: CreateUnitData) throws -> Future<Response> {
-        guard let cost = createUnitRequest.unitCost.intValue,
-            let minQuantity = createUnitRequest.unitMinQuantity.intValue,
+        guard let minQuantity = createUnitRequest.unitMinQuantity.intValue,
             let maxQuantity = createUnitRequest.unitMaxQuantity.intValue,
             let unitTypeId = createUnitRequest.unitTypeId.intValue,
             let armyId = createUnitRequest.armyId.intValue else {
@@ -40,7 +39,6 @@ struct WebsiteUnitController {
         let rules = WebRequestUtils().addRuleRequest(forRuleData: createUnitRequest.rules)
 
         let newUnitRequest = CreateUnitRequest(name: createUnitRequest.unitName,
-                                               cost: Int(cost),
                                                isUnique: isUnique,
                                                minQuantity: Int(minQuantity),
                                                maxQuantity: Int(maxQuantity),
@@ -63,6 +61,7 @@ struct WebsiteUnitController {
         var models: [CreateModelRequest] = []
         for modelDictionary in modelData.values {
             if let modelName = modelDictionary["name"], modelName.count > 0,
+                let modelCostString = modelDictionary["cost"],
                 let modelMinQuantityString = modelDictionary["minQuantity"],
                 let modelMaxQuantityString = modelDictionary["maxQuantity"],
                 let modelWeaponQuantityString = modelDictionary["weaponQuantity"],
@@ -75,6 +74,7 @@ struct WebsiteUnitController {
                 let modelAttacks = modelDictionary["attacks"],
                 let modelLeadership = modelDictionary["leadership"],
                 let modelSave = modelDictionary["save"],
+                let modelCost = modelCostString.intValue,
                 let modelMinQuantity = modelMinQuantityString.intValue,
                 let modelMaxQuantity = modelMaxQuantityString.intValue,
                 let modelWeaponQuantity = modelWeaponQuantityString.intValue {
@@ -88,6 +88,7 @@ struct WebsiteUnitController {
                                                                         leadership: modelLeadership,
                                                                         save: modelSave)
                 let model = CreateModelRequest(name: modelName,
+                                               cost: modelCost,
                                                minQuantity: modelMinQuantity,
                                                maxQuantity: modelMaxQuantity,
                                                weaponQuantity: modelWeaponQuantity,

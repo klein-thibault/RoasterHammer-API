@@ -7,6 +7,10 @@
             <label for="models_0_0" data-pattern-text="Model Name +=1:">Model Name 1</label>
             <input type="text" class="form-control" name="models[0][name]" id="models_0_name" data-pattern-name= "models[++][name]" data-pattern-id="models++_name"/>
         </div>
+        <div class="form-group">
+            <label for="models_0_0" data-pattern-text="Model Cost +=1:">Model Cost 1</label>
+            <input type="text" class="form-control" name="models[0][cost]" id="models_0_cost" data-pattern-name= "models[++][cost]" data-pattern-id="models++_cost"/>
+        </div>
         <div class="row">
             <div class="col">
                 <label for="models_0_0" data-pattern-text="Model Min Quantity +=1:">Model Min Quantity 1:</label>
