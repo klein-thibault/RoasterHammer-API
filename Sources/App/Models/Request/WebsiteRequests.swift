@@ -58,9 +58,15 @@ struct ArmyContext: Encodable {
     let units: [UnitResponse]
 }
 
-struct WeaponsContext: Encodable {
+struct WeaponsContext: WebContextTitle, Encodable {
     let title: String
     let weapons: [Weapon]
+}
+
+struct EditWeaponContext: WebContextTitle, Encodable {
+    let title: String
+    let weapon: Weapon
+    let editing: Bool = true
 }
 
 struct CreateWeaponContext: WebContextTitle, Encodable {

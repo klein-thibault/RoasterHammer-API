@@ -31,9 +31,26 @@ struct WebsiteWeaponController {
 
         return WeaponController()
             .createWeapon(request: newWeaponRequest, conn: req)
-            .map(to: Response.self, { _ in
-                return req.redirect(to: "/roasterhammer/weapons")
+            .transform(to: req.redirect(to: "/roasterhammer/weapons"))
+    }
+
+    func editWeaponHandler(_ req: Request) throws -> Future<View> {
+        let weaponId = try req.parameters.next(Int.self)
+
+        return WeaponController().getWeapon(byID: weaponId, conn: req)
+            .flatMap(to: View.self, { weapon in
+                let context = EditWeaponContext(title: "Edit Weapon", weapon: weapon)
+                return try req.view().render("createWeapon", context)
             })
+    }
+
+    func editWeaponPostHandler(_ req: Request,
+                               editWeaponRequest: CreateWeaponData) throws -> Future<Response> {
+        let weaponId = try req.parameters.next(Int.self)
+
+        return WeaponController()
+            .editWeapon(weaponId: weaponId, request: editWeaponRequest, conn: req)
+            .transform(to: req.redirect(to: "/roasterhammer/weapons"))
     }
 
 }

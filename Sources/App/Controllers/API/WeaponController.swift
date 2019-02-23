@@ -18,7 +18,7 @@ final class WeaponController {
 
     func getWeaponById(_ req: Request) throws -> Future<Weapon> {
         let weaponId = try req.parameters.next(Int.self)
-        return Weapon.find(weaponId, on: req).unwrap(or: RoasterHammerError.weaponIsMissing.error())
+        return getWeapon(byID: weaponId, conn: req)
     }
 
     func addWeaponToModel(_ req: Request) throws -> Future<UnitResponse> {
@@ -45,6 +45,15 @@ final class WeaponController {
         })
     }
 
+    func editWeapon(_ req: Request) throws -> Future<Weapon> {
+        let weaponId = try req.parameters.next(Int.self)
+
+        return try req.content.decode(CreateWeaponData.self)
+            .flatMap(to: Weapon.self, { request in
+                return self.editWeapon(weaponId: weaponId, request: request, conn: req)
+            })
+    }
+
     // MARK: - Utils Functions
 
     func weaponResponse(forWeapon weapon: Weapon,
@@ -67,6 +76,10 @@ final class WeaponController {
         return Weapon.query(on: conn).all()
     }
 
+    func getWeapon(byID id: Int, conn: DatabaseConnectable) -> Future<Weapon> {
+        return Weapon.find(id, on: conn).unwrap(or: RoasterHammerError.weaponIsMissing.error())
+    }
+
     func createWeapon(request: CreateWeaponRequest, conn: DatabaseConnectable) -> Future<Weapon> {
         return Weapon(name: request.name,
                       range: request.range,
@@ -77,6 +90,27 @@ final class WeaponController {
                       cost: request.cost,
                       ability: request.ability)
             .save(on: conn)
+    }
+
+    func editWeapon(weaponId: Int, request: CreateWeaponData, conn: DatabaseConnectable) -> Future<Weapon> {
+        return Weapon.find(weaponId, on: conn)
+        .unwrap(or: RoasterHammerError.weaponIsMissing.error())
+            .flatMap(to: Weapon.self, { weapon in
+                guard let cost = request.cost.intValue else {
+                    throw Abort(.badRequest)
+                }
+
+                weapon.name = request.name
+                weapon.range = request.range
+                weapon.type = request.type
+                weapon.strength = request.strength
+                weapon.armorPiercing = request.armorPiercing
+                weapon.damage = request.damage
+                weapon.cost = cost
+                weapon.ability = request.ability
+
+                return weapon.save(on: conn)
+            })
     }
 
 }

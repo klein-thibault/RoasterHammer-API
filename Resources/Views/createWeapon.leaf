@@ -3,45 +3,45 @@
 <form method="post">
     <div class="form-group">
         <label for="short">Name</label>
-        <input type="text" name="name" class="form-control" id="weapon-name"/>
+        <input type="text" name="name" class="form-control" id="weapon-name" #if(editing) { value="#(weapon.name)" }/>
     </div>
     <div class="form-group">
         <label for="short">Range</label>
-        <input type="text" name="range" class="form-control" id="weapon-range"/>
+        <input type="text" name="range" class="form-control" id="weapon-range" #if(editing) { value="#(weapon.range)" }/>
         <small id="weaponRangeHelp" class="form-text text-muted">e.g. 24"</small>
     </div>
     <div class="form-group">
         <label for="short">Type</label>
-        <input type="text" name="type" class="form-control" id="weapon-type"/>
+        <input type="text" name="type" class="form-control" id="weapon-type" #if(editing) { value="#(weapon.type)" }/>
         <small id="weaponTypeHelp" class="form-text text-muted">e.g. Pistol 1</small>
     </div>
     <div class="form-group">
         <label for="short">Strength</label>
-        <input type="text" name="strength" class="form-control" id="weapon-strength"/>
+        <input type="text" name="strength" class="form-control" id="weapon-strength" #if(editing) { value="#(weapon.strength)" }/>
         <small id="weaponStrengthHelp" class="form-text text-muted">e.g. 4</small>
     </div>
     <div class="form-group">
         <label for="short">Armor Piercing</label>
-        <input type="text" name="armorPiercing" class="form-control" id="weapon-armorPiercing"/>
+        <input type="text" name="armorPiercing" class="form-control" id="weapon-armorPiercing" #if(editing) { value="#(weapon.armorPiercing)" }/>
         <small id="weaponArmorPiercingHelp" class="form-text text-muted">e.g. -1</small>
     </div>
     <div class="form-group">
         <label for="short">Damage</label>
-        <input type="text" name="damage" class="form-control" id="weapon-damage"/>
+        <input type="text" name="damage" class="form-control" id="weapon-damage" #if(editing) { value="#(weapon.damage)" }/>
         <small id="weaponDamageHelp" class="form-text text-muted">e.g. 1</small>
     </div>
     <div class="form-group">
         <label for="short">Cost</label>
-        <input type="text" name="cost" class="form-control" id="weapon-cost"/>
+        <input type="text" name="cost" class="form-control" id="weapon-cost" #if(editing) { value="#(weapon.cost)" }/>
     </div>
     <div class="form-group">
         <label for="short">Ability</label>
-        <input type="text" name="ability" class="form-control" id="weapon-ability"/>
+        <input type="text" name="ability" class="form-control" id="weapon-ability" #if(editing) { value="#(weapon.ability)" }/>
     </div>
 
 
     <button type="submit" class="btn btn-primary">
-        Submit
+        #if(editing) { Update } else { Submit }
     </button>
 </form>
 }

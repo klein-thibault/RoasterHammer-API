@@ -11,6 +11,7 @@
             <th>D</th>
             <th>Cost</th>
             <th>Ability</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -24,6 +25,12 @@
             <td>#(weapon.damage)</td>
             <td>#(weapon.cost)</td>
             <td>#(weapon.ability)</td>
+            <td>
+                <form method="post" action="/roasterhammer/weapons/#(weapon.id)/delete">
+                    <a class="btn btn-primary" href="/roasterhammer/weapons/#(weapon.id)/edit" role="button">Edit</a>
+                    <input class="btn btn-danger" type="submit" value="Delete"/>
+                </form>
+            </td>
         </tr>
         }
     </tbody>

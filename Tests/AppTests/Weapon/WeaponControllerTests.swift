@@ -65,4 +65,29 @@ class WeaponControllerTests: BaseTests {
         XCTAssertEqual(modelWithWeapon.weapons[0].maxQuantity, 1)
     }
 
+    func testEditWeapon() throws {
+        let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
+        let editWeaponRequest = CreateWeaponData(name: "New Name",
+                                                 range: "New Range",
+                                                 type: "New Type",
+                                                 strength: "New S",
+                                                 armorPiercing: "New AP",
+                                                 damage: "New D",
+                                                 cost: "100",
+                                                 ability: "New ability")
+        let editedWeapon = try app.getResponse(to: "weapons/\(weapon.requireID())",
+            method: .PATCH,
+            headers: ["Content-Type": "application/json"],
+            data: editWeaponRequest,
+            decodeTo: Weapon.self)
+        XCTAssertEqual(editedWeapon.name, editWeaponRequest.name)
+        XCTAssertEqual(editedWeapon.range, editWeaponRequest.range)
+        XCTAssertEqual(editedWeapon.type, editWeaponRequest.type)
+        XCTAssertEqual(editedWeapon.strength, editWeaponRequest.strength)
+        XCTAssertEqual(editedWeapon.armorPiercing, editWeaponRequest.armorPiercing)
+        XCTAssertEqual(editedWeapon.damage, editWeaponRequest.damage)
+        XCTAssertEqual(editedWeapon.cost, editWeaponRequest.cost.intValue)
+        XCTAssertEqual(editedWeapon.ability, editWeaponRequest.ability)
+    }
+
 }
