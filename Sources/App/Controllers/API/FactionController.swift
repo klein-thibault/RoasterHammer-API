@@ -87,10 +87,8 @@ final class FactionController {
     func deleteFaction(factionId: Int, conn: DatabaseConnectable) -> Future<HTTPStatus> {
         return Faction.find(factionId, on: conn)
             .unwrap(or: RoasterHammerError.factionIsMissing.error())
-            .flatMap(to: HTTPStatus.self) { faction in
-                return faction.delete(on: conn)
-                    .transform(to: HTTPStatus.ok)
-        }
+            .delete(on: conn)
+            .transform(to: HTTPStatus.ok)
     }
 
     // MARK: - Private Functions

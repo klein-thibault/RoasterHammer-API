@@ -53,4 +53,11 @@ struct WebsiteWeaponController {
             .transform(to: req.redirect(to: "/roasterhammer/weapons"))
     }
 
+    func deleteWeaponHandler(_ req: Request) throws -> Future<Response> {
+        let weaponId = try req.parameters.next(Int.self)
+        return WeaponController()
+        .deleteWeapon(weaponId: weaponId, conn: req)
+        .transform(to: req.redirect(to: "/roasterhammer/weapons"))
+    }
+
 }

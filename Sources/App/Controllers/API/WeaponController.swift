@@ -54,6 +54,11 @@ final class WeaponController {
             })
     }
 
+    func deleteWeapon(_ req: Request) throws -> Future<HTTPStatus> {
+        let weaponId = try req.parameters.next(Int.self)
+        return deleteWeapon(weaponId: weaponId, conn: req)
+    }
+
     // MARK: - Utils Functions
 
     func weaponResponse(forWeapon weapon: Weapon,
@@ -111,6 +116,13 @@ final class WeaponController {
 
                 return weapon.save(on: conn)
             })
+    }
+
+    func deleteWeapon(weaponId: Int, conn: DatabaseConnectable) -> Future<HTTPStatus> {
+        return Weapon.find(weaponId, on: conn)
+            .unwrap(or: RoasterHammerError.weaponIsMissing.error())
+            .delete(on: conn)
+            .transform(to: HTTPStatus.ok)
     }
 
 }

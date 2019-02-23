@@ -90,4 +90,18 @@ class WeaponControllerTests: BaseTests {
         XCTAssertEqual(editedWeapon.ability, editWeaponRequest.ability)
     }
 
+    func testDeleteWeapon() throws {
+        let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
+        let weaponId = try weapon.requireID()
+        _ = try app.sendRequest(to: "weapons/\(weaponId)", method: .DELETE)
+
+        do {
+            _ = try app.getResponse(to: "weapons/\(weaponId)", decodeTo: Weapon.self)
+            XCTFail("Should have received a missing army error")
+        } catch {
+            print(error)
+            XCTAssertNotNil(error)
+        }
+    }
+
 }

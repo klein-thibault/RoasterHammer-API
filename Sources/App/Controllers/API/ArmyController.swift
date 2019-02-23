@@ -102,12 +102,8 @@ final class ArmyController {
     func deleteArmy(armyId: Int, conn: DatabaseConnectable) -> Future<HTTPStatus> {
         return Army.find(armyId, on: conn)
             .unwrap(or: RoasterHammerError.armyIsMissing)
-            .flatMap(to: HTTPStatus.self, { army in
-                return army.delete(on: conn)
-                    .map(to: HTTPStatus.self, { _ in
-                        return .ok
-                    })
-            })
+            .delete(on: conn)
+            .transform(to: HTTPStatus.ok)
     }
 
     // MARK: - Private Functions
