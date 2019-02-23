@@ -21,7 +21,7 @@ struct UnitResponse: Content {
          rules: [Rule]) throws {
         self.id = try unit.requireID()
         self.name = unit.name
-        self.cost = models.reduce(0) { $0 + $1.cost } + models.flatMap({ $0.weapons }).reduce(0) { $0 + $1.cost }
+        self.cost = models.reduce(0) { $0 + $1.cost }
         self.isUnique = unit.isUnique
         self.minQuantity = unit.minQuantity
         self.maxQuantity = unit.maxQuantity
