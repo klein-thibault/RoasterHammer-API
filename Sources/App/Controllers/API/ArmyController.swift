@@ -1,5 +1,6 @@
 import Vapor
 import FluentPostgreSQL
+import RoasterhammerShared
 
 final class ArmyController {
 
@@ -66,7 +67,9 @@ final class ArmyController {
             return try factions.map { try factionController.factionResponse(faction: $0, conn: conn) }
                 .flatten(on: conn)
                 .map(to: ArmyResponse.self, { factions in
-                    return try ArmyResponse(army: army, factions: factions, rules: rules)
+                    let armyDTO = ArmyDTO(id: try army.requireID(), name: army.name)
+                    let rulesResponse = RuleController().rulesResponse(forRules: rules)
+                    return ArmyResponse(army: armyDTO, factions: factions, rules: rulesResponse)
                 })
         })
     }

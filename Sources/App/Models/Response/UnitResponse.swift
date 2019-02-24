@@ -1,4 +1,5 @@
 import Vapor
+import RoasterhammerShared
 
 struct UnitResponse: Content {
     let id: Int

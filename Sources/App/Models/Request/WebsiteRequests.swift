@@ -1,4 +1,5 @@
 import Vapor
+import RoasterhammerShared
 
 typealias DynamicFormData = [String: [String: String]]
 

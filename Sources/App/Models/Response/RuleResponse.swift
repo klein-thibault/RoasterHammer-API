@@ -1,4 +1,4 @@
 import Vapor
 import RoasterhammerShared
 
-extension ArmyResponse: Content { }
+extension RuleResponse: Content { }

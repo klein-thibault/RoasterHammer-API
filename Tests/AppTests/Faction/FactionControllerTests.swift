@@ -2,6 +2,7 @@
 import XCTest
 import Vapor
 import FluentPostgreSQL
+import RoasterhammerShared
 
 class FactionControllerTests: BaseTests {
 

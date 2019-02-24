@@ -1,5 +1,6 @@
 import Vapor
 import FluentPostgreSQL
+import RoasterhammerShared
 
 final class FactionController {
 
@@ -38,7 +39,9 @@ final class FactionController {
     func factionResponse(faction: Faction, conn: DatabaseConnectable) throws -> Future<FactionResponse> {
         return try faction.rules.query(on: conn).all()
             .map(to: FactionResponse.self, { rules in
-                return try FactionResponse(faction: faction, rules: rules)
+                let rulesResponse = RuleController().rulesResponse(forRules: rules)
+                let factionDTO = FactionDTO(id: try faction.requireID(), name: faction.name)
+                return try FactionResponse(faction: factionDTO, rules: rulesResponse)
             })
     }
 
