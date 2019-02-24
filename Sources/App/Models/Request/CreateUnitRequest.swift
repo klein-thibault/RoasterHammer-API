@@ -1,5 +1,7 @@
 import Vapor
 
+typealias KeywordName = String
+
 struct CreateUnitRequest: Content {
     let name: String
     let isUnique: Bool
@@ -8,7 +10,7 @@ struct CreateUnitRequest: Content {
     let unitTypeId: Int
     let armyId: Int
     let models: [CreateModelRequest]
-    let keywords: [String]
+    let keywords: [KeywordName]
     let rules: [AddRuleRequest]
 
     init(name: String,
@@ -18,7 +20,7 @@ struct CreateUnitRequest: Content {
          unitTypeId: Int,
          armyId: Int,
          models: [CreateModelRequest],
-         keywords: [String],
+         keywords: [KeywordName],
          rules: [AddRuleRequest]) {
         self.name = name
         self.isUnique = isUnique

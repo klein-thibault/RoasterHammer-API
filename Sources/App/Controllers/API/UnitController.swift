@@ -19,6 +19,17 @@ final class UnitController {
         let filters = try req.query.decode(UnitFilters.self)
         return getUnits(armyId: filters.armyId, conn: req)
     }
+
+    func editUnit(_ req: Request) throws -> Future<UnitResponse> {
+        let unitId = try req.parameters.next(Int.self)
+        return try req.content.decode(CreateUnitRequest.self)
+            .flatMap(to: Unit.self, { request in
+                return self.editUnit(unitId: unitId, request: request, conn: req)
+            })
+            .flatMap(to: UnitResponse.self, { unit in
+                return try self.unitResponse(forUnit: unit, conn: req)
+            })
+    }
     
     func addUnitToDetachmentUnitRole(_ req: Request) throws -> Future<DetachmentResponse> {
         _ = try req.requireAuthenticated(Customer.self)
@@ -111,6 +122,14 @@ final class UnitController {
                 .map { try self.unitResponse(forUnit: $0, conn: conn) }
                 .flatten(on: conn)
         })
+    }
+
+    func getUnit(byID id: Int, conn: DatabaseConnectable) -> Future<UnitResponse> {
+        return Unit.find(id, on: conn)
+            .unwrap(or: RoasterHammerError.unitIsMissing.error())
+            .flatMap(to: UnitResponse.self, { unit in
+                return try self.unitResponse(forUnit: unit, conn: conn)
+            })
     }
 
     func selectedModelResponse(forSelectedModel selectedModel: SelectedModel,
@@ -229,6 +248,36 @@ final class UnitController {
             })
     }
 
+    func editUnit(unitId: Int, request: CreateUnitRequest, conn: DatabaseConnectable) -> Future<Unit> {
+        return Unit.find(unitId, on: conn)
+            .unwrap(or: RoasterHammerError.unitIsMissing.error())
+            .flatMap(to: Unit.self, { unit in
+                unit.name = request.name
+                unit.isUnique = request.isUnique
+                unit.minQuantity = request.minQuantity
+                unit.maxQuantity = request.maxQuantity
+                unit.unitTypeId = request.unitTypeId
+                unit.armyId = request.armyId
+
+                return unit.save(on: conn)
+            })
+            .flatMap(to: Unit.self, { unit in
+                return self.editRules(forUnit: unit,
+                                      updatedRules: request.rules,
+                                      conn: conn)
+            })
+            .flatMap(to: Unit.self, { unit in
+                return self.editKeywords(forUnit: unit,
+                                         updatedKeywords: request.keywords,
+                                         conn: conn)
+            })
+            .flatMap(to: Unit.self, { unit in
+                return self.editModels(forUnit: unit,
+                                       updatedModels: request.models,
+                                       conn: conn)
+            })
+    }
+
     // MARK: - Private Functions
 
     private func createModels(forUnit unit: Unit,
@@ -285,7 +334,7 @@ final class UnitController {
     }
 
     private func createKeywords(forUnit unit: Unit,
-                                keywords: [String],
+                                keywords: [KeywordName],
                                 conn: DatabaseConnectable) -> Future<Unit> {
         let keywordsFuture = keywords.map { Keyword(name: $0).save(on: conn) }.flatten(on: conn)
         return keywordsFuture
@@ -309,6 +358,42 @@ final class UnitController {
             })
             .map(to: Unit.self, { _ in
                 return unit
+            })
+    }
+
+    private func editModels(forUnit unit: Unit,
+                            updatedModels: [CreateModelRequest],
+                            conn: DatabaseConnectable) -> Future<Unit> {
+        return unit.models
+            .detachAll(on: conn)
+            .flatMap(to: Unit.self, { _ in
+                return try self.createModels(forUnit: unit,
+                                             request: updatedModels,
+                                             conn: conn)
+            })
+    }
+
+    private func editKeywords(forUnit unit: Unit,
+                              updatedKeywords: [KeywordName],
+                              conn: DatabaseConnectable) -> Future<Unit> {
+        return unit.keywords
+            .detachAll(on: conn)
+            .flatMap(to: Unit.self, { _ in
+                return self.createKeywords(forUnit: unit,
+                                           keywords: updatedKeywords,
+                                           conn: conn)
+            })
+    }
+
+    private func editRules(forUnit unit: Unit,
+                           updatedRules: [AddRuleRequest],
+                           conn: DatabaseConnectable) -> Future<Unit> {
+        return unit.rules
+            .detachAll(on: conn)
+            .flatMap(to: Unit.self, { _ in
+                return self.createRules(forUnit: unit,
+                                        rules: updatedRules,
+                                        conn: conn)
             })
     }
 

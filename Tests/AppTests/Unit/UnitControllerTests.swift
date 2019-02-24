@@ -60,6 +60,67 @@ class UnitControllerTests: BaseTests {
         XCTAssertEqual(units.count, 0)
     }
 
+    func testEditUnit() throws {
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, army2) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+        let editedCharacteristics = CreateCharacteristicsRequest(movement: "New Movement",
+                                                                 weaponSkill: "New Weapon Skill",
+                                                                 balisticSkill: "New Balistic Skill",
+                                                                 strength: "New Strength",
+                                                                 toughness: "New Toughness",
+                                                                 wounds: "New Wounds",
+                                                                 attacks: "New Attack",
+                                                                 leadership: "New Ld",
+                                                                 save: "New Save")
+        let editModelRequest = CreateModelRequest(name: "New Model Name",
+                                                  cost: 999,
+                                                  minQuantity: 9,
+                                                  maxQuantity: 999,
+                                                  weaponQuantity: 9,
+                                                  characteristics: editedCharacteristics)
+        let editedRuleRequest = AddRuleRequest(name: "New Rule Name", description: "New Rule Desc")
+        let editUnitRequest = CreateUnitRequest(name: "New Name",
+                                                isUnique: false,
+                                                minQuantity: 9,
+                                                maxQuantity: 999,
+                                                unitTypeId: 3,
+                                                armyId: army2.id!,
+                                                models: [editModelRequest],
+                                                keywords: ["New Keyword Name"],
+                                                rules: [editedRuleRequest])
+        let editedUnit = try app.getResponse(to: "units/\(unit.id)",
+            method: .PATCH,
+            headers: ["Content-Type": "application/json"],
+            data: editUnitRequest,
+            decodeTo: UnitResponse.self)
+
+        let modelCharacteristics = editedUnit.models[0].characteristics
+        XCTAssertNotNil(editedUnit.id)
+        XCTAssertEqual(editedUnit.name, editUnitRequest.name)
+        XCTAssertEqual(editedUnit.minQuantity, editUnitRequest.minQuantity)
+        XCTAssertEqual(editedUnit.maxQuantity, editUnitRequest.maxQuantity)
+        XCTAssertEqual(editedUnit.models[0].weaponQuantity, editUnitRequest.models[0].weaponQuantity)
+        XCTAssertEqual(editedUnit.isUnique, editUnitRequest.isUnique)
+        XCTAssertEqual(editedUnit.unitType, "Elite")
+        XCTAssertEqual(editedUnit.cost, 999)
+        XCTAssertEqual(editedUnit.models[0].cost, editUnitRequest.models[0].cost)
+        XCTAssertEqual(modelCharacteristics.movement, editModelRequest.characteristics.movement)
+        XCTAssertEqual(modelCharacteristics.weaponSkill, editModelRequest.characteristics.weaponSkill)
+        XCTAssertEqual(modelCharacteristics.balisticSkill, editModelRequest.characteristics.balisticSkill)
+        XCTAssertEqual(modelCharacteristics.strength, editModelRequest.characteristics.strength)
+        XCTAssertEqual(modelCharacteristics.toughness, editModelRequest.characteristics.toughness)
+        XCTAssertEqual(modelCharacteristics.wounds, editModelRequest.characteristics.wounds)
+        XCTAssertEqual(modelCharacteristics.attacks, editModelRequest.characteristics.attacks)
+        XCTAssertEqual(modelCharacteristics.leadership, editModelRequest.characteristics.leadership)
+        XCTAssertEqual(modelCharacteristics.save, editModelRequest.characteristics.save)
+        XCTAssertEqual(editedUnit.keywords.count, editUnitRequest.keywords.count)
+        XCTAssertEqual(editedUnit.keywords[0], editUnitRequest.keywords[0])
+        XCTAssertEqual(editedUnit.rules.count, 1)
+        XCTAssertEqual(editedUnit.rules[0].name, editUnitRequest.rules[0].name)
+        XCTAssertEqual(editedUnit.rules[0].description, editUnitRequest.rules[0].description)
+    }
+
     func testAddUnitToDetachment() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)

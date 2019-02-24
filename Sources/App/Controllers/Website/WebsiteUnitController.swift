@@ -25,37 +25,66 @@ struct WebsiteUnitController {
     }
 
     func createUnitPostHandler(_ req: Request,
-                               createUnitRequest: CreateUnitData) throws -> Future<Response> {
-        guard let minQuantity = createUnitRequest.unitMinQuantity.intValue,
-            let maxQuantity = createUnitRequest.unitMaxQuantity.intValue,
-            let unitTypeId = createUnitRequest.unitTypeId.intValue,
-            let armyId = createUnitRequest.armyId.intValue else {
-                throw Abort(.badRequest)
-        }
-
-        let isUnique = createUnitRequest.isUniqueCheckbox?.isCheckboxOn ?? false
-        let keywords: [String] = createUnitRequest.keywords ?? []
-        let models = addModelRequest(forModelData: createUnitRequest.models)
-        let rules = WebRequestUtils().addRuleRequest(forRuleData: createUnitRequest.rules)
-
-        let newUnitRequest = CreateUnitRequest(name: createUnitRequest.unitName,
-                                               isUnique: isUnique,
-                                               minQuantity: Int(minQuantity),
-                                               maxQuantity: Int(maxQuantity),
-                                               unitTypeId: Int(unitTypeId),
-                                               armyId: Int(armyId),
-                                               models: models,
-                                               keywords: keywords,
-                                               rules: rules)
+                               createUnitData: CreateUnitData) throws -> Future<Response> {
+        let newUnitRequest = try createUnitRequest(forData: createUnitData)
 
         return UnitController()
             .createUnit(request: newUnitRequest, conn: req)
-            .map(to: Response.self, { _ in
-                return req.redirect(to: "/roasterhammer/units")
-            })
+            .transform(to: req.redirect(to: "/roasterhammer/units"))
+    }
+
+    func editUnitHandler(_ req: Request) throws -> Future<View> {
+        let unitId = try req.parameters.next(Int.self)
+
+        let armiesFuture = try ArmyController().getAllArmies(conn: req)
+        let unitTypesFuture = UnitTypeController().getAllUnitTypes(conn: req)
+        let unitFuture = UnitController().getUnit(byID: unitId, conn: req)
+
+        return flatMap(to: View.self,
+                       armiesFuture,
+                       unitTypesFuture,
+                       unitFuture, { (armies, unitTypes, unit) in
+                        let context = EditUnitContext(title: "Edit Unit",
+                                                      unit: unit,
+                                                      armies: armies,
+                                                      unitTypes: unitTypes)
+                        return try req.view().render("createUnit", context)
+        })
+    }
+
+    func editUnitPostHandler(_ req: Request, editUnitRequest: CreateUnitData) throws -> Future<Response> {
+        let unitId = try req.parameters.next(Int.self)
+        let editUnitRequest = try createUnitRequest(forData: editUnitRequest)
+        return UnitController()
+            .editUnit(unitId: unitId, request: editUnitRequest, conn: req)
+            .transform(to: req.redirect(to: "/roasterhammer/units"))
     }
 
     // MARK: - Private Functions
+
+    private func createUnitRequest(forData data: CreateUnitData) throws -> CreateUnitRequest {
+        guard let minQuantity = data.unitMinQuantity.intValue,
+            let maxQuantity = data.unitMaxQuantity.intValue,
+            let unitTypeId = data.unitTypeId.intValue,
+            let armyId = data.armyId.intValue else {
+                throw Abort(.badRequest)
+        }
+
+        let isUnique = data.isUniqueCheckbox?.isCheckboxOn ?? false
+        let keywords: [String] = data.keywords ?? []
+        let models = addModelRequest(forModelData: data.models)
+        let rules = WebRequestUtils().addRuleRequest(forRuleData: data.rules)
+
+        return CreateUnitRequest(name: data.unitName,
+                                               isUnique: isUnique,
+                                               minQuantity: minQuantity,
+                                               maxQuantity: maxQuantity,
+                                               unitTypeId: unitTypeId,
+                                               armyId: armyId,
+                                               models: models,
+                                               keywords: keywords,
+                                               rules: rules)
+    }
 
     private func addModelRequest(forModelData modelData: DynamicFormData) -> [CreateModelRequest] {
         var models: [CreateModelRequest] = []

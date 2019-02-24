@@ -68,6 +68,7 @@ public func routes(_ router: Router) throws {
     let unitController = UnitController()
     router.post("units", use: unitController.createUnit)
     router.get("units", use: unitController.units)
+    router.patch("units", Int.parameter, use: unitController.editUnit)
     protectedAuthRouter.post("detachments",
                              Int.parameter,
                              "roles",
@@ -108,6 +109,10 @@ public func routes(_ router: Router) throws {
     router.post(CreateUnitData.self,
                 at: "roasterhammer", "units", "create",
                 use: websiteUnitController.createUnitPostHandler)
+    router.get("roasterhammer", "units", Int.parameter, "edit", use: websiteUnitController.editUnitHandler)
+    router.post(CreateUnitData.self,
+                at: "roasterhammer", "units", Int.parameter, "edit",
+                use: websiteUnitController.editUnitPostHandler)
     // - Weapons
     let websiteWeaponController = WebsiteWeaponController()
     router.get("roasterhammer", "weapons", use: websiteWeaponController.weaponsHandler)

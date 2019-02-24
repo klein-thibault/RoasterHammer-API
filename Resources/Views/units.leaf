@@ -7,6 +7,7 @@
             <th>Name</th>
             <th>Type</th>
             <th>Cost</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -15,6 +16,12 @@
             <td>#(unit.name)</td>
             <td>#(unit.unitType)</td>
             <td>#(unit.cost)</td>
+            <td>
+                <form method="post" action="/roasterhammer/units/#(unit.id)/delete">
+                    <a class="btn btn-primary" href="/roasterhammer/units/#(unit.id)/edit" role="button">Edit</a>
+                    <input class="btn btn-danger" type="submit" value="Delete"/>
+                </form>
+            </td>
         </tr>
         }
     </tbody>
