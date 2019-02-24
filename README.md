@@ -1,1 +1,5 @@
 # RoasterHammer
+
+## Authors
+
+* Thibault Klein
