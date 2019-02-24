@@ -30,6 +30,11 @@ final class UnitController {
                 return try self.unitResponse(forUnit: unit, conn: req)
             })
     }
+
+    func deleteUnit(_ req: Request) throws -> Future<HTTPStatus> {
+        let unitId = try req.parameters.next(Int.self)
+        return deleteUnit(unitId: unitId, conn: req)
+    }
     
     func addUnitToDetachmentUnitRole(_ req: Request) throws -> Future<DetachmentResponse> {
         _ = try req.requireAuthenticated(Customer.self)
@@ -276,6 +281,25 @@ final class UnitController {
                                        updatedModels: request.models,
                                        conn: conn)
             })
+    }
+
+    func deleteUnit(unitId: Int, conn: DatabaseConnectable) -> Future<HTTPStatus> {
+        return Unit.find(unitId, on: conn)
+            .unwrap(or: RoasterHammerError.unitIsMissing.error())
+            .flatMap(to: Unit.self, { unit in
+                return try unit.models.query(on: conn).all()
+                    .flatMap(to: Unit.self, { (models) -> EventLoopFuture<Unit> in
+                        return models.map { $0.delete(on: conn) }
+                            .flatten(on: conn)
+                            .map(to: Unit.self, { _ in
+                                return unit
+                            })
+                    })
+            })
+            .flatMap({ unit in
+                return unit.delete(on: conn)
+            })
+            .transform(to: .ok)
     }
 
     // MARK: - Private Functions

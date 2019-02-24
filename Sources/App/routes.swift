@@ -113,6 +113,7 @@ public func routes(_ router: Router) throws {
     router.post(CreateUnitData.self,
                 at: "roasterhammer", "units", Int.parameter, "edit",
                 use: websiteUnitController.editUnitPostHandler)
+    router.post("roasterhammer", "units", Int.parameter, "delete", use: websiteUnitController.deleteUnitHandler)
     // - Weapons
     let websiteWeaponController = WebsiteWeaponController()
     router.get("roasterhammer", "weapons", use: websiteWeaponController.weaponsHandler)

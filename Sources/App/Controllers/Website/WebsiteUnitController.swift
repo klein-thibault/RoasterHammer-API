@@ -60,6 +60,13 @@ struct WebsiteUnitController {
             .transform(to: req.redirect(to: "/roasterhammer/units"))
     }
 
+    func deleteUnitHandler(_ req: Request) throws -> Future<Response> {
+        let unitId = try req.parameters.next(Int.self)
+        return UnitController()
+            .deleteUnit(unitId: unitId, conn: req)
+            .transform(to: req.redirect(to: "/roasterhammer/units"))
+    }
+
     // MARK: - Private Functions
 
     private func createUnitRequest(forData data: CreateUnitData) throws -> CreateUnitRequest {

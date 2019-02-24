@@ -121,6 +121,21 @@ class UnitControllerTests: BaseTests {
         XCTAssertEqual(editedUnit.rules[0].description, editUnitRequest.rules[0].description)
     }
 
+    func testDeleteUnit() throws {
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+
+        _ = try app.sendRequest(to: "units/\(unit.id)", method: .DELETE)
+
+        do {
+            _ = try app.getResponse(to: "units/\(unit.id)", decodeTo: UnitResponse.self)
+            XCTFail("Should have received a missing army error")
+        } catch {
+            print(error)
+            XCTAssertNotNil(error)
+        }
+    }
+
     func testAddUnitToDetachment() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
