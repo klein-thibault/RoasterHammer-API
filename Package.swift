@@ -1,4 +1,4 @@
-// swift-tools-version:4.0
+// swift-tools-version:4.2
 import PackageDescription
 
 let package = Package(
@@ -16,12 +16,14 @@ let package = Package(
         // Web templating language framework package
         .package(url: "https://github.com/vapor/leaf.git", from: "3.0.2"),
 
+        .package(url: "https://github.com/klein-thibault/RoasterHammer-Shared.git", from: "0.0.3")
+
         // Neo4j Database client
         // .package(url: "https://github.com/Neo4j-Swift/Neo4j-Swift.git", from: "4.0.2")
     ],
     targets: [
-        //.target(name: "App", dependencies: ["FluentPostgreSQL", "Vapor", "Authentication", "Leaf", "Theo"]),
-        .target(name: "App", dependencies: ["FluentPostgreSQL", "Vapor", "Authentication", "Leaf"]),
+        //.target(name: "App", dependencies: ["FluentPostgreSQL", "Vapor", "Authentication", "Leaf", "RoasterHammer-Shared", "Theo"]),
+        .target(name: "App", dependencies: ["FluentPostgreSQL", "Vapor", "Authentication", "Leaf", "RoasterHammer-Shared"]),
         .target(name: "Run", dependencies: ["App"]),
         .testTarget(name: "AppTests", dependencies: ["App"])
     ]

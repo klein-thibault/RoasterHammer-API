@@ -1,4 +1,5 @@
 import Vapor
+import RoasterHammer_Shared
 
 struct DetachmentResponse: Content {
     let id: Int

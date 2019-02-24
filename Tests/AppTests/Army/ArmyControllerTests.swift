@@ -2,6 +2,7 @@
 import XCTest
 import Vapor
 import FluentPostgreSQL
+import RoasterHammer_Shared
 
 class ArmyControllerTests: BaseTests {
 
