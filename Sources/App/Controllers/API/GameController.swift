@@ -1,5 +1,6 @@
 import Vapor
 import FluentPostgreSQL
+import RoasterHammer_Shared
 
 final class GameController {
 
@@ -14,8 +15,7 @@ final class GameController {
                 })
             })
             .flatMap(to: GameResponse.self, { game in
-                let response = try GameResponse(game: game, roasters: [], rules: [])
-                return req.future(response)
+                return try self.gameResponse(forGame: game, conn: req)
             })
     }
 
@@ -57,7 +57,11 @@ final class GameController {
                 .flatten(on: conn)
 
             return roasterResponses.map(to: GameResponse.self, { roasters in
-                return try GameResponse(game: game, roasters: roasters, rules: rules)
+                let gameDTO = GameDTO(id: try game.requireID(),
+                                      name: game.name,
+                                      version: game.version)
+                let rulesResponse = RuleController().rulesResponse(forRules: rules)
+                return GameResponse(game: gameDTO, roasters: roasters, rules: rulesResponse)
             })
         })
     }

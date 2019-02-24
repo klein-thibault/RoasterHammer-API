@@ -1,5 +1,6 @@
 import Vapor
 import FluentPostgreSQL
+import RoasterHammer_Shared
 
 final class UnitController {
     
@@ -142,17 +143,30 @@ final class UnitController {
         let modelFuture = Model
             .find(selectedModel.modelId, on: conn)
             .unwrap(or: RoasterHammerError.modelIsMissing.error())
+        let modelResponseFuture = Model
+            .find(selectedModel.modelId, on: conn)
+            .unwrap(or: RoasterHammerError.modelIsMissing.error())
             .flatMap(to: ModelResponse.self) { model in
                 return try self.modelResponse(forModel: model, conn: conn)
         }
         let selectedWeaponsFuture = try selectedModel.weapons.query(on: conn).all()
 
-        return map(to: SelectedModelResponse.self,
-                   modelFuture,
-                   selectedWeaponsFuture, { model, weapons in
-                    return try SelectedModelResponse(selectedModel: selectedModel,
-                                                     model: model,
-                                                     selectedWeapons: weapons)
+        return flatMap(to: SelectedModelResponse.self,
+                       modelFuture,
+                       modelResponseFuture,
+                       selectedWeaponsFuture, { model, modelResponse, weapons in
+                        let weaponController = WeaponController()
+                        let weaponsResponseFuture = try weapons.map { try weaponController.weaponResponse(forWeapon: $0,
+                                                                                                          model: model,
+                                                                                                          conn: conn) }
+                            .flatten(on: conn)
+
+                        return weaponsResponseFuture.map(to: SelectedModelResponse.self, { weapons in
+                            let selectedModelDTO = SelectedModelDTO(id: try selectedModel.requireID())
+                            return SelectedModelResponse(selectedModel: selectedModelDTO,
+                                                         model: modelResponse,
+                                                         selectedWeapons: weapons)
+                        })
         })
     }
     
@@ -172,9 +186,10 @@ final class UnitController {
                                                                                        conn: conn) }
                             .flatten(on: conn)
                             .map(to: SelectedUnitResponse.self, { selectedModels in
-                                return try SelectedUnitResponse(selectedUnit: selectedUnit,
-                                                                unit: unit,
-                                                                models: selectedModels)
+                                let selectedUnitDTO = SelectedUnitDTO(id: try selectedUnit.requireID())
+                                return SelectedUnitResponse(selectedUnit: selectedUnitDTO,
+                                                            unit: unit,
+                                                            models: selectedModels)
                             })
         })
     }
@@ -199,12 +214,18 @@ final class UnitController {
                             .map(to: UnitResponse.self, { modelResponses in
                                 let keywordStrings = keywords.map { $0.name }
                                 let unitTypeString = unitType.name
-                                return try UnitResponse(unit: unit,
-                                                        unitType: unitTypeString,
-                                                        army: army,
-                                                        models: modelResponses,
-                                                        keywords: keywordStrings,
-                                                        rules: rules)
+                                let unitDTO = UnitDTO(id: try unit.requireID(),
+                                                      name: unit.name,
+                                                      isUnique: unit.isUnique,
+                                                      minQuantity: unit.minQuantity,
+                                                      maxQuantity: unit.maxQuantity)
+                                let rulesResponse = RuleController().rulesResponse(forRules: rules)
+                                return UnitResponse(unit: unitDTO,
+                                                    unitType: unitTypeString,
+                                                    army: army,
+                                                    models: modelResponses,
+                                                    keywords: keywordStrings,
+                                                    rules: rulesResponse)
                             })
         }
     }
@@ -221,9 +242,26 @@ final class UnitController {
                             .map { try weaponController.weaponResponse(forWeapon: $0, model: model, conn: conn) }
                             .flatten(on: conn)
                             .map(to: ModelResponse.self, { (weaponResponses) in
-                                return try ModelResponse(model: model,
-                                                         characteristics: characteristics,
-                                                         weapons: weaponResponses)
+                                let modelDTO = ModelDTO(id: try model.requireID(),
+                                                        name: model.name,
+                                                        cost: model.cost,
+                                                        minQuantity: model.minQuantity,
+                                                        maxQuantity: model.maxQuantity,
+                                                        weaponQuantity: model.weaponQuantity)
+                                let characteristicsDTO = CharacteristicsDTO(id: try characteristics.requireID(),
+                                                                            movement: characteristics.movement,
+                                                                            weaponSkill: characteristics.weaponSkill,
+                                                                            balisticSkill: characteristics.balisticSkill,
+                                                                            strength: characteristics.strength,
+                                                                            toughness: characteristics.toughness,
+                                                                            wounds: characteristics.wounds,
+                                                                            attacks: characteristics.attacks,
+                                                                            leadership: characteristics.leadership,
+                                                                            save: characteristics.save,
+                                                                            modelId: characteristics.modelId)
+                                return ModelResponse(model: modelDTO,
+                                                     characteristics: characteristicsDTO,
+                                                     weapons: weaponResponses)
                             })
         })
     }

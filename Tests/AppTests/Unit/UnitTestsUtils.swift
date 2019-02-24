@@ -1,6 +1,7 @@
 @testable import App
 import Vapor
 import FluentPostgreSQL
+import RoasterHammer_Shared
 
 final class UnitTestsUtils {
 

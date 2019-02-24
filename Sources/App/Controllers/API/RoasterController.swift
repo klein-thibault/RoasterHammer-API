@@ -1,5 +1,6 @@
 import Vapor
 import FluentPostgreSQL
+import RoasterHammer_Shared
 
 final class RoasterController {
 
@@ -58,7 +59,11 @@ final class RoasterController {
                 .flatten(on: conn)
 
             return detachmentResponses.map(to: RoasterResponse.self, { detachments in
-                return try RoasterResponse(roaster: roaster, detachments: detachments, rules: rules)
+                let roasterDTO = RoasterDTO(id: try roaster.requireID(),
+                                            name: roaster.name,
+                                            version: roaster.version)
+                let rulesResponse = RuleController().rulesResponse(forRules: rules)
+                return RoasterResponse(roaster: roasterDTO, detachments: detachments, rules: rulesResponse)
             })
         })
     }

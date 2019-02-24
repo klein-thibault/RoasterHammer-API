@@ -1,5 +1,6 @@
 import Vapor
 import FluentPostgreSQL
+import RoasterHammer_Shared
 
 final class WeaponController {
 
@@ -71,9 +72,18 @@ final class WeaponController {
             .unwrap(or: RoasterHammerError.weaponIsMissing.error())
 
         return unitWeapon.map(to: WeaponResponse.self, { unitWeapon in
-            return try WeaponResponse(weapon: weapon,
-                                      minQuantity: unitWeapon.minQuantity,
-                                      maxQuantity: unitWeapon.maxQuantity)
+            let weaponDTO = WeaponDTO(id: try weapon.requireID(),
+                                      name: weapon.name,
+                                      range: weapon.range,
+                                      type: weapon.type,
+                                      strength: weapon.strength,
+                                      armorPiercing: weapon.armorPiercing,
+                                      damage: weapon.damage,
+                                      cost: weapon.cost,
+                                      ability: weapon.ability)
+            return WeaponResponse(weapon: weaponDTO,
+                                  minQuantity: unitWeapon.minQuantity,
+                                  maxQuantity: unitWeapon.maxQuantity)
         })
     }
 

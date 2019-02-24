@@ -1,10 +1,11 @@
 import Vapor
 import FluentPostgreSQL
+import RoasterHammer_Shared
 
 final class DetachmentController {
-
+    
     // MARK: - Public Functions
-
+    
     func createDetachment(_ req: Request) throws -> Future<Detachment> {
         return try req.content.decode(CreateDetachmentRequest.self)
             .flatMap(to: Detachment.self, { request in
@@ -22,11 +23,11 @@ final class DetachmentController {
                     })
             })
     }
-
+    
     func detachments(_ req: Request) throws -> Future<[Detachment]> {
         return Detachment.query(on: req).all()
     }
-
+    
     func detachmentTypes(_ req: Request) throws -> Future<[DetachmentShortResponse]> {
         let detachmentTypes = [
             (Constants.DetachmentName.patrol, 0),
@@ -35,15 +36,15 @@ final class DetachmentController {
             (Constants.DetachmentName.spearhead, 1),
             (Constants.DetachmentName.vanguard, 1),
             (Constants.DetachmentName.outrider, 1)
-        ].map { DetachmentShortResponse(name: $0.0, commandPoints: $0.1)}
-
+            ].map { DetachmentShortResponse(name: $0.0, commandPoints: $0.1)}
+        
         return req.eventLoop.future(detachmentTypes)
     }
-
+    
     func addDetachmentToRoaster(_ req: Request) throws -> Future<RoasterResponse> {
         _ = try req.requireAuthenticated(Customer.self)
         let roasterId = try req.parameters.next(Int.self)
-
+        
         return try req.content.decode(AddDetachmentToRoasterRequest.self)
             .flatMap(to: Detachment.self, { request in
                 // Might need to duplicate the detachment for the roaster to avoid collusion
@@ -66,13 +67,13 @@ final class DetachmentController {
                 return try roasterController.roasterResponse(forRoaster: roaster, conn: req)
             })
     }
-
+    
     func selectDetachmentFaction(_ req: Request) throws -> Future<RoasterResponse> {
         _ = try req.requireAuthenticated(Customer.self)
         let roasterId = try req.parameters.next(Int.self)
         let detachmentId = try req.parameters.next(Int.self)
         let factionId = try req.parameters.next(Int.self)
-
+        
         return Detachment
             .find(detachmentId, on: req)
             .unwrap(or: RoasterHammerError.detachmentIsMissing.error())
@@ -89,9 +90,9 @@ final class DetachmentController {
                 return try roasterController.roasterResponse(forRoaster: roaster, conn: req)
             })
     }
-
+    
     // MARK: - Utility Functions
-
+    
     func roleResponse(forRole role: Role,
                       conn: DatabaseConnectable) throws -> Future<RoleResponse> {
         return try role.units.query(on: conn).all()
@@ -102,58 +103,62 @@ final class DetachmentController {
                     .flatten(on: conn)
             })
             .map(to: RoleResponse.self, { units in
-                return try RoleResponse(role: role, units: units)
+                let roleDTO = RoleDTO(id: try role.requireID(), name: role.name)
+                return RoleResponse(role: roleDTO, units: units)
             })
     }
-
+    
     func detachmentResponse(forDetachment detachment: Detachment,
                             conn: DatabaseConnectable) throws -> Future<DetachmentResponse> {
         let rolesFuture = try detachment.roles.query(on: conn).all()
         let armyFuture = detachment.army.get(on: conn)
         let selectedFactionFuture = Faction.find(detachment.factionId ?? -1, on: conn)
-
+        
         return flatMap(rolesFuture,
                        armyFuture,
                        selectedFactionFuture, { (roles, army, selectedFaction) in
-            let roleResponsesFuture = try roles
-                .map { try self.roleResponse(forRole: $0, conn: conn) }
-                .flatten(on: conn)
-            let armyResponse = try ArmyController().armyResponse(forArmy: army, conn: conn)
-
-            if let selectedFaction = selectedFaction {
-                let selectedFactionResponse = try FactionController().factionResponse(faction: selectedFaction,
-                                                                                      conn: conn)
-
-                return map(roleResponsesFuture,
-                           armyResponse,
-                           selectedFactionResponse, { (roleResponses, armyResponse, selectedFactionResponse) in
-                    return try DetachmentResponse(detachment: detachment,
-                                                  selectedFaction: selectedFactionResponse,
-                                                  roles: roleResponses,
-                                                  army: armyResponse)
-                })
-            } else {
-                return map(roleResponsesFuture, armyResponse, { (roleResponses, armyResponse) in
-                    return try DetachmentResponse(detachment: detachment,
-                                                  selectedFaction: nil,
-                                                  roles: roleResponses,
-                                                  army: armyResponse)
-                })
-            }
+                        let roleResponsesFuture = try roles
+                            .map { try self.roleResponse(forRole: $0, conn: conn) }
+                            .flatten(on: conn)
+                        let armyResponse = try ArmyController().armyResponse(forArmy: army, conn: conn)
+                        let detachmentDTO = DetachmentDTO(id: try detachment.requireID(),
+                                                          name: detachment.name,
+                                                          commandPoints: detachment.commandPoints)
+                        
+                        if let selectedFaction = selectedFaction {
+                            let selectedFactionResponse = try FactionController().factionResponse(faction: selectedFaction,
+                                                                                                  conn: conn)
+                            
+                            return map(roleResponsesFuture,
+                                       armyResponse,
+                                       selectedFactionResponse, { (roleResponses, armyResponse, selectedFactionResponse) in
+                                        return DetachmentResponse(detachment: detachmentDTO,
+                                                                  selectedFaction: selectedFactionResponse,
+                                                                  roles: roleResponses,
+                                                                  army: armyResponse)
+                            })
+                        } else {
+                            return map(roleResponsesFuture, armyResponse, { (roleResponses, armyResponse) in
+                                return DetachmentResponse(detachment: detachmentDTO,
+                                                          selectedFaction: nil,
+                                                          roles: roleResponses,
+                                                          army: armyResponse)
+                            })
+                        }
         })
-
+        
     }
-
+    
     func minMaxUnits(forDetachment detachment: Detachment, andRole role: Role) -> (min: Int, max: Int) {
         switch (detachment.name, role.name) {
-            // Patrol
+        // Patrol
         case (Constants.DetachmentName.patrol, Constants.RoleName.hq):
             return (1, 2)
         case (Constants.DetachmentName.patrol, Constants.RoleName.troop):
             return (1, 3)
         case (Constants.DetachmentName.patrol, _):
             return (0, 2)
-            // Batallion
+        // Batallion
         case (Constants.DetachmentName.batallion, Constants.RoleName.hq):
             return (2, 3)
         case (Constants.DetachmentName.batallion, Constants.RoleName.troop):
@@ -165,7 +170,7 @@ final class DetachmentController {
             return (0, 3)
         case (Constants.DetachmentName.batallion, Constants.RoleName.flyer):
             return (0, 2)
-            // Brigade
+        // Brigade
         case (Constants.DetachmentName.brigade, Constants.RoleName.hq):
             return (3, 5)
         case (Constants.DetachmentName.brigade, Constants.RoleName.troop):
@@ -177,7 +182,7 @@ final class DetachmentController {
             return (3, 5)
         case (Constants.DetachmentName.brigade, Constants.RoleName.flyer):
             return (0, 2)
-            // Vanguard
+        // Vanguard
         case (Constants.DetachmentName.vanguard, Constants.RoleName.hq):
             return (1, 2)
         case (Constants.DetachmentName.vanguard, Constants.RoleName.troop):
@@ -186,7 +191,7 @@ final class DetachmentController {
             return (3, 6)
         case (Constants.DetachmentName.vanguard, _):
             return (0, 2)
-            // Spearhead
+        // Spearhead
         case (Constants.DetachmentName.spearhead, Constants.RoleName.hq):
             return (1, 2)
         case (Constants.DetachmentName.spearhead, Constants.RoleName.troop):
@@ -195,7 +200,7 @@ final class DetachmentController {
             return (3, 6)
         case (Constants.DetachmentName.spearhead, _):
             return (0, 2)
-            // Outrider
+        // Outrider
         case (Constants.DetachmentName.outrider, Constants.RoleName.hq):
             return (1, 2)
         case (Constants.DetachmentName.outrider, Constants.RoleName.fastAttack):
@@ -206,9 +211,9 @@ final class DetachmentController {
             return (0, 0)
         }
     }
-
+    
     // MARK: - Private Functions
-
+    
     private func generateRoles(forDetachment detachment: Detachment,
                                conn: DatabaseConnectable) throws -> Future<Detachment> {
         let detachmentId = try detachment.requireID()
@@ -220,10 +225,10 @@ final class DetachmentController {
             Role(name: Constants.RoleName.heavySupport, detachmentId: detachmentId).save(on: conn),
             Role(name: Constants.RoleName.flyer, detachmentId: detachmentId).save(on: conn)
         ]
-
+        
         return rolesFutures.flatten(on: conn).then({ _ in
             return conn.future(detachment)
         })
     }
-
+    
 }
