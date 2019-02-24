@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "RoasterHammer",
+    name: "RoasterHammerAPI",
     dependencies: [
         // 💧 A server-side Swift web framework.
         .package(url: "https://github.com/vapor/vapor.git", from: "3.1.0"),
