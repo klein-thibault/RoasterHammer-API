@@ -16,7 +16,7 @@ let package = Package(
         // Web templating language framework package
         .package(url: "https://github.com/vapor/leaf.git", from: "3.0.2"),
 
-        .package(url: "https://github.com/klein-thibault/RoasterHammer-Shared.git", from: "0.0.6")
+        .package(url: "https://github.com/klein-thibault/RoasterHammer-Shared.git", from: "0.0.8")
 
         // Neo4j Database client
         // .package(url: "https://github.com/Neo4j-Swift/Neo4j-Swift.git", from: "4.0.2")
