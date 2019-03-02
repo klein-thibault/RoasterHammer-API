@@ -1,5 +1,4 @@
 import Vapor
+import RoasterHammer_Shared
 
-struct CreateUnitRoleRequest: Content {
-    var name: String
-}
+extension CreateUnitRoleRequest: Content { }

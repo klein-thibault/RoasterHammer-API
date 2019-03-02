@@ -1,5 +1,4 @@
 import Vapor
+import RoasterHammer_Shared
 
-struct UnitFilters: Content {
-    var armyId: Int?
-}
+extension UnitFilters: Content { }

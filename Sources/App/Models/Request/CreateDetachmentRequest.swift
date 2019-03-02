@@ -1,7 +1,4 @@
 import Vapor
+import RoasterHammer_Shared
 
-struct CreateDetachmentRequest: Content {
-    var name: String
-    var commandPoints: Int
-    var armyId: Int
-}
+extension CreateDetachmentRequest: Content { }

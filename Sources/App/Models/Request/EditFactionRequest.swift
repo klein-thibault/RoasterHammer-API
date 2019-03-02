@@ -1,13 +1,4 @@
 import Vapor
+import RoasterHammer_Shared
 
-struct EditFactionRequest: Content {
-    var name: String?
-    var rules: [AddRuleRequest]?
-    var armyId: Int?
-
-    init(name: String?, rules: [AddRuleRequest]?, armyId: Int?) {
-        self.name = name
-        self.rules = rules
-        self.armyId = armyId
-    }
-}
+extension EditFactionRequest: Content { }

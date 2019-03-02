@@ -1,6 +1,4 @@
 import Vapor
+import RoasterHammer_Shared
 
-struct CreateRuleRequest: Content {
-    let name: String
-    let description: String
-}
+extension CreateRuleRequest: Content { }

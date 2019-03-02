@@ -1,5 +1,6 @@
 import Vapor
 import Leaf
+import RoasterHammer_Shared
 
 struct WebsiteWeaponController {
 

@@ -1,5 +1,4 @@
 import Vapor
+import RoasterHammer_Shared
 
-struct AddDetachmentToRoasterRequest: Content {
-    var detachmentId: Int
-}
+extension AddDetachmentToRoasterRequest: Content { }

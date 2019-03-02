@@ -1,5 +1,4 @@
 import Vapor
+import RoasterHammer_Shared
 
-struct AddUnitToDetachmentRequest: Content {
-    let unitQuantity: Int
-}
+extension AddUnitToDetachmentRequest: Content { }

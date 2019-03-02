@@ -2,6 +2,7 @@ import Vapor
 @testable import App
 import FluentPostgreSQL
 import Authentication
+import RoasterHammer_Shared
 
 extension Application {
     static func start(envArgs: [String]? = nil) throws -> Application {
@@ -63,7 +64,7 @@ extension Application {
             let tokenResponse = try self.sendRequest(to: "users/login",
                                                      method: .POST,
                                                      headers: tokenHeaders)
-            let token = try tokenResponse.content.syncDecode(UserToken.self)
+            let token = try tokenResponse.content.syncDecode(AuthTokenResponse.self)
             headers.add(name: .authorization,
                         value: "Bearer \(token.token)")
         }

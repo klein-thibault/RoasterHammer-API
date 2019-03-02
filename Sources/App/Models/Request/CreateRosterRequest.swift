@@ -1,5 +1,4 @@
 import Vapor
+import RoasterHammer_Shared
 
-struct CreateRoasterRequest: Content {
-    var name: String
-}
+extension CreateRoasterRequest: Content { }

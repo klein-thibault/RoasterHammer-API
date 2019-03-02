@@ -1,6 +1,4 @@
 import Vapor
+import RoasterHammer_Shared
 
-struct AddWeaponToModelRequest: Content {
-    let minQuantity: Int
-    let maxQuantity: Int
-}
+extension AddWeaponToModelRequest: Content { }

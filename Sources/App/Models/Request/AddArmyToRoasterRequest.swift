@@ -1,5 +1,4 @@
 import Vapor
+import RoasterHammer_Shared
 
-struct AddArmyToRoasterRequest: Content {
-    var armyId: Int
-}
+extension AddArmyToRoasterRequest: Content { }
