@@ -11,7 +11,7 @@ class DetachmentControllerTests: BaseTests {
         XCTAssertEqual(detachment.name, request.name)
         XCTAssertEqual(detachment.commandPoints, request.commandPoints)
 
-        let unitRoles = try detachment.roles.query(on: conn).all().wait()
+        let unitRoles = detachment.roles
         XCTAssertEqual(unitRoles.count, 6)
         XCTAssertEqual(unitRoles[0].name, Constants.RoleName.hq)
         XCTAssertEqual(unitRoles[1].name, Constants.RoleName.troop)
@@ -35,7 +35,7 @@ class DetachmentControllerTests: BaseTests {
         let (_, roaster) = try RoasterTestsUtils.createRoaster(user: user, gameId: game.id, app: app)
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
 
-        let addDetachmentRequest = AddDetachmentToRoasterRequest(detachmentId: detachment.id!)
+        let addDetachmentRequest = AddDetachmentToRoasterRequest(detachmentId: detachment.id)
         try app.sendRequest(to: "roasters/\(roaster.id)/detachments",
             method: .POST,
             headers: ["Content-Type": "application/json"],
@@ -43,14 +43,14 @@ class DetachmentControllerTests: BaseTests {
             loggedInRequest: true,
             loggedInCustomer: user)
 
-        let army = try detachment.army.get(on: conn).wait()
-        let factions = try army.factions.query(on: conn).all().wait()
+        let army = detachment.army
+        let factions = army.factions
         let updatedRoaster = try app.getResponse(to: "roasters/\(roaster.id)", decodeTo: RoasterResponse.self)
         XCTAssertEqual(updatedRoaster.detachments.count, 1)
-        XCTAssertEqual(updatedRoaster.detachments[0].id, detachment.id!)
+        XCTAssertEqual(updatedRoaster.detachments[0].id, detachment.id)
         XCTAssertEqual(updatedRoaster.detachments[0].name, detachment.name)
         XCTAssertEqual(updatedRoaster.detachments[0].commandPoints, detachment.commandPoints)
-        XCTAssertEqual(updatedRoaster.detachments[0].army.id, army.id!)
+        XCTAssertEqual(updatedRoaster.detachments[0].army.id, army.id)
         XCTAssertEqual(updatedRoaster.detachments[0].army.name, army.name)
         XCTAssertEqual(updatedRoaster.detachments[0].army.factions.count, factions.count)
         XCTAssertEqual(updatedRoaster.detachments[0].army.factions[0].name, factions[0].name)
@@ -62,7 +62,7 @@ class DetachmentControllerTests: BaseTests {
         let (_, roaster) = try RoasterTestsUtils.createRoaster(user: user, gameId: game.id, app: app)
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
 
-        let addDetachmentRequest = AddDetachmentToRoasterRequest(detachmentId: detachment.id!)
+        let addDetachmentRequest = AddDetachmentToRoasterRequest(detachmentId: detachment.id)
         try app.sendRequest(to: "roasters/\(roaster.id)/detachments",
             method: .POST,
             headers: ["Content-Type": "application/json"],
@@ -70,10 +70,10 @@ class DetachmentControllerTests: BaseTests {
             loggedInRequest: true,
             loggedInCustomer: user)
 
-        let army = try detachment.army.get(on: conn).wait()
-        let faction = try army.factions.query(on: conn).first().unwrap(or: RoasterHammerError.factionIsMissing.error()).wait()
+        let army = detachment.army
+        let faction = army.factions[0]
 
-        let updatedRoaster = try app.getResponse(to: "roasters/\(roaster.id)/detachments/\(detachment.id!)/factions/\(faction.id!)",
+        let updatedRoaster = try app.getResponse(to: "roasters/\(roaster.id)/detachments/\(detachment.id)/factions/\(faction.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: nil,

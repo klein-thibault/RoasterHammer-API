@@ -5,7 +5,7 @@ import RoasterHammer_Shared
 
 final class DetachmentTestsUtils {
 
-    static func createPatrolDetachmentWithArmy(app: Application) throws -> (request: CreateDetachmentRequest, response: Detachment) {
+    static func createPatrolDetachmentWithArmy(app: Application) throws -> (request: CreateDetachmentRequest, response: DetachmentResponse) {
         let (_, army) = try ArmyTestsUtils.createArmyWithFaction(app: app)
 
         let request = CreateDetachmentRequest(name: Constants.DetachmentName.patrol, commandPoints: 0, armyId: army.id!)
@@ -13,7 +13,7 @@ final class DetachmentTestsUtils {
                                              method: .POST,
                                              headers: ["Content-Type": "application/json"],
                                              data: request,
-                                             decodeTo: Detachment.self)
+                                             decodeTo: DetachmentResponse.self)
 
         return (request, detachment)
     }

@@ -6,7 +6,7 @@ final class DetachmentController {
     
     // MARK: - Public Functions
     
-    func createDetachment(_ req: Request) throws -> Future<Detachment> {
+    func createDetachment(_ req: Request) throws -> Future<DetachmentResponse> {
         return try req.content.decode(CreateDetachmentRequest.self)
             .flatMap(to: Detachment.self, { request in
                 return Army.find(request.armyId, on: req)
@@ -21,6 +21,9 @@ final class DetachmentController {
                     .flatMap(to: Detachment.self, { detachment in
                         return try self.generateRoles(forDetachment: detachment, conn: req)
                     })
+            })
+            .flatMap(to: DetachmentResponse.self, { detachment in
+                return try self.detachmentResponse(forDetachment: detachment, conn: req)
             })
     }
     

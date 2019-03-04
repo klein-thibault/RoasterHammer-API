@@ -140,13 +140,13 @@ class UnitControllerTests: BaseTests {
     func testAddUnitToDetachment() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
-        let unitRoles = try detachment.roles.query(on: conn).all().wait()
+        let unitRoles = detachment.roles
         let (_, army) = try ArmyTestsUtils.createArmy(app: app)
         let (createUnitRequest, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
         let createModelRequest = createUnitRequest.models[0]
 
         let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
-        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(unit.id)",
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: addUnitToDetachmentRequest,
@@ -173,12 +173,12 @@ class UnitControllerTests: BaseTests {
     func testAddUnitToDetachment_whenUniqueUnitWasAddedOnce() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
-        let unitRoles = try detachment.roles.query(on: conn).all().wait()
+        let unitRoles = detachment.roles
         let (_, army) = try ArmyTestsUtils.createArmy(app: app)
         let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
 
         let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
-        _ = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(unit.id)",
+        _ = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: addUnitToDetachmentRequest,
@@ -187,7 +187,7 @@ class UnitControllerTests: BaseTests {
             loggedInCustomer: user)
 
         do {
-            _ = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(unit.id)",
+            _ = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
                 method: .POST,
                 headers: ["Content-Type": "application/json"],
                 data: addUnitToDetachmentRequest,
@@ -203,14 +203,14 @@ class UnitControllerTests: BaseTests {
     func testAddUnitToDetachment_whenAddingToWrongRole() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
-        let unitRoles = try detachment.roles.query(on: conn).all().wait()
+        let unitRoles = detachment.roles
         let (_, army) = try ArmyTestsUtils.createArmy(app: app)
         let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
 
         do {
             let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
             // Adding to the wrong unit role (Troop instead of HQ)
-            _ = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[1].id!)/units/\(unit.id)",
+            _ = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[1].id)/units/\(unit.id)",
                 method: .POST,
                 headers: ["Content-Type": "application/json"],
                 data: addUnitToDetachmentRequest,
@@ -226,7 +226,7 @@ class UnitControllerTests: BaseTests {
     func testAddUnitToDetachment_whenDetachmentHasTooManyUnits() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
-        let unitRoles = try detachment.roles.query(on: conn).all().wait()
+        let unitRoles = detachment.roles
         let (_, army) = try ArmyTestsUtils.createArmy(app: app)
         let (_, uniqueUnit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
         let (_, hqUnit1) = try UnitTestsUtils.createHQUnit(armyId: army.requireID(), app: app)
@@ -234,7 +234,7 @@ class UnitControllerTests: BaseTests {
 
         // Add unique HQ
         let addUniqueUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: uniqueUnit.maxQuantity)
-        _ = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(uniqueUnit.id)",
+        _ = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(uniqueUnit.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: addUniqueUnitToDetachmentRequest,
@@ -243,7 +243,7 @@ class UnitControllerTests: BaseTests {
             loggedInCustomer: user)
         // Add HQ unit 1
         let addHQUnit1ToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: hqUnit1.maxQuantity)
-        _ = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(hqUnit1.id)",
+        _ = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(hqUnit1.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: addHQUnit1ToDetachmentRequest,
@@ -254,7 +254,7 @@ class UnitControllerTests: BaseTests {
         do {
             // Add HQ unit 2
             let addHQUnit2ToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: hqUnit2.maxQuantity)
-            _ = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(hqUnit2.id)",
+            _ = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(hqUnit2.id)",
                 method: .POST,
                 headers: ["Content-Type": "application/json"],
                 data: addHQUnit2ToDetachmentRequest,
@@ -270,7 +270,7 @@ class UnitControllerTests: BaseTests {
     func testSelectWeaponForSelectedModel() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
-        let unitRoles = try detachment.roles.query(on: conn).all().wait()
+        let unitRoles = detachment.roles
         let (_, army) = try ArmyTestsUtils.createArmy(app: app)
         let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
         let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
@@ -283,7 +283,7 @@ class UnitControllerTests: BaseTests {
             data: addWeaponToUnitRequest)
 
         let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
-        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(unit.id)",
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: addUnitToDetachmentRequest,
@@ -295,7 +295,7 @@ class UnitControllerTests: BaseTests {
         let addedModels = addedUnit[0].models
         let modelWeapon = addedModels[0].model.weapons[0]
 
-        let updatedDetachmentWithWeapon = try app.getResponse(to: "detachments/\(detachment.id!)/models/\(addedModels[0].id)/weapons/\(modelWeapon.id)",
+        let updatedDetachmentWithWeapon = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapons/\(modelWeapon.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             decodeTo: DetachmentResponse.self,
@@ -309,7 +309,7 @@ class UnitControllerTests: BaseTests {
     func testSelectWeaponForSelectedModel_whenModelWeaponsAreMaxedOut() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
-        let unitRoles = try detachment.roles.query(on: conn).all().wait()
+        let unitRoles = detachment.roles
         let (_, army) = try ArmyTestsUtils.createArmy(app: app)
         let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
         let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
@@ -322,7 +322,7 @@ class UnitControllerTests: BaseTests {
             data: addWeaponToUnitRequest)
 
         let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
-        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id!)/roles/\(unitRoles[0].id!)/units/\(unit.id)",
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: addUnitToDetachmentRequest,
@@ -334,7 +334,7 @@ class UnitControllerTests: BaseTests {
         let addedModels = addedUnit[0].models
         let modelWeapon = addedModels[0].model.weapons[0]
 
-        _ = try app.getResponse(to: "detachments/\(detachment.id!)/models/\(addedModels[0].id)/weapons/\(modelWeapon.id)",
+        _ = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapons/\(modelWeapon.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             decodeTo: DetachmentResponse.self,
@@ -342,7 +342,7 @@ class UnitControllerTests: BaseTests {
             loggedInCustomer: user)
 
         do {
-            _ = try app.getResponse(to: "detachments/\(detachment.id!)/models/\(addedModels[0].id)/weapons/\(modelWeapon.id)",
+            _ = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapons/\(modelWeapon.id)",
                 method: .POST,
                 headers: ["Content-Type": "application/json"],
                 decodeTo: DetachmentResponse.self,
