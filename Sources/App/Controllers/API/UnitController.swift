@@ -18,7 +18,7 @@ final class UnitController {
     
     func units(_ req: Request) throws -> Future<[UnitResponse]> {
         let filters = try req.query.decode(UnitFilters.self)
-        return getUnits(armyId: filters.armyId, conn: req)
+        return getUnits(armyId: filters.armyId, unitType: filters.unitType, conn: req)
     }
 
     func editUnit(_ req: Request) throws -> Future<UnitResponse> {
@@ -115,19 +115,46 @@ final class UnitController {
     
     // MARK: - Utility Functions
 
-    func getUnits(armyId: Int?, conn: DatabaseConnectable) -> Future<[UnitResponse]> {
-        let unitQuery: EventLoopFuture<[Unit]>
-        if let armyId = armyId {
-            unitQuery = Unit.query(on: conn).filter(\.armyId == armyId).all()
-        } else {
-            unitQuery = Unit.query(on: conn).all()
+    func getUnits(armyId: Int?,
+                  unitType: String?,
+                  conn: DatabaseConnectable) -> Future<[UnitResponse]> {
+        func performGetUnitQuery(unitQuery: EventLoopFuture<[Unit]>) -> Future<[UnitResponse]> {
+            return unitQuery.flatMap(to: [UnitResponse].self, { units in
+                return try units
+                    .map { try self.unitResponse(forUnit: $0, conn: conn) }
+                    .flatten(on: conn)
+            })
         }
 
-        return unitQuery.flatMap(to: [UnitResponse].self, { units in
-            return try units
-                .map { try self.unitResponse(forUnit: $0, conn: conn) }
-                .flatten(on: conn)
-        })
+        let unitQuery: EventLoopFuture<[Unit]>
+        Unit.query(on: conn).filter(\.unitTypeId == 1)
+
+        if let unitType = unitType {
+            return UnitType.query(on: conn)
+                .filter(\.name == unitType)
+                .first()
+                .unwrap(or: RoasterHammerError.unitTypeIsMissing.error())
+                .flatMap(to: [UnitResponse].self, { unitType in
+                    let unitQuery: EventLoopFuture<[Unit]>
+                    let unitTypeId = try unitType.requireID()
+
+                    if let armyId = armyId {
+                        unitQuery = Unit.query(on: conn).filter(\.armyId == armyId).filter(\.unitTypeId == unitTypeId).all()
+                    } else {
+                        unitQuery = Unit.query(on: conn).filter(\.unitTypeId == unitTypeId).all()
+                    }
+
+                    return performGetUnitQuery(unitQuery: unitQuery)
+                })
+        } else {
+            if let armyId = armyId {
+                unitQuery = Unit.query(on: conn).filter(\.armyId == armyId).all()
+            } else {
+                unitQuery = Unit.query(on: conn).all()
+            }
+
+            return performGetUnitQuery(unitQuery: unitQuery)
+        }
     }
 
     func getUnit(byID id: Int, conn: DatabaseConnectable) -> Future<UnitResponse> {

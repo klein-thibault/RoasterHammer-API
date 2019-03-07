@@ -61,6 +61,23 @@ class UnitControllerTests: BaseTests {
         XCTAssertEqual(units.count, 0)
     }
 
+    func testGettingAllUnits_withUnitTypeFilter_whenUnitTypeExists() throws {
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+        let units = try app.getResponse(to: "units?armyId=\(army.requireID())&unitType=HQ", decodeTo: [UnitResponse].self)
+        XCTAssertEqual(units.count, 1)
+        XCTAssertEqual(units[0].id, unit.id)
+        XCTAssertEqual(units[0].army.id, army.id!)
+        XCTAssertEqual(units[0].unitType, "HQ")
+    }
+
+    func testGettingAllUnits_withUnitTypeFilter_whenUnitTypeDoesntExists() throws {
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, _) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+        let units = try app.getResponse(to: "units?armyId=\(army.requireID())&unitType=Troop", decodeTo: [UnitResponse].self)
+        XCTAssertEqual(units.count, 0)
+    }
+
     func testEditUnit() throws {
         let (_, army) = try ArmyTestsUtils.createArmy(app: app)
         let (_, army2) = try ArmyTestsUtils.createArmy(app: app)

@@ -8,7 +8,7 @@ struct WebsiteUnitController {
 
     func unitsHandler(_ req: Request) throws -> Future<View> {
         return UnitController()
-            .getUnits(armyId: nil, conn: req)
+            .getUnits(armyId: nil, unitType: nil, conn: req)
             .flatMap(to: View.self, { units in
                 let context = UnitsContext(title: "Units", units: units)
                 return try req.view().render("units", context)
