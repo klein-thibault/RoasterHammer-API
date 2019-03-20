@@ -18,7 +18,8 @@ final class UnitController {
     
     func units(_ req: Request) throws -> Future<[UnitResponse]> {
         let filters = try req.query.decode(UnitFilters.self)
-        return getUnits(armyId: filters.armyId, unitType: filters.unitType, conn: req)
+        let armyId: Int? = (filters.armyId != nil) ? filters.armyId!.intValue : nil
+        return getUnits(armyId: armyId, unitType: filters.unitType, conn: req)
     }
 
     func editUnit(_ req: Request) throws -> Future<UnitResponse> {
