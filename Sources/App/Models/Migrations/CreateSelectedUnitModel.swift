@@ -5,11 +5,11 @@ struct CreateSelectedUnitModel: PostgreSQLMigration {
     static func prepare(on conn: PostgreSQLConnection) -> EventLoopFuture<Void> {
         return PostgreSQLDatabase.create(SelectedUnitModel.self, on: conn, closure: { (builder) in
             builder.field(for: \.id, isIdentifier: true)
-            builder.field(for: \.unitId)
-            builder.field(for: \.modelId)
-            builder.reference(from: \.unitId, to: \Unit.id, onDelete: .cascade)
-            builder.reference(from: \.modelId, to: \Model.id, onDelete: .cascade)
-            builder.unique(on: \.unitId, \.modelId)
+            builder.field(for: \.selectedUnitId)
+            builder.field(for: \.selectedModelId)
+            builder.reference(from: \.selectedUnitId, to: \SelectedUnit.id, onDelete: .cascade)
+            builder.reference(from: \.selectedModelId, to: \SelectedModel.id, onDelete: .cascade)
+            builder.unique(on: \.selectedUnitId, \.selectedModelId)
         })
     }
 

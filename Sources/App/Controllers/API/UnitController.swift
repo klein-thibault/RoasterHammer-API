@@ -2,6 +2,14 @@ import Vapor
 import FluentPostgreSQL
 import RoasterHammer_Shared
 
+extension Array where Element: Hashable {
+    func difference(from other: [Element]) -> [Element] {
+        let thisSet = Set(self)
+        let otherSet = Set(other)
+        return Array(thisSet.symmetricDifference(otherSet))
+    }
+}
+
 final class UnitController {
     
     // MARK: - Public Functions
