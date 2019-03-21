@@ -110,6 +110,7 @@ public func routes(_ router: Router) throws {
                 at: "roasterhammer", "units", "create",
                 use: websiteUnitController.createUnitPostHandler)
     router.get("roasterhammer", "units", Int.parameter, "edit", use: websiteUnitController.editUnitHandler)
+    router.get("roasterhammer", "units", Int.parameter, "assign-weapon", use: websiteUnitController.assignWeaponHandler)
     router.post(CreateUnitData.self,
                 at: "roasterhammer", "units", Int.parameter, "edit",
                 use: websiteUnitController.editUnitPostHandler)

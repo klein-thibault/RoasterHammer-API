@@ -68,6 +68,20 @@ struct WebsiteUnitController {
             .transform(to: req.redirect(to: "/roasterhammer/units"))
     }
 
+    func assignWeaponHandler(_ req: Request) throws -> Future<View> {
+        let unitId = try req.parameters.next(Int.self)
+        let unitFuture = UnitController().getUnit(byID: unitId, conn: req)
+        let weaponsFuture = WeaponController().getAllWeapons(conn: req)
+
+        return flatMap(to: View.self, unitFuture, weaponsFuture, { (unit, weapons) in
+            let context = AssignWeaponToUnitContext(title: "Assign Weapons To Unit",
+                                                    unit: unit,
+                                                    weapons: weapons)
+
+            return try req.view().render("unitWeapons", context)
+        })
+    }
+
     // MARK: - Private Functions
 
     private func createUnitRequest(forData data: CreateUnitData) throws -> CreateUnitRequest {

@@ -110,3 +110,9 @@ struct EditUnitContext: WebContextTitle, Encodable {
     let unitTypes: [UnitType]
     let editing: Bool = true
 }
+
+struct AssignWeaponToUnitContext: WebContextTitle, Encodable {
+    let title: String
+    let unit: UnitResponse
+    let weapons: [Weapon]
+}
