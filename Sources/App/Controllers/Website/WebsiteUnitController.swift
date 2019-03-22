@@ -82,6 +82,12 @@ struct WebsiteUnitController {
         })
     }
 
+    func assignWeaponPostHandler(_ req: Request, assignWeaponRequest: AssignWeaponData) throws -> Future<Response> {
+        print(assignWeaponRequest)
+        // TODO: do the mapping between weapon ids and associated data
+        return req.future(req.redirect(to: "/roasterhammer/units"))
+    }
+
     // MARK: - Private Functions
 
     private func createUnitRequest(forData data: CreateUnitData) throws -> CreateUnitRequest {

@@ -116,3 +116,9 @@ struct AssignWeaponToUnitContext: WebContextTitle, Encodable {
     let unit: UnitResponse
     let weapons: [Weapon]
 }
+
+struct AssignWeaponData: Content {
+    let weaponCheckbox: [String: String]
+    let minQuantitySelection: [String: String]
+    let maxQuantitySelection: [String: String]
+}
