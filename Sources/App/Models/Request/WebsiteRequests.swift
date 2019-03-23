@@ -118,7 +118,7 @@ struct AssignWeaponToUnitContext: WebContextTitle, Encodable {
 }
 
 struct AssignWeaponData: Content {
-    let weaponCheckbox: [String: String]
-    let minQuantitySelection: [String: String]
-    let maxQuantitySelection: [String: String]
+    let weaponCheckbox: DynamicFormData
+    let minQuantitySelection: DynamicFormData
+    let maxQuantitySelection: DynamicFormData
 }

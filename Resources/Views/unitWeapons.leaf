@@ -17,14 +17,14 @@
             <tr>
                 <td>
                     <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" name="weaponCheckbox[#(weapon.id)]" id="checkbox-#(weapon.id)">
+                        <input type="checkbox" class="form-check-input" name="weaponCheckbox[#(model.id)][#(weapon.id)]" id="checkbox-#(weapon.id)">
                             <label class="form-check-label" for="exampleCheck1">#(weapon.name)</label>
                     </div>
                 </td>
                 <td>
                     <div class="form-group">
                         <label for="exampleFormControlSelect1">Min Quantity</label>
-                        <select class="form-control" name="minQuantitySelection[#(weapon.id)]" id="minQuantitySelection-#(weapon.id)">
+                        <select class="form-control" name="minQuantitySelection[#(model.id)][#(weapon.id)]" id="minQuantitySelection-#(weapon.id)">
                             <option>1</option>
                             <option>2</option>
                             <option>3</option>
@@ -36,7 +36,7 @@
                 <td>
                     <div class="form-group">
                         <label for="exampleFormControlSelect1">Max Quantity</label>
-                        <select class="form-control" name= "maxQuantitySelection[#(weapon.id)]" id="maxQuantitySelection-#(weapon.id)">
+                        <select class="form-control" name= "maxQuantitySelection[#(model.id)][#(weapon.id)]" id="maxQuantitySelection-#(weapon.id)">
                             <option>1</option>
                             <option>2</option>
                             <option>3</option>
