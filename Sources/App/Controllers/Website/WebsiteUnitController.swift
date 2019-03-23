@@ -100,6 +100,9 @@ struct WebsiteUnitController {
      */
     func assignWeaponPostHandler(_ req: Request, assignWeaponRequest: AssignWeaponData) throws -> Future<Response> {
         let unitId = try req.parameters.next(Int.self)
+        let weaponController = WeaponController()
+        var assignWeaponToUnitFutures: [Future<UnitResponse>] = []
+
         // Go through each model Id
         for modelId in assignWeaponRequest.minQuantitySelection.keys {
             // Only selected weapons will be in weapon checkbox.
@@ -114,19 +117,19 @@ struct WebsiteUnitController {
                         let minQuantity = minQuantitySelection[weaponId]?.intValue,
                         let maxQuantity = maxQuantitySelection[weaponId]?.intValue {
                         let addWeaponToModelRequest = AddWeaponToModelRequest(minQuantity: minQuantity, maxQuantity: maxQuantity)
-                        return WeaponController()
-                            .addWeaponToModel(unitId: unitId,
-                                              modelId: modelIdInt,
-                                              weaponId: weaponIdInt,
-                                              request: addWeaponToModelRequest,
-                                              conn: req)
-                            .transform(to: req.redirect(to: "/roasterhammer/units"))
+
+                        assignWeaponToUnitFutures.append(weaponController.addWeaponToModel(unitId: unitId,
+                                                                                           modelId: modelIdInt,
+                                                                                           weaponId: weaponIdInt,
+                                                                                           request: addWeaponToModelRequest,
+                                                                                           conn: req))
                     }
                 }
             }
         }
-        // TODO: do the mapping between weapon ids and associated data
-        return req.future(req.redirect(to: "/roasterhammer/units"))
+
+        return assignWeaponToUnitFutures.flatten(on: req)
+            .transform(to: req.redirect(to: "/roasterhammer/units"))
     }
 
     // MARK: - Private Functions
