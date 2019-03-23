@@ -13,7 +13,7 @@
     <tbody>
         #for(unit in units) {
         <tr>
-            <td>#(unit.name)</td>
+            <td><a href="/roasterhammer/units/#(unit.id)">#(unit.name)</a></td>
             <td>#(unit.unitType)</td>
             <td>#(unit.cost)</td>
             <td>

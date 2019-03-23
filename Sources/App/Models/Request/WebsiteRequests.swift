@@ -21,6 +21,10 @@ struct UnitsContext: WebContextTitle, Encodable {
     let units: [UnitResponse]
 }
 
+struct UnitDetailsContext: Encodable {
+    let unit: UnitResponse
+}
+
 struct CreateArmyContext: WebContextTitle, Encodable {
     let title: String
 }

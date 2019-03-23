@@ -15,6 +15,17 @@ struct WebsiteUnitController {
             })
     }
 
+    func unitHandler(_ req: Request) throws -> Future<View> {
+        let unitId = try req.parameters.next(Int.self)
+
+        return UnitController()
+            .getUnit(byID: unitId, conn: req)
+            .flatMap(to: View.self, { unit in
+                let context = UnitDetailsContext(unit: unit)
+                return try req.view().render("unit", context)
+            })
+    }
+
     func createUnitHandler(_ req: Request) throws -> Future<View> {
         let armiesFuture = try ArmyController().getAllArmies(conn: req)
         let unitTypesFuture = UnitTypeController().getAllUnitTypes(conn: req)
