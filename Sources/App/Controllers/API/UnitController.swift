@@ -61,36 +61,26 @@ final class UnitController {
                        unitFuture,
                        detachmentFuture,
                        requestFuture, { (role, unit, detachment, request) in
+                        // Validate if the unit is able to be added for the detachment and role
                         return try self.validateUnitInDetachment(detachment: detachment, role: role, unit: unit, conn: req)
                             .flatMap(to: SelectedUnit.self, { _ in
-                                return try SelectedUnit(unitId: unit.requireID(),
-                                                        quantity: request.unitQuantity)
-                                    .save(on: req)
+                                // Create the selected unit
+                                return try self.createSelectedUnit(unit: unit,
+                                                                   quantity: request.unitQuantity,
+                                                                   conn: req)
                             })
                             .flatMap(to: SelectedUnit.self, { selectedUnit in
-                                return try unit.models.query(on: req).all()
-                                    .flatMap(to: [SelectedModel].self, { models in
-                                        return try models
-                                            .map {
-                                                try SelectedModel(modelId: $0.requireID(),
-                                                                  quantity: $0.minQuantity)
-                                                    .save(on: req)
-                                            }
-                                            .flatten(on: req)
-                                    })
-                                    .flatMap(to: [SelectedUnitModel].self, { selectedModels in
-                                        return selectedModels
-                                            .map { selectedUnit.models.attach($0, on: req) }
-                                            .flatten(on: req)
-                                    })
-                                    .map(to: SelectedUnit.self, { _ in
-                                        return selectedUnit
-                                    })
+                                // Create the default models of the selected unit
+                                return try self.createInitialModelsForSelectedUnit(unit: unit,
+                                                                                   selectedUnit: selectedUnit,
+                                                                                   conn: req)
                             })
                             .flatMap({ selectedUnit in
+                                // Attach the unit to the detachment's role
                                 return role.units.attach(selectedUnit, on: req)
                             })
                             .flatMap(to: DetachmentResponse.self, { _ in
+                                // Return the updated detachment
                                 let detachmentController = DetachmentController()
                                 return try detachmentController.detachmentResponse(forDetachment: detachment, conn: req)
                             })
@@ -530,6 +520,48 @@ final class UnitController {
                 throw RoasterHammerError.tooManyWeaponsForModel.error()
             }
         }
+    }
+
+    private func createSelectedUnit(unit: Unit, quantity: Int, conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
+        return try SelectedUnit(unitId: unit.requireID(), quantity: quantity).save(on: conn)
+    }
+
+    private func createSelectedModel(model: Model, conn: DatabaseConnectable) throws -> Future<SelectedModel> {
+        return try SelectedModel(modelId: model.requireID(), quantity: model.minQuantity).save(on: conn)
+    }
+
+    private func attachSelectedModel(_ selectedModel: SelectedModel,
+                                     toSelectedUnit selectedUnit: SelectedUnit,
+                                     conn: DatabaseConnectable) -> Future<SelectedUnitModel> {
+        return selectedUnit.models.attach(selectedModel, on: conn)
+    }
+
+    private func createInitialModelsForSelectedUnit(unit: Unit,
+                                                    selectedUnit: SelectedUnit,
+                                                    conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
+        // Get all the models associated with the unit
+        return try unit.models.query(on: conn).all()
+            // Create all the models that come stock with the selected unit using the min quantity
+            .flatMap(to: [SelectedModel].self, { models in
+                var selectedModelFutures = [Future<SelectedModel>]()
+                for model in models {
+                    for _ in 1...model.minQuantity {
+                        let createModelFuture = try self.createSelectedModel(model: model, conn: conn)
+                        selectedModelFutures.append(createModelFuture)
+                    }
+                }
+
+                return selectedModelFutures.flatten(on: conn)
+            })
+            .flatMap(to: [SelectedUnitModel].self, { selectedModels in
+                // Attach all the newly created models to the selected unit
+                return selectedModels
+                    .map { self.attachSelectedModel($0, toSelectedUnit: selectedUnit, conn: conn) }
+                    .flatten(on: conn)
+            })
+            .map(to: SelectedUnit.self, { _ in
+                return selectedUnit
+            })
     }
 
 }

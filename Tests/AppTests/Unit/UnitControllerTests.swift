@@ -179,6 +179,11 @@ class UnitControllerTests: BaseTests {
         let addedModelCharacteristics = addedUnit[0].unit.models[0].characteristics
         XCTAssertEqual(addedUnit[0].unit.name, unit.name)
         XCTAssertEqual(addedUnit[0].unit.cost, unit.cost)
+
+        // Make sure that the expected amount of models have been added
+        let expectedModelsCount = addedUnit[0].unit.models.reduce(0) { $0 + $1.minQuantity }
+        XCTAssertEqual(addedUnit[0].models.count, expectedModelsCount)
+
         XCTAssertEqual(addedModelCharacteristics.movement, createModelRequest.characteristics.movement)
         XCTAssertEqual(addedModelCharacteristics.weaponSkill, createModelRequest.characteristics.weaponSkill)
         XCTAssertEqual(addedModelCharacteristics.balisticSkill, createModelRequest.characteristics.balisticSkill)

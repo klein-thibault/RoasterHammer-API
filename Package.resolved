@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/vapor/http.git",
         "state": {
           "branch": null,
-          "revision": "24282b07c5b6fab13b7f2248eec45bc4e4e46eff",
-          "version": "3.1.10"
+          "revision": "8da7d475a1a060714766d9ad4b24eb0dae243aab",
+          "version": "3.1.11"
         }
       },
       {
@@ -114,8 +114,8 @@
         "repositoryURL": "https://github.com/klein-thibault/RoasterHammer-Shared.git",
         "state": {
           "branch": null,
-          "revision": "1334e17b95bb1287b37817ca543a9faf3cab5e71",
-          "version": "0.0.11"
+          "revision": "f2725fd60442909c3ab96c4bda95d8d5445f844c",
+          "version": "0.0.12"
         }
       },
       {
@@ -132,8 +132,8 @@
         "repositoryURL": "https://github.com/vapor/service.git",
         "state": {
           "branch": null,
-          "revision": "4907311d7d7f609365982fa302b8b17ffdeb46da",
-          "version": "1.0.1"
+          "revision": "fa5b5de62bd68bcde9a69933f31319e46c7275fb",
+          "version": "1.0.2"
         }
       },
       {
@@ -141,8 +141,8 @@
         "repositoryURL": "https://github.com/vapor/sql.git",
         "state": {
           "branch": null,
-          "revision": "f77bcae7c95150cdab62095e7bf321ed8c7551bd",
-          "version": "2.3.0"
+          "revision": "50eaeb8f52a1ce63f1ff3880e1114dd8757a78a6",
+          "version": "2.3.2"
         }
       },
       {
@@ -150,8 +150,8 @@
         "repositoryURL": "https://github.com/vapor/sqlite.git",
         "state": {
           "branch": null,
-          "revision": "4f5e173abafb0bb185608d28fccec3df166c689a",
-          "version": "3.2.0"
+          "revision": "314d9cd21165bcf14215e336a23ff8214f40e411",
+          "version": "3.2.1"
         }
       },
       {
@@ -204,8 +204,8 @@
         "repositoryURL": "https://github.com/vapor/url-encoded-form.git",
         "state": {
           "branch": null,
-          "revision": "932024f363ee5ff59059cf7d67194a1c271d3d0c",
-          "version": "1.0.5"
+          "revision": "82d8d63bdb76b6dd8febe916c639ab8608dbbaed",
+          "version": "1.0.6"
         }
       },
       {
