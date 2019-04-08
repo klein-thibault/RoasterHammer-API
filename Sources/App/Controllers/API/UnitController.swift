@@ -86,6 +86,32 @@ final class UnitController {
                             })
         })
     }
+
+    func addModelToUnit(_ req: Request) throws -> Future<DetachmentResponse> {
+        _ = try req.requireAuthenticated(Customer.self)
+        let detachmentId = try req.parameters.next(Int.self)
+        let unitId = try req.parameters.next(Int.self)
+        let modelId = try req.parameters.next(Int.self)
+
+        let detachmentFuture = Detachment.find(detachmentId, on: req).unwrap(or: RoasterHammerError.detachmentIsMissing.error())
+        let unitFuture = SelectedUnit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let modelFuture = Model.find(modelId, on: req).unwrap(or: RoasterHammerError.modelIsMissing.error())
+
+        return flatMap(detachmentFuture, unitFuture, modelFuture, { detachment, unit, model in
+            return try self.validateModelInUnit(unit: unit, model: model, conn: req)
+                .flatMap(to: SelectedModel.self, { _ in
+                    return SelectedModel(modelId: modelId, quantity: model.minQuantity).save(on: req)
+                })
+                .flatMap({ selectedModel in
+                    return unit.models.attach(selectedModel, on: req)
+                })
+                .flatMap(to: DetachmentResponse.self, { _ in
+                    // Return the updated detachment
+                    let detachmentController = DetachmentController()
+                    return try detachmentController.detachmentResponse(forDetachment: detachment, conn: req)
+                })
+        })
+    }
     
     func attachWeaponToSelectedModel(_ req: Request) throws -> Future<DetachmentResponse> {
         _ = try req.requireAuthenticated(Customer.self)
@@ -508,6 +534,26 @@ final class UnitController {
                 throw RoasterHammerError.tooManyUnitsInDetachment.error()
             }
         })
+    }
+
+    private func validateModelInUnit(unit: SelectedUnit, model: Model, conn: DatabaseConnectable) throws -> Future<Void> {
+        // Get all selected models for the unit
+        return try unit.models.query(on: conn).all()
+            .flatMap({ selectedModels in
+                // Get the selected model response associated to each to get more information about the selected model
+                let selectedModelResponseFutures = try selectedModels.map { try self.selectedModelResponse(forSelectedModel: $0, conn: conn) }
+                return selectedModelResponseFutures
+                    .flatten(on: conn)
+                    .map({ selectedModelResponses in
+                        // Filter the already selected models matching the newly added model
+                        // If the max quantity is already reached for the selected models in the unit, do not allow an additional model to the unit
+                        if let matchinModels = selectedModelResponses.filter({ $0.model.id == model.id! }).first,
+                            matchinModels.model.maxQuantity >= selectedModels.count {
+                            throw RoasterHammerError.tooManyModelsInUnit.error()
+                        }
+                    })
+            })
+
     }
 
     private func validateWeaponsForSelectedModel(selectedModel: SelectedModel,

@@ -78,6 +78,13 @@ public func routes(_ router: Router) throws {
                              use: unitController.addUnitToDetachmentUnitRole)
     protectedAuthRouter.post("detachments",
                              Int.parameter,
+                             "units",
+                             Int.parameter,
+                             "models",
+                             Int.parameter,
+                             use: unitController.addModelToUnit)
+    protectedAuthRouter.post("detachments",
+                             Int.parameter,
                              "models",
                              Int.parameter,
                              "weapons",
