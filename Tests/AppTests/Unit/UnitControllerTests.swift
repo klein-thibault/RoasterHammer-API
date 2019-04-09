@@ -292,6 +292,67 @@ class UnitControllerTests: BaseTests {
         }
     }
 
+    func testAddModelToUnit() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let troopRoleId = unitRoles.filter({ $0.name == "Troop" }).first!.id
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createTroopUnit(armyId: army.requireID(), app: app)
+
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(troopRoleId)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let oldModels = updatedDetachment.roles[1].units[0].models
+        let modelIdToAdd = updatedDetachment.roles[1].units[0].models[0].id
+        let updatedDetachmentWithNewModel = try app.getResponse(to: "detachments/\(detachment.id)/units/\(unit.id)/models/\(modelIdToAdd)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let newModels = updatedDetachmentWithNewModel.roles[1].units[0].models
+        XCTAssertTrue(newModels.count == oldModels.count + 1)
+    }
+
+    func testAddModelToUnit_whenUnitHasTooManyModels() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let modelIdToAdd = updatedDetachment.roles[0].units[0].models[0].id
+
+        do {
+            _ = try app.getResponse(to: "detachments/\(detachment.id)/units/\(unit.id)/models/\(modelIdToAdd)",
+                method: .POST,
+                headers: ["Content-Type": "application/json"],
+                decodeTo: DetachmentResponse.self,
+                loggedInRequest: true,
+                loggedInCustomer: user)
+            XCTFail("Should have received an error")
+        } catch {
+            XCTAssertNotNil(error)
+        }
+    }
+
     func testSelectWeaponForSelectedModel() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)

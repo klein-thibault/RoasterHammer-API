@@ -547,8 +547,8 @@ final class UnitController {
                     .map({ selectedModelResponses in
                         // Filter the already selected models matching the newly added model
                         // If the max quantity is already reached for the selected models in the unit, do not allow an additional model to the unit
-                        if let matchinModels = selectedModelResponses.filter({ $0.model.id == model.id! }).first,
-                            matchinModels.model.maxQuantity >= selectedModels.count {
+                        if let modelMatchingAddedModel = selectedModelResponses.filter({ $0.model.id == model.id! }).first,
+                            selectedModels.count >= modelMatchingAddedModel.model.maxQuantity {
                             throw RoasterHammerError.tooManyModelsInUnit.error()
                         }
                     })
