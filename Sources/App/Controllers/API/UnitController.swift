@@ -100,7 +100,7 @@ final class UnitController {
         return flatMap(detachmentFuture, unitFuture, modelFuture, { detachment, unit, model in
             return try self.validateModelInUnit(unit: unit, model: model, conn: req)
                 .flatMap(to: SelectedModel.self, { _ in
-                    return SelectedModel(modelId: modelId, quantity: model.minQuantity).save(on: req)
+                    return SelectedModel(modelId: modelId).save(on: req)
                 })
                 .flatMap({ selectedModel in
                     return unit.models.attach(selectedModel, on: req)
@@ -573,7 +573,7 @@ final class UnitController {
     }
 
     private func createSelectedModel(model: Model, conn: DatabaseConnectable) throws -> Future<SelectedModel> {
-        return try SelectedModel(modelId: model.requireID(), quantity: model.minQuantity).save(on: conn)
+        return try SelectedModel(modelId: model.requireID()).save(on: conn)
     }
 
     private func attachSelectedModel(_ selectedModel: SelectedModel,

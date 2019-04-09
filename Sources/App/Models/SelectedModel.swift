@@ -4,7 +4,6 @@ import FluentPostgreSQL
 final class SelectedModel: PostgreSQLModel {
     var id: Int?
     var modelId: Int
-    var quantity: Int
     var weapons: Siblings<SelectedModel, Weapon, SelectedModelWeapon> {
         return siblings()
     }
@@ -12,9 +11,8 @@ final class SelectedModel: PostgreSQLModel {
         return siblings()
     }
 
-    init(modelId: Int, quantity: Int) {
+    init(modelId: Int) {
         self.modelId = modelId
-        self.quantity = quantity
     }
 }
 

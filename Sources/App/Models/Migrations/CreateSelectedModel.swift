@@ -6,7 +6,6 @@ struct CreateSelectedModel: PostgreSQLMigration {
         return PostgreSQLDatabase.create(SelectedModel.self, on: conn, closure: { (builder) in
             builder.field(for: \.id, isIdentifier: true)
             builder.field(for: \.modelId)
-            builder.field(for: \.quantity)
             builder.reference(from: \.modelId, to: \Model.id, onDelete: .cascade)
         })
     }
