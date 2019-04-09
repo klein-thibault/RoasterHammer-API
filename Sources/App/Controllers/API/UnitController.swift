@@ -62,7 +62,7 @@ final class UnitController {
                        detachmentFuture,
                        requestFuture, { (role, unit, detachment, request) in
                         // Validate if the unit is able to be added for the detachment and role
-                        return try self.validateUnitInDetachment(detachment: detachment, role: role, unit: unit, conn: req)
+                        return try self.validateAddingUnitToDetachment(detachment: detachment, role: role, unit: unit, conn: req)
                             .flatMap(to: SelectedUnit.self, { _ in
                                 // Create the selected unit
                                 return try self.createSelectedUnit(unit: unit,
@@ -118,7 +118,7 @@ final class UnitController {
         let modelFuture = Model.find(modelId, on: req).unwrap(or: RoasterHammerError.modelIsMissing.error())
 
         return flatMap(detachmentFuture, unitFuture, modelFuture, { detachment, unit, model in
-            return try self.validateModelInUnit(unit: unit, model: model, conn: req)
+            return try self.validateAddingModelInUnit(unit: unit, model: model, conn: req)
                 .flatMap(to: SelectedModel.self, { _ in
                     return SelectedModel(modelId: modelId).save(on: req)
                 })
@@ -132,7 +132,28 @@ final class UnitController {
                 })
         })
     }
-    
+
+    func removeModelFromUnit(_ req: Request) throws -> Future<DetachmentResponse> {
+        _ = try req.requireAuthenticated(Customer.self)
+        let detachmentId = try req.parameters.next(Int.self)
+        let unitId = try req.parameters.next(Int.self)
+        let modelId = try req.parameters.next(Int.self)
+
+        let unitFuture = SelectedUnit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let modelFuture = SelectedModel.find(modelId, on: req).unwrap(or: RoasterHammerError.modelIsMissing.error())
+
+        return flatMap(to: DetachmentResponse.self, unitFuture, modelFuture, { (unit, model) in
+            return try self.validateRemovingModelFromUnit(unit: unit, model: model, conn: req)
+                .flatMap({ _ in
+                    return unit.models.detach(model, on: req)
+                })
+                .flatMap(to: DetachmentResponse.self, { _ in
+                    let detachmentController = DetachmentController()
+                    return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                })
+        })
+    }
+
     func attachWeaponToSelectedModel(_ req: Request) throws -> Future<DetachmentResponse> {
         _ = try req.requireAuthenticated(Customer.self)
         let detachmentId = try req.parameters.next(Int.self)
@@ -531,10 +552,10 @@ final class UnitController {
             })
     }
 
-    private func validateUnitInDetachment(detachment: Detachment,
-                                          role: Role,
-                                          unit: Unit,
-                                          conn: DatabaseConnectable) throws -> Future<Void> {
+    private func validateAddingUnitToDetachment(detachment: Detachment,
+                                                role: Role,
+                                                unit: Unit,
+                                                conn: DatabaseConnectable) throws -> Future<Void> {
         let roleUnitsFuture = try role.units.query(on: conn).all()
         let unitTypeFuture = unit.unitType.get(on: conn)
 
@@ -556,7 +577,7 @@ final class UnitController {
         })
     }
 
-    private func validateModelInUnit(unit: SelectedUnit, model: Model, conn: DatabaseConnectable) throws -> Future<Void> {
+    private func validateAddingModelInUnit(unit: SelectedUnit, model: Model, conn: DatabaseConnectable) throws -> Future<Void> {
         // Get all selected models for the unit
         return try unit.models.query(on: conn).all()
             .flatMap({ selectedModels in
@@ -574,6 +595,26 @@ final class UnitController {
                     })
             })
 
+    }
+
+    private func validateRemovingModelFromUnit(unit: SelectedUnit, model: SelectedModel, conn: DatabaseConnectable) throws -> Future<Void> {
+        // Get all selected models for the unit
+        return try unit.models.query(on: conn).all()
+            .flatMap({ selectedModels in
+                // Get the selected model response associated to each to get more information about the selected model
+                let selectedModelResponseFutures = try selectedModels.map { try self.selectedModelResponse(forSelectedModel: $0, conn: conn) }
+                return selectedModelResponseFutures
+                    .flatten(on: conn)
+                    .map({ selectedModelResponses in
+                        // Filter the already selected models matching the newly added model
+                        // If the number of selected models minus the future deletion is lower than the model min quantity,
+                        // do not allow removing a model to the unit
+                        if let modelMatchingAddedModel = selectedModelResponses.filter({ $0.id == model.id! }).first,
+                            selectedModels.count - 1 < modelMatchingAddedModel.model.minQuantity {
+                            throw RoasterHammerError.tooManyModelsInUnit.error()
+                        }
+                    })
+            })
     }
 
     private func validateWeaponsForSelectedModel(selectedModel: SelectedModel,

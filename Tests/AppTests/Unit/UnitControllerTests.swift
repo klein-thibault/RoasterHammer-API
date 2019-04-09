@@ -387,6 +387,101 @@ class UnitControllerTests: BaseTests {
         }
     }
 
+    func testRemoveModelFromUnit() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let troopRoleId = unitRoles.filter({ $0.name == "Troop" }).first!.id
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createTroopUnit(armyId: army.requireID(), app: app)
+
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(troopRoleId)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let oldModels = updatedDetachment.roles[1].units[0].models
+        let modelIdToUse = updatedDetachment.roles[1].units[0].models[0].id
+        let updatedDetachmentWithNewModel = try app.getResponse(to: "detachments/\(detachment.id)/units/\(unit.id)/models/\(modelIdToUse)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let newModels = updatedDetachmentWithNewModel.roles[1].units[0].models
+        XCTAssertTrue(newModels.count == oldModels.count + 1)
+
+        let selectedModelIdToRemove = updatedDetachmentWithNewModel.roles[1].units[0].models[0].id
+        let updatedDetachmentAfterRemovingNewModel = try app.getResponse(to: "detachments/\(detachment.id)/units/\(unit.id)/models/\(selectedModelIdToRemove)",
+            method: .DELETE,
+            headers: ["Content-Type": "application/json"],
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let newModelsAfterRemoval = updatedDetachmentAfterRemovingNewModel.roles[1].units[0].models
+        XCTAssertTrue(newModelsAfterRemoval.count == oldModels.count)
+    }
+
+    func testRemoveModelFromUnit_whenUnitAlreadyHasTheMinimalAmountOfModels() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let troopRoleId = unitRoles.filter({ $0.name == "Troop" }).first!.id
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createTroopUnit(armyId: army.requireID(), app: app)
+
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(troopRoleId)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let oldModels = updatedDetachment.roles[1].units[0].models
+        let modelIdToUse = updatedDetachment.roles[1].units[0].models[0].id
+        let updatedDetachmentWithNewModel = try app.getResponse(to: "detachments/\(detachment.id)/units/\(unit.id)/models/\(modelIdToUse)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let newModels = updatedDetachmentWithNewModel.roles[1].units[0].models
+        XCTAssertTrue(newModels.count == oldModels.count + 1)
+
+        let firstSelectedModelIdToRemove = updatedDetachmentWithNewModel.roles[1].units[0].models[0].id
+        let secondSelectedModelIdToRemove = updatedDetachmentWithNewModel.roles[1].units[0].models[1].id
+        // Remove 1st model, putting back the number of models to the min quantity required in the unit
+        _ = try app.getResponse(to: "detachments/\(detachment.id)/units/\(unit.id)/models/\(firstSelectedModelIdToRemove)",
+            method: .DELETE,
+            headers: ["Content-Type": "application/json"],
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        do {
+            // Remove 2nd model, making the number of models under the min quantity required in the unit
+            _ = try app.getResponse(to: "detachments/\(detachment.id)/units/\(unit.id)/models/\(secondSelectedModelIdToRemove)",
+                method: .DELETE,
+                headers: ["Content-Type": "application/json"],
+                decodeTo: DetachmentResponse.self,
+                loggedInRequest: true,
+                loggedInCustomer: user)
+            XCTFail("Should have received an error")
+        } catch {
+            XCTAssertNotNil(error)
+        }
+
+    }
+
     func testSelectWeaponForSelectedModel() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)

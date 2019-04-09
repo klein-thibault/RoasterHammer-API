@@ -90,6 +90,13 @@ public func routes(_ router: Router) throws {
                              "models",
                              Int.parameter,
                              use: unitController.addModelToUnit)
+    protectedAuthRouter.delete("detachments",
+                               Int.parameter,
+                               "units",
+                               Int.parameter,
+                               "models",
+                               Int.parameter,
+                               use: unitController.removeModelFromUnit)
     protectedAuthRouter.post("detachments",
                              Int.parameter,
                              "models",
@@ -170,7 +177,7 @@ public func routes(_ router: Router) throws {
     router.post("roasterhammer", "factions", Int.parameter, "delete", use: websiteFactionController.deleteFactionHandler)
 
     // QA
-//    let qaController = QAController()
-//    router.post("qa/node", use: qaController.addNodeQA)
-//    router.get("qa/node", use: qaController.getNodeQA)
+    //    let qaController = QAController()
+    //    router.post("qa/node", use: qaController.addNodeQA)
+    //    router.get("qa/node", use: qaController.getNodeQA)
 }
