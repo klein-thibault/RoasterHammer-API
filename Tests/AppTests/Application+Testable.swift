@@ -14,7 +14,9 @@ extension Application {
             env.arguments = environmentArgs
         }
 
-        try App.configure(&config, &env, &services)
+        let environmentConfiguration = registerEnvironmentConfiguration(for: env, services: &services)
+
+        try App.configure(&config, &env, &services, environmentConfiguration)
         let app = try Application(
             config: config,
             environment: env,

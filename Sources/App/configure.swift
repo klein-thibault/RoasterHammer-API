@@ -4,7 +4,10 @@ import FluentPostgreSQL
 import Authentication
 
 /// Called before your application initializes.
-public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
+public func configure(_ config: inout Config,
+                      _ env: inout Environment,
+                      _ services: inout Services,
+                      _ environmentConfiguration: EnvironmentConfiguration) throws {
     /// Register providers first
     try services.register(FluentPostgreSQLProvider())
 
@@ -19,20 +22,10 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
     services.register(middlewares)
 
+    try environmentConfiguration.configure(&services)
+
     // Configure a PostgreSQL database
-    let databaseConfiguration: PostgreSQLDatabaseConfig
-
-    if let databaseURL = Environment.get("DATABASE_URL") {
-        databaseConfiguration = PostgreSQLDatabaseConfig(url: databaseURL)!
-    } else {
-        databaseConfiguration = PostgreSQLDatabaseConfig(hostname: "localhost",
-                                                         port: 5432,
-                                                         username: "postgres",
-                                                         database: "postgres",
-                                                         password: "vPYZxUmZLxYMNiRrkrVX",
-                                                         transport: .cleartext)
-    }
-
+    let databaseConfiguration = environmentConfiguration.databaseConfiguration
     let postgresql = PostgreSQLDatabase(config: databaseConfiguration)
 
     /// Register the configured PostgreSQL database to the database config.
