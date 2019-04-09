@@ -22,6 +22,15 @@ final class WeaponController {
         return getWeapon(byID: weaponId, conn: req)
     }
 
+    func getWeaponsForModel(_ req: Request) throws -> Future<[Weapon]> {
+        let modelId = try req.parameters.next(Int.self)
+
+        return Model.find(modelId, on: req).unwrap(or: RoasterHammerError.modelIsMissing.error())
+            .flatMap(to: [Weapon].self, { model in
+                return try model.weapons.query(on: req).all()
+            })
+    }
+
     func addWeaponToModel(_ req: Request) throws -> Future<UnitResponse> {
         let unitId = try req.parameters.next(Int.self)
         let modelId = try req.parameters.next(Int.self)

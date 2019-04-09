@@ -39,6 +39,43 @@ class WeaponControllerTests: BaseTests {
         XCTAssertEqual(weapon.ability, getWeapon.ability)
     }
 
+    func testGetWeaponsForModel() throws {
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+        let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
+        let model = unit.models[0]
+
+        let addWeaponToUnitRequest = AddWeaponToModelRequest(minQuantity: 1, maxQuantity: 1)
+        let unitWithWeapon = try app.getResponse(to: "units/\(unit.id)/models/\(model.id)/weapons/\(weapon.id!)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addWeaponToUnitRequest,
+            decodeTo: UnitResponse.self)
+        let modelWithWeapon = unitWithWeapon.models[0]
+
+        let modelWeapons = try app.getResponse(to: "/weapons/models/\(model.id)", decodeTo: [Weapon].self)
+
+        XCTAssertEqual(modelWithWeapon.weapons.count, modelWeapons.count)
+        XCTAssertEqual(modelWithWeapon.weapons[0].name, modelWeapons[0].name)
+        XCTAssertEqual(modelWithWeapon.weapons[0].range, modelWeapons[0].range)
+        XCTAssertEqual(modelWithWeapon.weapons[0].type, modelWeapons[0].type)
+        XCTAssertEqual(modelWithWeapon.weapons[0].strength, modelWeapons[0].strength)
+        XCTAssertEqual(modelWithWeapon.weapons[0].armorPiercing, modelWeapons[0].armorPiercing)
+        XCTAssertEqual(modelWithWeapon.weapons[0].damage, modelWeapons[0].damage)
+        XCTAssertEqual(modelWithWeapon.weapons[0].cost, modelWeapons[0].cost)
+        XCTAssertEqual(modelWithWeapon.weapons[0].ability, modelWeapons[0].ability)
+    }
+
+    func testGetWeaponsForModel_whenModelDoesntHaveWeapons() throws {
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+        let model = unit.models[0]
+
+        let modelWeapons = try app.getResponse(to: "/weapons/models/\(model.id)", decodeTo: [Weapon].self)
+
+        XCTAssertEqual(modelWeapons.count, 0)
+    }
+
     func testAttachWeaponToModel() throws {
         let (_, army) = try ArmyTestsUtils.createArmy(app: app)
         let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
