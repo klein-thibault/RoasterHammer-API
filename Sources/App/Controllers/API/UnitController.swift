@@ -82,8 +82,28 @@ final class UnitController {
                             .flatMap(to: DetachmentResponse.self, { _ in
                                 // Return the updated detachment
                                 let detachmentController = DetachmentController()
-                                return try detachmentController.detachmentResponse(forDetachment: detachment, conn: req)
+                                return try detachmentController.getDetachmentById(detachmentId, conn: req)
                             })
+        })
+    }
+
+    func removeUnitFromDetachmentUnitRole(_ req: Request) throws -> Future<DetachmentResponse> {
+        _ = try req.requireAuthenticated(Customer.self)
+        let detachmentId = try req.parameters.next(Int.self)
+        let roleId = try req.parameters.next(Int.self)
+        let unitId = try req.parameters.next(Int.self)
+
+        let unitFuture = SelectedUnit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let roleFuture = Role.find(roleId, on: req).unwrap(or: RoasterHammerError.roleIsMissing.error())
+        let detachmentFuture = Detachment.find(detachmentId, on: req).unwrap(or: RoasterHammerError.detachmentIsMissing.error())
+
+        return flatMap(unitFuture, roleFuture, detachmentFuture, { (unit, role, detachment) in
+            return role.units.detach(unit, on: req)
+                .flatMap(to: DetachmentResponse.self, { _ in
+                    // Return the updated detachment
+                    let detachmentController = DetachmentController()
+                    return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                })
         })
     }
 
@@ -108,7 +128,7 @@ final class UnitController {
                 .flatMap(to: DetachmentResponse.self, { _ in
                     // Return the updated detachment
                     let detachmentController = DetachmentController()
-                    return try detachmentController.detachmentResponse(forDetachment: detachment, conn: req)
+                    return try detachmentController.getDetachmentById(detachmentId, conn: req)
                 })
         })
     }
@@ -133,7 +153,7 @@ final class UnitController {
                 })
                 .flatMap(to: DetachmentResponse.self, { detachment in
                     let detachmentController = DetachmentController()
-                    return try detachmentController.detachmentResponse(forDetachment: detachment, conn: req)
+                    return try detachmentController.getDetachmentById(detachmentId, conn: req)
                 })
         })
     }

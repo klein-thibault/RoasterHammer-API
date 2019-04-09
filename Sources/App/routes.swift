@@ -76,6 +76,13 @@ public func routes(_ router: Router) throws {
                              "units",
                              Int.parameter,
                              use: unitController.addUnitToDetachmentUnitRole)
+    protectedAuthRouter.delete("detachments",
+                               Int.parameter,
+                               "roles",
+                               Int.parameter,
+                               "units",
+                               Int.parameter,
+                               use: unitController.removeUnitFromDetachmentUnitRole)
     protectedAuthRouter.post("detachments",
                              Int.parameter,
                              "units",

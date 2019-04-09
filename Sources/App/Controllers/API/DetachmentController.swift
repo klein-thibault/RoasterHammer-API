@@ -151,6 +151,14 @@ final class DetachmentController {
         })
         
     }
+
+    func getDetachmentById(_ detachmentId: Int, conn: DatabaseConnectable) throws -> Future<DetachmentResponse> {
+        return Detachment.find(detachmentId, on: conn)
+            .unwrap(or: RoasterHammerError.detachmentIsMissing.error())
+            .flatMap(to: DetachmentResponse.self, { detachment in
+                return try self.detachmentResponse(forDetachment: detachment, conn: conn)
+            })
+    }
     
     func minMaxUnits(forDetachment detachment: Detachment, andRole role: Role) -> (min: Int, max: Int) {
         switch (detachment.name, role.name) {

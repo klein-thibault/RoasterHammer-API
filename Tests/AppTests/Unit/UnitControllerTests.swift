@@ -292,6 +292,40 @@ class UnitControllerTests: BaseTests {
         }
     }
 
+    func testRemoveUnitFromDetachment() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let updatedDetachmentRole = updatedDetachment.roles
+        let addedUnit = updatedDetachmentRole[0].units
+        XCTAssertTrue(updatedDetachmentRole[0].units.count == 1)
+        XCTAssertEqual(addedUnit[0].unit.name, unit.name)
+        XCTAssertEqual(addedUnit[0].unit.cost, unit.cost)
+
+        let detachmentAfterRemovingModel = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .DELETE,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let updatedDetachmentRoleAfterRemovingModel = detachmentAfterRemovingModel.roles
+        XCTAssertTrue(updatedDetachmentRoleAfterRemovingModel[0].units.count == 0)
+    }
+
     func testAddModelToUnit() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
