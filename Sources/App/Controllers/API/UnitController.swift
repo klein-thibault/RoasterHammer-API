@@ -279,10 +279,12 @@ final class UnitController {
                                                                                        conn: conn) }
                             .flatten(on: conn)
                             .map(to: SelectedUnitResponse.self, { selectedModels in
+                                // Sorted by models with lower max quantity to have sergeants etc on top
+                                let sortedSelectedModels = selectedModels.sorted(by: { $0.model.maxQuantity < $1.model.maxQuantity })
                                 let selectedUnitDTO = SelectedUnitDTO(id: try selectedUnit.requireID())
                                 return SelectedUnitResponse(selectedUnit: selectedUnitDTO,
                                                             unit: unit,
-                                                            models: selectedModels)
+                                                            models: sortedSelectedModels)
                             })
         })
     }
@@ -611,7 +613,7 @@ final class UnitController {
                         // do not allow removing a model to the unit
                         if let modelMatchingAddedModel = selectedModelResponses.filter({ $0.id == model.id! }).first,
                             selectedModels.count - 1 < modelMatchingAddedModel.model.minQuantity {
-                            throw RoasterHammerError.tooManyModelsInUnit.error()
+                            throw RoasterHammerError.tooFewModelsInUnit.error()
                         }
                     })
             })
