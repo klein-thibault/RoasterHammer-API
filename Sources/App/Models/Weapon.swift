@@ -11,7 +11,11 @@ final class Weapon: PostgreSQLModel {
     var damage: String
     var cost: Int
     var ability: String
+    // TODO: to remove, replaced by weaponBuckets
     var models: Siblings<Weapon, Model, ModelWeapon> {
+        return siblings()
+    }
+    var weaponBuckets: Siblings<Weapon, WeaponBucket, WeaponBucketWeapon> {
         return siblings()
     }
 

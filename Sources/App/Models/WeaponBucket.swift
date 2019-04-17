@@ -4,8 +4,12 @@ import FluentPostgreSQL
 final class WeaponBucket: PostgreSQLModel {
     var id: Int?
     var name: String
-    // TODO: add link between weapon and weapon option
-    // and weapon option and weapon
+    var models: Siblings<WeaponBucket, SelectedModel, SelectedModelWeaponBucket> {
+        return siblings()
+    }
+    var weapons: Siblings<WeaponBucket, Weapon, WeaponBucketWeapon> {
+        return siblings()
+    }
 
     init(name: String) {
         self.name = name
