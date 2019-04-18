@@ -13,23 +13,35 @@ class WeaponBucketControllerTests: BaseTests {
     }
 
     func testAssignModelToWeaponBucket() throws {
+        let user = try app.createAndLogUser()
         let (_, weaponBucket) = try WeaponBucketTestUtils.createWeaponBucket(app: app)
         let (_, army) = try ArmyTestsUtils.createArmy(app: app)
-        let (_, unit) = try UnitTestsUtils.createTroopUnit(armyId: army.requireID(), app: app)
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
 
-        guard let model = unit.models.first else {
-            assertionFailure("The model could not be found")
-            return
-        }
+        let model = unit.models[0]
 
-        let updatedWeaponBucket = try app.getResponse(to: "weapon-buckets/\(weaponBucket.id)/models/\(model.id)",
+        let _ = try app.getResponse(to: "weapon-buckets/\(weaponBucket.id)/models/\(model.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: nil,
-            decodeTo: WeaponBucket.self)
-        let weaponBucketModels = try updatedWeaponBucket.models.query(on: conn).all().wait()
+            decodeTo: WeaponBucketResponse.self)
 
-        XCTAssertTrue(weaponBucketModels.count == 1)
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+        let updatedDetachmentRole = updatedDetachment.roles
+        let addedUnit = updatedDetachmentRole[0].units
+        let updatedModel = addedUnit[0].unit.models[0]
+
+
+        XCTAssertTrue(updatedModel.weaponBuckets.count == 1)
     }
 
     func testAssignWeaponToWeaponBucket() throws {
@@ -40,66 +52,53 @@ class WeaponBucketControllerTests: BaseTests {
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: nil,
-            decodeTo: WeaponBucket.self)
-        let weaponBucketWeapons = try updatedWeaponBucket.weapons.query(on: conn).all().wait()
+            decodeTo: WeaponBucketResponse.self)
 
-        XCTAssertTrue(weaponBucketWeapons.count == 1)
-    }
-
-    func testGetWeaponBucketsForModel() throws {
-        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
-        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
-        let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
-        let model = unit.models[0]
-
-        
-
-//        let addWeaponToUnitRequest = AddWeaponToModelRequest(minQuantity: 1, maxQuantity: 1)
-//        let unitWithWeapon = try app.getResponse(to: "units/\(unit.id)/models/\(model.id)/weapons/\(weapon.id!)",
-//            method: .POST,
-//            headers: ["Content-Type": "application/json"],
-//            data: addWeaponToUnitRequest,
-//            decodeTo: UnitResponse.self)
-//        let modelWithWeapon = unitWithWeapon.models[0]
-//
-//        let modelWeapons = try app.getResponse(to: "/weapons/models/\(model.id)", decodeTo: [Weapon].self)
-//
-//        XCTAssertEqual(modelWithWeapon.weapons.count, modelWeapons.count)
-//        XCTAssertEqual(modelWithWeapon.weapons[0].name, modelWeapons[0].name)
-//        XCTAssertEqual(modelWithWeapon.weapons[0].range, modelWeapons[0].range)
-//        XCTAssertEqual(modelWithWeapon.weapons[0].type, modelWeapons[0].type)
-//        XCTAssertEqual(modelWithWeapon.weapons[0].strength, modelWeapons[0].strength)
-//        XCTAssertEqual(modelWithWeapon.weapons[0].armorPiercing, modelWeapons[0].armorPiercing)
-//        XCTAssertEqual(modelWithWeapon.weapons[0].damage, modelWeapons[0].damage)
-//        XCTAssertEqual(modelWithWeapon.weapons[0].cost, modelWeapons[0].cost)
-//        XCTAssertEqual(modelWithWeapon.weapons[0].ability, modelWeapons[0].ability)
+        XCTAssertTrue(updatedWeaponBucket.weapons.count == 1)
     }
 
     func testAttachWeaponToModel() throws {
+        let user = try app.createAndLogUser()
+        let (_, weaponBucket) = try WeaponBucketTestUtils.createWeaponBucket(app: app)
         let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
         let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
         let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
         let model = unit.models[0]
 
-//        let addWeaponToUnitRequest = AddWeaponToModelRequest(minQuantity: 1, maxQuantity: 1)
-//        let unitWithWeapon = try app.getResponse(to: "units/\(unit.id)/models/\(model.id)/weapons/\(weapon.id!)",
-//            method: .POST,
-//            headers: ["Content-Type": "application/json"],
-//            data: addWeaponToUnitRequest,
-//            decodeTo: UnitResponse.self)
-//        let modelWithWeapon = unitWithWeapon.models[0]
-//
-//        XCTAssertEqual(modelWithWeapon.weapons.count, 1)
-//        XCTAssertEqual(modelWithWeapon.weapons[0].name, "Pistol")
-//        XCTAssertEqual(modelWithWeapon.weapons[0].range, "12\"")
-//        XCTAssertEqual(modelWithWeapon.weapons[0].type, "Pistol")
-//        XCTAssertEqual(modelWithWeapon.weapons[0].strength, "3")
-//        XCTAssertEqual(modelWithWeapon.weapons[0].armorPiercing, "0")
-//        XCTAssertEqual(modelWithWeapon.weapons[0].damage, "1")
-//        XCTAssertEqual(modelWithWeapon.weapons[0].cost, 15)
-//        XCTAssertEqual(modelWithWeapon.weapons[0].ability, "-")
-//        XCTAssertEqual(modelWithWeapon.weapons[0].minQuantity, 1)
-//        XCTAssertEqual(modelWithWeapon.weapons[0].maxQuantity, 1)
+        let weaponBucketWithModel = try app.getResponse(to: "weapon-buckets/\(weaponBucket.id)/models/\(model.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: nil,
+            decodeTo: WeaponBucketResponse.self)
+        let _ = try app.getResponse(to: "weapon-buckets/\(weaponBucketWithModel.id)/weapons/\(weapon.requireID())",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: nil,
+            decodeTo: WeaponBucketResponse.self)
+
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+        let updatedDetachmentRole = updatedDetachment.roles
+        let addedUnit = updatedDetachmentRole[0].units
+        let updatedModel = addedUnit[0].unit.models[0]
+
+        XCTAssertEqual(updatedModel.weaponBuckets[0].weapons.count, 1)
+        XCTAssertEqual(updatedModel.weaponBuckets[0].weapons[0].name, weapon.name)
+        XCTAssertEqual(updatedModel.weaponBuckets[0].weapons[0].range, weapon.range)
+        XCTAssertEqual(updatedModel.weaponBuckets[0].weapons[0].type, weapon.type)
+        XCTAssertEqual(updatedModel.weaponBuckets[0].weapons[0].strength, weapon.strength)
+        XCTAssertEqual(updatedModel.weaponBuckets[0].weapons[0].armorPiercing, weapon.armorPiercing)
+        XCTAssertEqual(updatedModel.weaponBuckets[0].weapons[0].damage, weapon.damage)
+        XCTAssertEqual(updatedModel.weaponBuckets[0].weapons[0].cost, weapon.cost)
+        XCTAssertEqual(updatedModel.weaponBuckets[0].weapons[0].ability, weapon.ability)
     }
 
 }
