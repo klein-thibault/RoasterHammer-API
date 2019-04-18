@@ -55,7 +55,7 @@ public func configure(_ config: inout Config,
     SelectedModel.defaultDatabase = .psql
     SelectedModelWeapon.defaultDatabase = .psql
     SelectedUnitModel.defaultDatabase = .psql
-    SelectedModelWeaponBucket.defaultDatabase = .psql
+    ModelWeaponBucket.defaultDatabase = .psql
     WeaponBucketWeapon.defaultDatabase = .psql
     migrations.add(model: Customer.self, database: .psql)
     migrations.add(model: UserToken.self, database: .psql)
@@ -90,7 +90,7 @@ public func configure(_ config: inout Config,
     migrations.add(migration: CreateUnitKeyword.self, database: .psql)
     migrations.add(migration: CreateFactionRule.self, database: .psql)
     migrations.add(migration: CreateUnitModel.self, database: .psql)
-    migrations.add(migration: CreateSelectedModelWeaponBucket.self, database: .psql)
+    migrations.add(migration: CreateModelWeaponBucket.self, database: .psql)
     migrations.add(migration: CreateWeaponBucketWeapon.self, database: .psql)
     migrations.add(migration: PopulateUnitTypeData.self, database: .psql)
     services.register(migrations)

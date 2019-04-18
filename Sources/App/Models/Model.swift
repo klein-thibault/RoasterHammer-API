@@ -11,7 +11,11 @@ final class Model: PostgreSQLModel {
     var characteristics: Children<Model, Characteristics> {
         return children(\.modelId)
     }
+    // TODO: to remove, replaced by weaponBuckets
     var weapons: Siblings<Model, Weapon, ModelWeapon> {
+        return siblings()
+    }
+    var weaponBuckets: Siblings<Model, WeaponBucket, ModelWeaponBucket> {
         return siblings()
     }
 

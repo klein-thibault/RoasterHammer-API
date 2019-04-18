@@ -4,7 +4,7 @@ import FluentPostgreSQL
 final class WeaponBucket: PostgreSQLModel {
     var id: Int?
     var name: String
-    var models: Siblings<WeaponBucket, SelectedModel, SelectedModelWeaponBucket> {
+    var models: Siblings<WeaponBucket, Model, ModelWeaponBucket> {
         return siblings()
     }
     var weapons: Siblings<WeaponBucket, Weapon, WeaponBucketWeapon> {
