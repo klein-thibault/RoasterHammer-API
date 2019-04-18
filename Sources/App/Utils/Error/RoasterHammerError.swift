@@ -18,6 +18,7 @@ enum RoasterHammerError: Swift.Error {
     case weaponIsMissing
     case unitTypeIsMissing
     case factionIsMissing
+    case weaponBucketIsMissing
     case characteristicsAreMissing
     case addingUnitToWrongRole
     case addingUniqueUnitMoreThanOnce
@@ -53,6 +54,8 @@ extension RoasterHammerError {
             return Abort(.badRequest, reason: "The unit type could not be found")
         case .factionIsMissing:
             return Abort(.badRequest, reason: "The faction could not be found")
+        case .weaponBucketIsMissing:
+            return Abort(.badRequest, reason: "The weapon bucket could not be found")
         case .characteristicsAreMissing:
             return Abort(.badRequest, reason: "The model characteristics could not be found")
         case .addingUnitToWrongRole:

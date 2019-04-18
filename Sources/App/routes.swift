@@ -121,6 +121,20 @@ public func routes(_ router: Router) throws {
     router.patch("weapons", Int.parameter, use: weaponController.editWeapon)
     router.delete("weapons", Int.parameter, use: weaponController.deleteWeapon)
 
+    // Weapon Bucket
+    let weaponBucketController = WeaponBucketController()
+    router.post("weapon-buckets", use: weaponBucketController.createWeaponBucket)
+    router.post("weapon-buckets",
+                Int.parameter,
+                "models",
+                Int.parameter,
+                use: weaponBucketController.assignModelToWeaponBucket)
+    router.post("weapon-buckets",
+                Int.parameter,
+                "weapons",
+                Int.parameter,
+                use: weaponBucketController.assignWeaponToWeaponBucket)
+
     // Website
     let websiteController = WebsiteController()
     router.get("roasterhammer", use: websiteController.indexHandler)

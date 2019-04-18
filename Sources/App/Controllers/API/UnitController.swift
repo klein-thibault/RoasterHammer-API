@@ -231,6 +231,11 @@ final class UnitController {
             })
     }
 
+    func getModel(byID id: Int, conn: DatabaseConnectable) -> Future<Model> {
+        return Model.find(id, on: conn)
+        .unwrap(or: RoasterHammerError.modelIsMissing.error())
+    }
+
     func selectedModelResponse(forSelectedModel selectedModel: SelectedModel,
                                conn: DatabaseConnectable) throws -> Future<SelectedModelResponse> {
         let modelFuture = Model
