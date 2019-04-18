@@ -491,11 +491,9 @@ class UnitControllerTests: BaseTests {
         let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
         let model = unit.models[0]
 
-        let addWeaponToUnitRequest = AddWeaponToModelRequest(minQuantity: 1, maxQuantity: 1)
-        try app.sendRequest(to: "units/\(unit.id)/models/\(model.id)/weapons/\(weapon.id!)",
-            method: .POST,
-            headers: ["Content-Type": "application/json"],
-            data: addWeaponToUnitRequest)
+        let weaponBucket = try WeaponBucketTestUtils.assignWeaponToModel(weaponId: weapon.requireID(),
+                                                                            modelId: model.id,
+                                                                            app: app)
 
         let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
         let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
@@ -508,7 +506,7 @@ class UnitControllerTests: BaseTests {
         let updatedDetachmentRole = updatedDetachment.roles
         let addedUnit = updatedDetachmentRole[0].units
         let addedModels = addedUnit[0].models
-        let modelWeapon = addedModels[0].model.weapons[0]
+        let modelWeapon = weaponBucket.weapons[0]
 
         let updatedDetachmentWithWeapon = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapons/\(modelWeapon.id)",
             method: .POST,
@@ -530,11 +528,9 @@ class UnitControllerTests: BaseTests {
         let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
         let model = unit.models[0]
 
-        let addWeaponToUnitRequest = AddWeaponToModelRequest(minQuantity: 1, maxQuantity: 1)
-        try app.sendRequest(to: "units/\(unit.id)/models/\(model.id)/weapons/\(weapon.id!)",
-            method: .POST,
-            headers: ["Content-Type": "application/json"],
-            data: addWeaponToUnitRequest)
+        let weaponBucket = try WeaponBucketTestUtils.assignWeaponToModel(weaponId: weapon.requireID(),
+                                                                         modelId: model.id,
+                                                                         app: app)
 
         let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
         let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
@@ -547,7 +543,7 @@ class UnitControllerTests: BaseTests {
         let updatedDetachmentRole = updatedDetachment.roles
         let addedUnit = updatedDetachmentRole[0].units
         let addedModels = addedUnit[0].models
-        let modelWeapon = addedModels[0].model.weapons[0]
+        let modelWeapon = weaponBucket.weapons[0]
 
         _ = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapons/\(modelWeapon.id)",
             method: .POST,

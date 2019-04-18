@@ -6,20 +6,28 @@ final class WeaponBucketController {
 
     // MARK: - Public Functions
 
-    func createWeaponBucket(_ req: Request) throws -> Future<WeaponBucket> {
+    func createWeaponBucket(_ req: Request) throws -> Future<WeaponBucketResponse> {
         return try req.content.decode(CreateWeaponBucketRequest.self)
             .flatMap(to: WeaponBucket.self, { request in
                 return self.createWeaponBucket(request: request, conn: req)
             })
+            .flatMap(to: WeaponBucketResponse.self, { weaponBucket in
+                return try self.weaponBucketResponse(forWeaponBucket: weaponBucket,
+                                                     conn: req)
+            })
     }
 
-    func getWeaponBucket(_ req: Request) throws -> Future<WeaponBucket> {
+    func getWeaponBucket(_ req: Request) throws -> Future<WeaponBucketResponse> {
         let weaponBucketId = try req.parameters.next(Int.self)
 
         return getWeaponBucketById(weaponBucketId, conn: req)
+            .flatMap(to: WeaponBucketResponse.self, { weaponBucket in
+                return try self.weaponBucketResponse(forWeaponBucket: weaponBucket,
+                                                     conn: req)
+            })
     }
 
-    func assignModelToWeaponBucket(_ req: Request) throws -> Future<WeaponBucket> {
+    func assignModelToWeaponBucket(_ req: Request) throws -> Future<WeaponBucketResponse> {
         let modelId = try req.parameters.next(Int.self)
         let weaponBucketId = try req.parameters.next(Int.self)
 
@@ -29,9 +37,13 @@ final class WeaponBucketController {
         return flatMap(to: WeaponBucket.self, modelFuture, weaponBucketFuture, { (model, weaponBucket) in
             return try self.assignWeaponBucketToModel(weaponBucket: weaponBucket, model: model, conn: req)
         })
+            .flatMap(to: WeaponBucketResponse.self, { weaponBucket in
+                return try self.weaponBucketResponse(forWeaponBucket: weaponBucket,
+                                                     conn: req)
+            })
     }
 
-    func assignWeaponToWeaponBucket(_ req: Request) throws -> Future<WeaponBucket> {
+    func assignWeaponToWeaponBucket(_ req: Request) throws -> Future<WeaponBucketResponse> {
         let weaponId = try req.parameters.next(Int.self)
         let weaponBucketId = try req.parameters.next(Int.self)
 
@@ -41,6 +53,10 @@ final class WeaponBucketController {
         return flatMap(to: WeaponBucket.self, weaponFuture, weaponBucketFuture, { (weapon, weaponBucket) in
             return try self.assignWeaponToWeaponBucket(weaponBucket: weaponBucket, weapon: weapon, conn: req)
         })
+            .flatMap(to: WeaponBucketResponse.self, { weaponBucket in
+                return try self.weaponBucketResponse(forWeaponBucket: weaponBucket,
+                                                     conn: req)
+            })
     }
 
     // MARK: - Utils Functions

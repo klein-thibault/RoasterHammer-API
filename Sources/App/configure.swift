@@ -47,7 +47,6 @@ public func configure(_ config: inout Config,
     RoasterDetachment.defaultDatabase = .psql
     UnitRule.defaultDatabase = .psql
     UnitRole.defaultDatabase = .psql
-    ModelWeapon.defaultDatabase = .psql
     UnitKeyword.defaultDatabase = .psql
     FactionRule.defaultDatabase = .psql
     UnitModel.defaultDatabase = .psql
