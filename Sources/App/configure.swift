@@ -86,7 +86,6 @@ public func configure(_ config: inout Config,
     migrations.add(migration: CreateSelectedModelWeapon.self, database: .psql)
     migrations.add(migration: CreateUnitRule.self, database: .psql)
     migrations.add(migration: CreateUnitRole.self, database: .psql)
-    migrations.add(migration: CreateModelWeapon.self, database: .psql)
     migrations.add(migration: CreateUnitKeyword.self, database: .psql)
     migrations.add(migration: CreateFactionRule.self, database: .psql)
     migrations.add(migration: CreateUnitModel.self, database: .psql)

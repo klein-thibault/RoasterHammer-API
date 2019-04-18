@@ -109,15 +109,7 @@ public func routes(_ router: Router) throws {
     let weaponController = WeaponController()
     router.post("weapons", use: weaponController.createWeapon)
     router.get("weapons", use: weaponController.getAllWeapons)
-    router.get("weapons", "models", Int.parameter, use: weaponController.getWeaponsForModel)
     router.get("weapons", Int.parameter, use: weaponController.getWeaponById)
-    router.post("units",
-                Int.parameter,
-                "models",
-                Int.parameter,
-                "weapons",
-                Int.parameter,
-                use: weaponController.addWeaponToModel)
     router.patch("weapons", Int.parameter, use: weaponController.editWeapon)
     router.delete("weapons", Int.parameter, use: weaponController.deleteWeapon)
 

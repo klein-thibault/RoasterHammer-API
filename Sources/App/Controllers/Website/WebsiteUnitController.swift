@@ -107,25 +107,26 @@ struct WebsiteUnitController {
         for modelId in assignWeaponRequest.minQuantitySelection.keys {
             // Only selected weapons will be in weapon checkbox.
             // If a weapon is missing from weaponCheckbox, it can be ignored since it has not been selected
-            if let modelIdInt = modelId.intValue,
-                let weaponSelection = assignWeaponRequest.weaponCheckbox[modelId],
-                let minQuantitySelection = assignWeaponRequest.minQuantitySelection[modelId],
-                let maxQuantitySelection = assignWeaponRequest.maxQuantitySelection[modelId] {
-                let weaponIds = weaponSelection.keys
-                for weaponId in weaponIds {
-                    if let weaponIdInt = weaponId.intValue,
-                        let minQuantity = minQuantitySelection[weaponId]?.intValue,
-                        let maxQuantity = maxQuantitySelection[weaponId]?.intValue {
-                        let addWeaponToModelRequest = AddWeaponToModelRequest(minQuantity: minQuantity, maxQuantity: maxQuantity)
-
-                        assignWeaponToUnitFutures.append(weaponController.addWeaponToModel(unitId: unitId,
-                                                                                           modelId: modelIdInt,
-                                                                                           weaponId: weaponIdInt,
-                                                                                           request: addWeaponToModelRequest,
-                                                                                           conn: req))
-                    }
-                }
-            }
+            // TODO: update with weapon buckets
+//            if let modelIdInt = modelId.intValue,
+//                let weaponSelection = assignWeaponRequest.weaponCheckbox[modelId],
+//                let minQuantitySelection = assignWeaponRequest.minQuantitySelection[modelId],
+//                let maxQuantitySelection = assignWeaponRequest.maxQuantitySelection[modelId] {
+//                let weaponIds = weaponSelection.keys
+//                for weaponId in weaponIds {
+//                    if let weaponIdInt = weaponId.intValue,
+//                        let minQuantity = minQuantitySelection[weaponId]?.intValue,
+//                        let maxQuantity = maxQuantitySelection[weaponId]?.intValue {
+//                        let addWeaponToModelRequest = AddWeaponToModelRequest(minQuantity: minQuantity, maxQuantity: maxQuantity)
+//
+//                        assignWeaponToUnitFutures.append(weaponController.addWeaponToModel(unitId: unitId,
+//                                                                                           modelId: modelIdInt,
+//                                                                                           weaponId: weaponIdInt,
+//                                                                                           request: addWeaponToModelRequest,
+//                                                                                           conn: req))
+//                    }
+//                }
+//            }
         }
 
         return assignWeaponToUnitFutures.flatten(on: req)

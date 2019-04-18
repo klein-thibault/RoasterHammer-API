@@ -2,14 +2,6 @@ import Vapor
 import FluentPostgreSQL
 import RoasterHammer_Shared
 
-public struct CreateWeaponBucketRequest: Content {
-    public let name: String
-
-    public init(name: String) {
-        self.name = name
-    }
-}
-
 final class WeaponBucketController {
 
     // MARK: - Public Functions
@@ -19,6 +11,12 @@ final class WeaponBucketController {
             .flatMap(to: WeaponBucket.self, { request in
                 return self.createWeaponBucket(request: request, conn: req)
             })
+    }
+
+    func getWeaponBucket(_ req: Request) throws -> Future<WeaponBucket> {
+        let weaponBucketId = try req.parameters.next(Int.self)
+
+        return getWeaponBucketById(weaponBucketId, conn: req)
     }
 
     func assignModelToWeaponBucket(_ req: Request) throws -> Future<WeaponBucket> {
@@ -47,6 +45,19 @@ final class WeaponBucketController {
 
     // MARK: - Utils Functions
 
+    func weaponBucketResponse(forWeaponBucket weaponBucket: WeaponBucket,
+                              conn: DatabaseConnectable) throws -> Future<WeaponBucketResponse> {
+        return try weaponBucket.weapons.query(on: conn).all()
+            .map(to: [WeaponResponse].self, { (weapons) in
+                let weaponController = WeaponController()
+                return try weapons.map { try weaponController.weaponResponse(forWeapon: $0) }
+            })
+            .map(to: WeaponBucketResponse.self, { (weapons) in
+                let weaponBucketDTO = try WeaponBucketDTO(id: weaponBucket.requireID(), name: weaponBucket.name)
+                return WeaponBucketResponse(weaponBucket: weaponBucketDTO, weapons: weapons)
+            })
+    }
+
     func createWeaponBucket(request: CreateWeaponBucketRequest,
                             conn: DatabaseConnectable) -> Future<WeaponBucket> {
         return WeaponBucket(name: request.name).save(on: conn)
@@ -73,5 +84,9 @@ final class WeaponBucketController {
             .flatMap(to: WeaponBucket.self, { _ in
                 return try self.getWeaponBucketById(weaponBucket.requireID(), conn: conn)
             })
+    }
+
+    func getWeaponBucketForModelId(model: Model, conn: DatabaseConnectable) throws -> Future<[WeaponBucket]> {
+        return try model.weaponBuckets.query(on: conn).all()
     }
 }

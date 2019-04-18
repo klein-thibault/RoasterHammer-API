@@ -249,22 +249,16 @@ final class UnitController {
         }
         let selectedWeaponsFuture = try selectedModel.weapons.query(on: conn).all()
 
-        return flatMap(to: SelectedModelResponse.self,
-                       modelFuture,
-                       modelResponseFuture,
-                       selectedWeaponsFuture, { model, modelResponse, weapons in
-                        let weaponController = WeaponController()
-                        let weaponsResponseFuture = try weapons.map { try weaponController.weaponResponse(forWeapon: $0,
-                                                                                                          model: model,
-                                                                                                          conn: conn) }
-                            .flatten(on: conn)
-
-                        return weaponsResponseFuture.map(to: SelectedModelResponse.self, { weapons in
-                            let selectedModelDTO = SelectedModelDTO(id: try selectedModel.requireID())
-                            return SelectedModelResponse(selectedModel: selectedModelDTO,
-                                                         model: modelResponse,
-                                                         selectedWeapons: weapons)
-                        })
+        return map(to: SelectedModelResponse.self,
+                   modelFuture,
+                   modelResponseFuture,
+                   selectedWeaponsFuture, { model, modelResponse, weapons in
+                    let weaponController = WeaponController()
+                    let weaponResponses = try weapons.map { try weaponController.weaponResponse(forWeapon: $0) }
+                    let selectedModelDTO = SelectedModelDTO(id: try selectedModel.requireID())
+                    return SelectedModelResponse(selectedModel: selectedModelDTO,
+                                                 model: modelResponse,
+                                                 selectedWeapons: weaponResponses)
         })
     }
     
@@ -332,16 +326,16 @@ final class UnitController {
 
     func modelResponse(forModel model: Model, conn: DatabaseConnectable) throws -> Future<ModelResponse> {
         let characteristicsFuture = try model.characteristics.query(on: conn).first().unwrap(or: RoasterHammerError.characteristicsAreMissing.error())
-        let weaponsFuture = try model.weapons.query(on: conn).all()
+        let weaponBucketsFuture = try model.weaponBuckets.query(on: conn).all()
 
         return flatMap(to: ModelResponse.self,
                        characteristicsFuture,
-                       weaponsFuture, { (characteristics, weapons) in
-                        let weaponController = WeaponController()
-                        return try weapons
-                            .map { try weaponController.weaponResponse(forWeapon: $0, model: model, conn: conn) }
+                       weaponBucketsFuture, { (characteristics, weaponBuckets) in
+                        let weaponBucketController = WeaponBucketController()
+                        return try weaponBuckets
+                            .map { try weaponBucketController.weaponBucketResponse(forWeaponBucket: $0, conn: conn) }
                             .flatten(on: conn)
-                            .map(to: ModelResponse.self, { (weaponResponses) in
+                            .map(to: ModelResponse.self, { (weaponBucketResponses) in
                                 let modelDTO = ModelDTO(id: try model.requireID(),
                                                         name: model.name,
                                                         cost: model.cost,
@@ -361,7 +355,7 @@ final class UnitController {
                                                                             modelId: characteristics.modelId)
                                 return ModelResponse(model: modelDTO,
                                                      characteristics: characteristicsDTO,
-                                                     weapons: weaponResponses)
+                                                     weaponBuckets: weaponBucketResponses)
                             })
         })
     }

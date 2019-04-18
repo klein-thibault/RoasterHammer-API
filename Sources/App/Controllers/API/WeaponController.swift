@@ -22,30 +22,6 @@ final class WeaponController {
         return getWeapon(byID: weaponId, conn: req)
     }
 
-    func getWeaponsForModel(_ req: Request) throws -> Future<[Weapon]> {
-        let modelId = try req.parameters.next(Int.self)
-
-        return Model.find(modelId, on: req).unwrap(or: RoasterHammerError.modelIsMissing.error())
-            .flatMap(to: [Weapon].self, { model in
-                return try model.weapons.query(on: req).all()
-            })
-    }
-
-    func addWeaponToModel(_ req: Request) throws -> Future<UnitResponse> {
-        let unitId = try req.parameters.next(Int.self)
-        let modelId = try req.parameters.next(Int.self)
-        let weaponId = try req.parameters.next(Int.self)
-
-        return try req.content.decode(AddWeaponToModelRequest.self)
-            .flatMap(to: UnitResponse.self, { request in
-                return self.addWeaponToModel(unitId: unitId,
-                                             modelId: modelId,
-                                             weaponId: weaponId,
-                                             request: request,
-                                             conn: req)
-            })
-    }
-
     func editWeapon(_ req: Request) throws -> Future<Weapon> {
         let weaponId = try req.parameters.next(Int.self)
 
@@ -62,29 +38,17 @@ final class WeaponController {
 
     // MARK: - Utils Functions
 
-    func weaponResponse(forWeapon weapon: Weapon,
-                        model: Model,
-                        conn: DatabaseConnectable) throws -> Future<WeaponResponse> {
-        let unitWeapon = try model.weapons
-            .pivots(on: conn)
-            .filter(\.weaponId == weapon.requireID())
-            .first()
-            .unwrap(or: RoasterHammerError.weaponIsMissing.error())
-
-        return unitWeapon.map(to: WeaponResponse.self, { unitWeapon in
-            let weaponDTO = WeaponDTO(id: try weapon.requireID(),
-                                      name: weapon.name,
-                                      range: weapon.range,
-                                      type: weapon.type,
-                                      strength: weapon.strength,
-                                      armorPiercing: weapon.armorPiercing,
-                                      damage: weapon.damage,
-                                      cost: weapon.cost,
-                                      ability: weapon.ability)
-            return WeaponResponse(weapon: weaponDTO,
-                                  minQuantity: unitWeapon.minQuantity,
-                                  maxQuantity: unitWeapon.maxQuantity)
-        })
+    func weaponResponse(forWeapon weapon: Weapon) throws -> WeaponResponse {
+        let weaponDTO = WeaponDTO(id: try weapon.requireID(),
+                                  name: weapon.name,
+                                  range: weapon.range,
+                                  type: weapon.type,
+                                  strength: weapon.strength,
+                                  armorPiercing: weapon.armorPiercing,
+                                  damage: weapon.damage,
+                                  cost: weapon.cost,
+                                  ability: weapon.ability)
+        return WeaponResponse(weapon: weaponDTO)
     }
 
     func getAllWeapons(conn: DatabaseConnectable) -> Future<[Weapon]> {
@@ -133,29 +97,6 @@ final class WeaponController {
             .unwrap(or: RoasterHammerError.weaponIsMissing.error())
             .delete(on: conn)
             .transform(to: HTTPStatus.ok)
-    }
-    
-    func addWeaponToModel(unitId: Int,
-                          modelId: Int,
-                          weaponId: Int,
-                          request: AddWeaponToModelRequest,
-                          conn: DatabaseConnectable) -> Future<UnitResponse> {
-        let unitFuture = Unit.find(unitId, on: conn).unwrap(or: RoasterHammerError.unitIsMissing.error())
-        let modelFuture = Model.find(modelId, on: conn).unwrap(or: RoasterHammerError.modelIsMissing.error())
-        let weaponFuture = Weapon.find(weaponId, on: conn).unwrap(or: RoasterHammerError.weaponIsMissing.error())
-
-        return flatMap(unitFuture, modelFuture, weaponFuture, { (unit, model, weapon) in
-            return model.weapons.attach(weapon, on: conn)
-                .flatMap(to: ModelWeapon.self, { modelWeapon in
-                    modelWeapon.minQuantity = request.minQuantity
-                    modelWeapon.maxQuantity = request.maxQuantity
-                    return modelWeapon.update(on: conn)
-                })
-                .flatMap(to: UnitResponse.self, { _ in
-                    let unitController = UnitController()
-                    return try unitController.unitResponse(forUnit: unit, conn: conn)
-                })
-        })
     }
 
 }
