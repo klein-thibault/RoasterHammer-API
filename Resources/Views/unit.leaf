@@ -54,6 +54,7 @@
 <h4>Weapon Buckets</h4>
 #for(weaponBucket in model.weaponBuckets) {
 <h5>#(weaponBucket.name)</h5>
+<a class="btn btn-primary" href="/roasterhammer/weapon-buckets/#(weaponBucket.id)/edit" role="button">Edit</a>
 <table class="table table-bordered table-hover">
     <thead class="thead-light">
         <tr>
@@ -65,7 +66,6 @@
             <th>D</th>
             <th>Cost</th>
             <th>Ability</th>
-            <th>Quantity</th>
         </tr>
     </thead>
     <tbody>

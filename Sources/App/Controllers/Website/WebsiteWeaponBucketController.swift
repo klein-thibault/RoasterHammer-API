@@ -25,6 +25,18 @@ struct WebsiteWeaponBucketController {
             .transform(to: req.redirect(to: "/roasterhammer/units"))
     }
 
+    func editWeaponBucketHandler(_ req: Request) throws -> Future<View> {
+        let weaponBucketId = try req.parameters.next(Int.self)
+
+        let weaponBucketFuture = WeaponBucketController().getWeaponBucketById(weaponBucketId, conn: req)
+        let weaponsFuture = try WeaponController().getAllWeapons(req)
+
+        return flatMap(to: View.self, weaponBucketFuture, weaponsFuture, { (weaponBucket, weapons) in
+            let context = EditWeaponBucketContext(title: "Edit Weapon Bucket", weaponBucket: weaponBucket, weapons: weapons)
+            return try req.view().render("weaponBucketWeapons", context)
+        })
+    }
+
     // MARK: - Private Functions
 
     // Structure follows [modelId: [request1, request2]]

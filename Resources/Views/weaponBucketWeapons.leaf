@@ -1,0 +1,58 @@
+#set("content") {
+<h1>#(title)</h1>
+
+<h2>#(weaponBucket.name)</h2>
+<form method="post">
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>Weapon</th>
+                <th>Profile</th>
+            </tr>
+        </thead>
+        <tbody>
+            #for(weapon in weapons) {
+            <tr>
+                <td>
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" name="weaponCheckbox[#(weapon.id)]" id="checkbox-#(weapon.id)">
+                            <label class="form-check-label" for="exampleCheck1">#(weapon.name)</label>
+                            </div>
+                </td>
+                <td>
+                    <table class="table table-bordered table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Range</th>
+                                <th>Type</th>
+                                <th>S</th>
+                                <th>AP</th>
+                                <th>D</th>
+                                <th>Cost</th>
+                                <th>Ability</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#(weapon.range)</td>
+                                <td>#(weapon.type)</td>
+                                <td>#(weapon.strength)</td>
+                                <td>#(weapon.armorPiercing)</td>
+                                <td>#(weapon.damage)</td>
+                                <td>#(weapon.cost)</td>
+                                <td>#(weapon.ability)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-primary">
+        Submit
+    </button>
+</form>
+}
+#embed("base")

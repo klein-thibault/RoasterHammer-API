@@ -135,3 +135,9 @@ struct WeaponBucketsContext: WebContextTitle, Encodable {
 struct CreateWeaponBucketData: Content {
     let weaponBuckets: DynamicFormData
 }
+
+struct EditWeaponBucketContext: WebContextTitle, Encodable {
+    let title: String
+    let weaponBucket: WeaponBucket
+    let weapons: [Weapon]
+}
