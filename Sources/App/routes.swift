@@ -68,6 +68,7 @@ public func routes(_ router: Router) throws {
     let unitController = UnitController()
     router.post("units", use: unitController.createUnit)
     router.get("units", use: unitController.units)
+    router.get("units", Int.parameter, use: unitController.getUnit)
     router.patch("units", Int.parameter, use: unitController.editUnit)
     protectedAuthRouter.post("detachments",
                              Int.parameter,
@@ -159,6 +160,12 @@ public func routes(_ router: Router) throws {
                 at: "roasterhammer", "weapons", Int.parameter, "edit",
                 use: websiteWeaponController.editWeaponPostHandler)
     router.post("roasterhammer", "weapons", Int.parameter, "delete", use: websiteWeaponController.deleteWeaponHandler)
+    // - Weapon Buckets
+    let websiteWeaponBucketController = WebsiteWeaponBucketController()
+    router.get("roasterhammer", "units", Int.parameter, "weapon-buckets", use: websiteWeaponBucketController.weaponBucketsHandler)
+    router.post(CreateWeaponBucketData.self,
+                at: "roasterhammer", "units", Int.parameter, "weapon-buckets",
+                use: websiteWeaponBucketController.createWeaponBucketPostHandler)
     // - Armies
     let websiteArmyController = WebsiteArmyController()
     router.get("roasterhammer", "armies", Int.parameter, use: websiteArmyController.armyHandler)

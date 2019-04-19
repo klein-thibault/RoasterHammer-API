@@ -51,6 +51,7 @@
     </tbody>
 </table>
 
+#/*
 <h4>Weapons Available</h4>
 <table class="table table-bordered table-hover">
     <thead class="thead-light">
@@ -82,6 +83,7 @@
         }
     </tbody>
 </table>
+*/
 }
 
 <h2>Rules</h2>

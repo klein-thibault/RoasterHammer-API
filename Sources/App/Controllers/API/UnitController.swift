@@ -30,6 +30,11 @@ final class UnitController {
         return getUnits(armyId: armyId, unitType: filters.unitType, conn: req)
     }
 
+    func getUnit(_ req: Request) throws -> Future<UnitResponse> {
+        let unitId = try req.parameters.next(Int.self)
+        return getUnit(byID: unitId, conn: req)
+    }
+
     func editUnit(_ req: Request) throws -> Future<UnitResponse> {
         let unitId = try req.parameters.next(Int.self)
         return try req.content.decode(CreateUnitRequest.self)

@@ -96,5 +96,12 @@
             <script src="/scripts/repeater-models-script.js"></script>
             <script src="/scripts/create-keywords.js"></script>
         }
+
+        #if(title == "Weapon Buckets") {
+            <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js" integrity="sha384-222hzbb8Z8ZKe6pzP18nTSltQM3PdcAwxWKzGOKOIF+Y3bROr5n9zdQ8yTRHgQkQ" crossorigin="anonymous"></script>
+            <script src="/scripts/jquery.form-repeater.js"></script>
+            <script src="/scripts/repeater-weapon-buckets-script.js"></script>
+        }
     </body>
 </html>

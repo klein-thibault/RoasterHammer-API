@@ -126,3 +126,12 @@ struct AssignWeaponData: Content {
     let minQuantitySelection: DynamicFormData
     let maxQuantitySelection: DynamicFormData
 }
+
+struct WeaponBucketsContext: WebContextTitle, Encodable {
+    let title: String
+    let unit: UnitResponse
+}
+
+struct CreateWeaponBucketData: Content {
+    let weaponBuckets: DynamicFormData
+}

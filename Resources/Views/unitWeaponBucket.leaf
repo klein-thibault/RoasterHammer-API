@@ -1,0 +1,29 @@
+#set("content") {
+<h1>#(title)</h1>
+
+<form method="post">
+    #for(model in unit.models) {
+    <h2>#(model.name)</h2>
+    <div class="weaponBuckets">
+        <!-- The add button -->
+        <button type="button" class="r-btnAdd-weaponBuckets btn btn-secondary">Add</button>
+
+        <div class="r-group-weaponBuckets">
+            <div class="form-group">
+                <input type="hidden" class="form-control" name="weaponBuckets[0][modelId]" id="weaponBuckets_0_modelId" data-pattern-name= "weaponBuckets[++][modelId]" data-pattern-id="weaponBuckets++_modelId" value="#(model.id)"/>
+                <input type="text" class="form-control" name="weaponBuckets[0][name]" id="weaponBuckets_0_name" data-pattern-name= "weaponBuckets[++][name]" data-pattern-id="weaponBuckets++_name" placeholder="Weapon Bucket name (e.g. 'Pistols')"/>
+            </div>
+            <p>
+            <!-- Add a remove button for the item. If one didn't exist, it would be added to overall group -->
+            <button type="button" class="r-btnRemove-weaponBuckets btn btn-secondary">Remove</button>
+            </p>
+        </div>
+    </div>
+    }
+
+    <button type="submit" class="btn btn-primary">
+        Submit
+    </button>
+</form>
+}
+#embed("base")

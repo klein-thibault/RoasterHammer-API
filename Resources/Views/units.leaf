@@ -19,7 +19,7 @@
             <td>
                 <form method="post" action="/roasterhammer/units/#(unit.id)/delete">
                     <a class="btn btn-primary" href="/roasterhammer/units/#(unit.id)/edit" role="button">Edit</a>
-                    <a class="btn btn-primary" href="/roasterhammer/units/#(unit.id)/assign-weapon" role="button">Assign Weapons</a>
+                    <a class="btn btn-primary" href="/roasterhammer/units/#(unit.id)/weapon-buckets" role="button">Create Weapon Buckets</a>
                     <input class="btn btn-danger" type="submit" value="Delete"/>
                 </form>
             </td>
