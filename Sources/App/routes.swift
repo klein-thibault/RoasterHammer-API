@@ -70,6 +70,7 @@ public func routes(_ router: Router) throws {
     router.get("units", use: unitController.units)
     router.get("units", Int.parameter, use: unitController.getUnit)
     router.patch("units", Int.parameter, use: unitController.editUnit)
+    router.delete("units", Int.parameter, use: unitController.deleteUnit)
     protectedAuthRouter.post("detachments",
                              Int.parameter,
                              "roles",
