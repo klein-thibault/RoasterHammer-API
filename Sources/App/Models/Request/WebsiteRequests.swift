@@ -115,18 +115,6 @@ struct EditUnitContext: WebContextTitle, Encodable {
     let editing: Bool = true
 }
 
-struct AssignWeaponToUnitContext: WebContextTitle, Encodable {
-    let title: String
-    let unit: UnitResponse
-    let weapons: [Weapon]
-}
-
-struct AssignWeaponData: Content {
-    let weaponCheckbox: DynamicFormData
-    let minQuantitySelection: DynamicFormData
-    let maxQuantitySelection: DynamicFormData
-}
-
 struct WeaponBucketsContext: WebContextTitle, Encodable {
     let title: String
     let unit: UnitResponse
@@ -140,4 +128,8 @@ struct EditWeaponBucketContext: WebContextTitle, Encodable {
     let title: String
     let weaponBucket: WeaponBucket
     let weapons: [Weapon]
+}
+
+struct EditWeaponBucketData: Content {
+    let weaponCheckbox: [String]
 }

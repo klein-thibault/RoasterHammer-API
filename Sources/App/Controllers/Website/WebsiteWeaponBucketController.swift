@@ -37,6 +37,13 @@ struct WebsiteWeaponBucketController {
         })
     }
 
+    func editWeaponBucketPostHandler(_ req: Request,
+                                     editWeaponBucketRequest: EditWeaponBucketData) throws -> Future<Response> {
+        // TODO: EditWeaponBucketData is not working atm, need to figure out what data type is passed with `weaponCheckbox[#(weapon.id)]`
+        print(editWeaponBucketRequest)
+        return req.future(req.redirect(to: "/roasterhammer/units"))
+    }
+
     // MARK: - Private Functions
 
     // Structure follows [modelId: [request1, request2]]
