@@ -79,60 +79,6 @@ struct WebsiteUnitController {
             .transform(to: req.redirect(to: "/roasterhammer/units"))
     }
 
-    func assignWeaponHandler(_ req: Request) throws -> Future<View> {
-        let unitId = try req.parameters.next(Int.self)
-        let unitFuture = UnitController().getUnit(byID: unitId, conn: req)
-        let weaponsFuture = WeaponController().getAllWeapons(conn: req)
-
-        return flatMap(to: View.self, unitFuture, weaponsFuture, { (unit, weapons) in
-            let context = AssignWeaponToUnitContext(title: "Assign Weapons To Unit",
-                                                    unit: unit,
-                                                    weapons: weapons)
-
-            return try req.view().render("unitWeapons", context)
-        })
-    }
-
-    /*
-     weaponCheckbox: ["{modelId}": ["{weaponId}}": "on"]],
-     minQuantitySelection: ["{modelId}": ["{weaponId}": "1"]],
-     maxQuantitySelection: ["{modelId}": ["{weaponId}": "1"]]
-     */
-    func assignWeaponPostHandler(_ req: Request, assignWeaponRequest: AssignWeaponData) throws -> Future<Response> {
-        let unitId = try req.parameters.next(Int.self)
-        let weaponController = WeaponController()
-        var assignWeaponToUnitFutures: [Future<UnitResponse>] = []
-
-        // Go through each model Id
-        for modelId in assignWeaponRequest.minQuantitySelection.keys {
-            // Only selected weapons will be in weapon checkbox.
-            // If a weapon is missing from weaponCheckbox, it can be ignored since it has not been selected
-            // TODO: update with weapon buckets
-//            if let modelIdInt = modelId.intValue,
-//                let weaponSelection = assignWeaponRequest.weaponCheckbox[modelId],
-//                let minQuantitySelection = assignWeaponRequest.minQuantitySelection[modelId],
-//                let maxQuantitySelection = assignWeaponRequest.maxQuantitySelection[modelId] {
-//                let weaponIds = weaponSelection.keys
-//                for weaponId in weaponIds {
-//                    if let weaponIdInt = weaponId.intValue,
-//                        let minQuantity = minQuantitySelection[weaponId]?.intValue,
-//                        let maxQuantity = maxQuantitySelection[weaponId]?.intValue {
-//                        let addWeaponToModelRequest = AddWeaponToModelRequest(minQuantity: minQuantity, maxQuantity: maxQuantity)
-//
-//                        assignWeaponToUnitFutures.append(weaponController.addWeaponToModel(unitId: unitId,
-//                                                                                           modelId: modelIdInt,
-//                                                                                           weaponId: weaponIdInt,
-//                                                                                           request: addWeaponToModelRequest,
-//                                                                                           conn: req))
-//                    }
-//                }
-//            }
-        }
-
-        return assignWeaponToUnitFutures.flatten(on: req)
-            .transform(to: req.redirect(to: "/roasterhammer/units"))
-    }
-
     // MARK: - Private Functions
 
     private func createUnitRequest(forData data: CreateUnitData) throws -> CreateUnitRequest {

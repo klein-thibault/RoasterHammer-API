@@ -51,39 +51,39 @@
     </tbody>
 </table>
 
-#/*
-<h4>Weapons Available</h4>
-<table class="table table-bordered table-hover">
-    <thead class="thead-light">
-        <tr>
-            <th>Name</th>
-            <th>Range</th>
-            <th>Type</th>
-            <th>S</th>
-            <th>AP</th>
-            <th>D</th>
-            <th>Cost</th>
-            <th>Ability</th>
-            <th>Quantity</th>
-        </tr>
-    </thead>
-    <tbody>
-        #for(weapon in model.weapons) {
-        <tr>
-            <td>#(weapon.name)</td>
-            <td>#(weapon.range)</td>
-            <td>#(weapon.type)</td>
-            <td>#(weapon.strength)</td>
-            <td>#(weapon.armorPiercing)</td>
-            <td>#(weapon.damage)</td>
-            <td>#(weapon.cost)</td>
-            <td>#(weapon.ability)</td>
-            <td>Min: #(weapon.minQuantity) - Max: #(weapon.maxQuantity)</td>
-        </tr>
-        }
-    </tbody>
-</table>
-*/
+    <h4>Weapon Buckets</h4>
+    #for(weaponBucket in model.weaponBuckets) {
+    <h5>#(weaponBucket.name)</h5>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>Name</th>
+                <th>Range</th>
+                <th>Type</th>
+                <th>S</th>
+                <th>AP</th>
+                <th>D</th>
+                <th>Cost</th>
+                <th>Ability</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            #for(weapon in weaponBucket.weapons) {
+            <tr>
+                <td>#(weapon.name)</td>
+                <td>#(weapon.range)</td>
+                <td>#(weapon.type)</td>
+                <td>#(weapon.strength)</td>
+                <td>#(weapon.armorPiercing)</td>
+                <td>#(weapon.damage)</td>
+                <td>#(weapon.cost)</td>
+                <td>#(weapon.ability)</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+    }
 }
 
 <h2>Rules</h2>
