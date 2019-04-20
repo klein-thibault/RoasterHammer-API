@@ -5,7 +5,7 @@ import RoasterHammer_Shared
 
 final class WeaponBucketTestUtils {
     static func createWeaponBucket(app: Application) throws -> (request: CreateWeaponBucketRequest, response: WeaponBucketResponse) {
-        let request = CreateWeaponBucketRequest(name: "Pistol Options")
+        let request = CreateWeaponBucketRequest(name: "Pistol Options", minWeaponQuantity: 1, maxWeaponQuantity: 1)
         let weaponBucket = try app.getResponse(to: "weapon-buckets",
                                                method: .POST,
                                                headers: ["Content-Type": "application/json"],
@@ -18,7 +18,7 @@ final class WeaponBucketTestUtils {
     static func assignWeaponToModel(weaponId: Int,
                                     modelId: Int,
                                     app: Application) throws -> WeaponBucketResponse {
-        let request = CreateWeaponBucketRequest(name: "Pistol Options")
+        let request = CreateWeaponBucketRequest(name: "Pistol Options", minWeaponQuantity: 1, maxWeaponQuantity: 1)
         let weaponBucket = try app.getResponse(to: "weapon-buckets",
                                                method: .POST,
                                                headers: ["Content-Type": "application/json"],

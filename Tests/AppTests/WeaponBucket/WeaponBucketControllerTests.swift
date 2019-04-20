@@ -10,6 +10,8 @@ class WeaponBucketControllerTests: BaseTests {
         let (request, weaponBucket) = try WeaponBucketTestUtils.createWeaponBucket(app: app)
         XCTAssertNotNil(weaponBucket.id)
         XCTAssertEqual(request.name, weaponBucket.name)
+        XCTAssertEqual(request.minWeaponQuantity, weaponBucket.minWeaponQuantity)
+        XCTAssertEqual(request.maxWeaponQuantity, weaponBucket.maxWeaponQuantity)
     }
 
     func testAssignModelToWeaponBucket() throws {

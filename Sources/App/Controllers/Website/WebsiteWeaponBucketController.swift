@@ -54,8 +54,12 @@ struct WebsiteWeaponBucketController {
 
         for weaponBucketDictionary in weaponBucketData.values {
             if let weaponBucketName = weaponBucketDictionary["name"],
+                let weaponBucketMinWeaponQuantity = weaponBucketDictionary["minWeaponQuantity"]?.intValue,
+                let weaponBucketMaxWeaponQuantity = weaponBucketDictionary["maxWeaponQuantity"]?.intValue,
                 let modelId = weaponBucketDictionary["modelId"]?.intValue {
-                let weaponBucketRequest = CreateWeaponBucketRequest(name: weaponBucketName)
+                let weaponBucketRequest = CreateWeaponBucketRequest(name: weaponBucketName,
+                                                                    minWeaponQuantity: weaponBucketMinWeaponQuantity,
+                                                                    maxWeaponQuantity: weaponBucketMaxWeaponQuantity)
 
                 if var requestArray = weaponBuckets[modelId] {
                     requestArray.append(weaponBucketRequest)

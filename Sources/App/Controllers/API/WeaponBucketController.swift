@@ -69,14 +69,20 @@ final class WeaponBucketController {
                 return try weapons.map { try weaponController.weaponResponse(forWeapon: $0) }
             })
             .map(to: WeaponBucketResponse.self, { (weapons) in
-                let weaponBucketDTO = try WeaponBucketDTO(id: weaponBucket.requireID(), name: weaponBucket.name)
+                let weaponBucketDTO = try WeaponBucketDTO(id: weaponBucket.requireID(),
+                                                          name: weaponBucket.name,
+                                                          minWeaponQuantity: weaponBucket.minWeaponQuantity,
+                                                          maxWeaponQuantity: weaponBucket.maxWeaponQuantity)
                 return WeaponBucketResponse(weaponBucket: weaponBucketDTO, weapons: weapons)
             })
     }
 
     func createWeaponBucket(request: CreateWeaponBucketRequest,
                             conn: DatabaseConnectable) -> Future<WeaponBucket> {
-        return WeaponBucket(name: request.name).save(on: conn)
+        return WeaponBucket(name: request.name,
+                            minWeaponQuantity: request.minWeaponQuantity,
+                            maxWeaponQuantity: request.maxWeaponQuantity)
+            .save(on: conn)
     }
 
     func getWeaponBucket(byID weaponBucketId: Int, conn: DatabaseConnectable) -> Future<WeaponBucket> {

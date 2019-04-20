@@ -4,6 +4,8 @@ import FluentPostgreSQL
 final class WeaponBucket: PostgreSQLModel {
     var id: Int?
     var name: String
+    var minWeaponQuantity: Int
+    var maxWeaponQuantity: Int
     var models: Siblings<WeaponBucket, Model, ModelWeaponBucket> {
         return siblings()
     }
@@ -11,8 +13,10 @@ final class WeaponBucket: PostgreSQLModel {
         return siblings()
     }
 
-    init(name: String) {
+    init(name: String, minWeaponQuantity: Int, maxWeaponQuantity: Int) {
         self.name = name
+        self.minWeaponQuantity = minWeaponQuantity
+        self.maxWeaponQuantity = maxWeaponQuantity
     }
 }
 
