@@ -508,7 +508,7 @@ class UnitControllerTests: BaseTests {
         let addedModels = addedUnit[0].models
         let modelWeapon = weaponBucket.weapons[0]
 
-        let updatedDetachmentWithWeapon = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapons/\(modelWeapon.id)",
+        let updatedDetachmentWithWeapon = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapon-buckets/\(weaponBucket.id)/weapons/\(modelWeapon.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             decodeTo: DetachmentResponse.self,
@@ -545,7 +545,7 @@ class UnitControllerTests: BaseTests {
         let addedModels = addedUnit[0].models
         let modelWeapon = weaponBucket.weapons[0]
 
-        _ = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapons/\(modelWeapon.id)",
+        _ = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapon-buckets/\(weaponBucket.id)/weapons/\(modelWeapon.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             decodeTo: DetachmentResponse.self,

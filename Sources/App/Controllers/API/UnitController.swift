@@ -163,15 +163,20 @@ final class UnitController {
         _ = try req.requireAuthenticated(Customer.self)
         let detachmentId = try req.parameters.next(Int.self)
         let modelId = try req.parameters.next(Int.self)
+        let weaponBucketId = try req.parameters.next(Int.self)
         let weaponId = try req.parameters.next(Int.self)
-        
-        let selectedModelFuture = SelectedModel.find(modelId, on: req).unwrap(or: RoasterHammerError.modelIsMissing.error())
-        let weaponFuture = Weapon.find(weaponId, on: req).unwrap(or: RoasterHammerError.weaponIsMissing.error())
 
-        return flatMap(selectedModelFuture, weaponFuture, { (selectedModel, weapon) in
+        let selectedModelFuture = SelectedModel.find(modelId, on: req).unwrap(or: RoasterHammerError.modelIsMissing.error())
+        let weaponBucketFuture = WeaponBucketController().getWeaponBucket(byID: weaponBucketId, conn: req)
+        let weaponFuture = WeaponController().getWeapon(byID: weaponId, conn: req)
+
+        return flatMap(selectedModelFuture, weaponBucketFuture, weaponFuture, { (selectedModel, weaponBucket, weapon) in
             return try self.validateWeaponsForSelectedModel(selectedModel: selectedModel, conn: req)
-                .flatMap({ _ in
-                    selectedModel.weapons.attach(weapon, on: req).save(on: req)
+                .flatMap(to: SelectedModelWeapon.self, { _ in
+                    return try SelectedModelWeapon(modelId: selectedModel.requireID(),
+                                                   weaponBucketId: weaponBucket.requireID(),
+                                                   weaponId: weapon.requireID())
+                    .save(on: req)
                 })
                 .flatMap(to: Detachment.self, { _ in
                     return Detachment.find(detachmentId, on: req)
@@ -252,18 +257,23 @@ final class UnitController {
             .flatMap(to: ModelResponse.self) { model in
                 return try self.modelResponse(forModel: model, conn: conn)
         }
-        let selectedWeaponsFuture = try selectedModel.weapons.query(on: conn).all()
+        let selectedWeaponsFuture = try selectedWeaponsForSelectedModel(selectedModel, conn: conn)
 
-        return map(to: SelectedModelResponse.self,
-                   modelFuture,
-                   modelResponseFuture,
-                   selectedWeaponsFuture, { model, modelResponse, weapons in
-                    let weaponController = WeaponController()
-                    let weaponResponses = try weapons.map { try weaponController.weaponResponse(forWeapon: $0) }
-                    let selectedModelDTO = SelectedModelDTO(id: try selectedModel.requireID())
-                    return SelectedModelResponse(selectedModel: selectedModelDTO,
-                                                 model: modelResponse,
-                                                 selectedWeapons: weaponResponses)
+        return flatMap(to: SelectedModelResponse.self,
+                       modelFuture,
+                       modelResponseFuture,
+                       selectedWeaponsFuture, { model, modelResponse, selectedWeapons in
+                        let weaponController = WeaponController()
+
+                        return selectedWeapons
+                            .map { weaponController.getWeapon(byID: $0.weaponId, conn: conn) }.flatten(on: conn)
+                            .map({ weapons in
+                                let weaponResponses = try weapons.map { try weaponController.weaponResponse(forWeapon: $0) }
+                                let selectedModelDTO = SelectedModelDTO(id: try selectedModel.requireID())
+                                return SelectedModelResponse(selectedModel: selectedModelDTO,
+                                                             model: modelResponse,
+                                                             selectedWeapons: weaponResponses)
+                            })
         })
     }
     
@@ -603,7 +613,9 @@ final class UnitController {
 
     }
 
-    private func validateRemovingModelFromUnit(unit: SelectedUnit, model: SelectedModel, conn: DatabaseConnectable) throws -> Future<Void> {
+    private func validateRemovingModelFromUnit(unit: SelectedUnit,
+                                               model: SelectedModel,
+                                               conn: DatabaseConnectable) throws -> Future<Void> {
         // Get all selected models for the unit
         return try unit.models.query(on: conn).all()
             .flatMap({ selectedModels in
@@ -623,10 +635,9 @@ final class UnitController {
             })
     }
 
-    private func validateWeaponsForSelectedModel(selectedModel: SelectedModel,
-                                                 conn: DatabaseConnectable) throws -> Future<Void> {
+    private func validateWeaponsForSelectedModel(selectedModel: SelectedModel, conn: DatabaseConnectable) throws -> Future<Void> {
         let modelFuture = Model.find(selectedModel.modelId, on: conn).unwrap(or: RoasterHammerError.modelIsMissing.error())
-        let attachedWeaponsFuture = try selectedModel.weapons.query(on: conn).all()
+        let attachedWeaponsFuture = try selectedWeaponsForSelectedModel(selectedModel, conn: conn)
 
         return map(modelFuture, attachedWeaponsFuture) { model, attachedWeapons in
             if attachedWeapons.count >= model.weaponQuantity {
@@ -675,6 +686,11 @@ final class UnitController {
             .map(to: SelectedUnit.self, { _ in
                 return selectedUnit
             })
+    }
+
+    private func selectedWeaponsForSelectedModel(_ selectedModel: SelectedModel,
+                                                 conn: DatabaseConnectable) throws -> Future<[SelectedModelWeapon]> {
+        return try SelectedModelWeapon.query(on: conn).filter(\.modelId == selectedModel.requireID()).all()
     }
 
 }
