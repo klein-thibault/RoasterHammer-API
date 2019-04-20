@@ -131,5 +131,5 @@ struct EditWeaponBucketContext: WebContextTitle, Encodable {
 }
 
 struct EditWeaponBucketData: Content {
-    let weaponCheckbox: [String]
+    let weaponCheckbox: [String: String]
 }

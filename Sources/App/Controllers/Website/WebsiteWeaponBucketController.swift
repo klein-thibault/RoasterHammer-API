@@ -28,7 +28,7 @@ struct WebsiteWeaponBucketController {
     func editWeaponBucketHandler(_ req: Request) throws -> Future<View> {
         let weaponBucketId = try req.parameters.next(Int.self)
 
-        let weaponBucketFuture = WeaponBucketController().getWeaponBucketById(weaponBucketId, conn: req)
+        let weaponBucketFuture = WeaponBucketController().getWeaponBucket(byID: weaponBucketId, conn: req)
         let weaponsFuture = try WeaponController().getAllWeapons(req)
 
         return flatMap(to: View.self, weaponBucketFuture, weaponsFuture, { (weaponBucket, weapons) in
@@ -39,9 +39,11 @@ struct WebsiteWeaponBucketController {
 
     func editWeaponBucketPostHandler(_ req: Request,
                                      editWeaponBucketRequest: EditWeaponBucketData) throws -> Future<Response> {
-        // TODO: EditWeaponBucketData is not working atm, need to figure out what data type is passed with `weaponCheckbox[#(weapon.id)]`
-        print(editWeaponBucketRequest)
-        return req.future(req.redirect(to: "/roasterhammer/units"))
+        let weaponBucketId = try req.parameters.next(Int.self)
+        let weaponIds = editWeaponBucketRequest.weaponCheckbox.keys.compactMap { $0.intValue }
+
+        return assignWeaponsToWeaponBucket(weaponBucketId: weaponBucketId, weaponIds: weaponIds, conn: req)
+            .transform(to: req.redirect(to: "/roasterhammer/units"))
     }
 
     // MARK: - Private Functions
@@ -83,13 +85,26 @@ struct WebsiteWeaponBucketController {
                     return createWeaponBucketFutures
                         .flatten(on: conn)
                         .flatMap(to: [WeaponBucket].self) { weaponBuckets in
-                            let assignModelToWeaponBucketFutures: [Future<WeaponBucket>] = try weaponBuckets.map { try weaponBucketController.assignWeaponBucketToModel(weaponBucket: $0,
-                                                                                                                                                                        model: model,
-                                                                                                                                                                        conn: conn) }
+                            let assignModelToWeaponBucketFutures: [Future<WeaponBucket>] = try weaponBuckets.map {
+                                try weaponBucketController.assignWeaponBucketToModel(weaponBucket: $0, model: model, conn: conn)
+                            }
                             return assignModelToWeaponBucketFutures.flatten(on: conn)
                     }
                 })
         })
             .flatten(on: conn)
+    }
+
+    private func assignWeaponsToWeaponBucket(weaponBucketId: Int,
+                                             weaponIds: [Int],
+                                             conn: DatabaseConnectable) -> Future<[WeaponBucketWeapon]> {
+        let weaponBucketController = WeaponBucketController()
+        let weaponController = WeaponController()
+        let weaponBucketFuture = weaponBucketController.getWeaponBucket(byID: weaponBucketId, conn: conn)
+        let weaponsFuture = weaponIds.map { weaponController.getWeapon(byID: $0, conn: conn) }.flatten(on: conn)
+
+        return flatMap(to: [WeaponBucketWeapon].self, weaponBucketFuture, weaponsFuture, { (weaponBucket, weapons) in
+            return weapons.map { weaponBucket.weapons.attach($0, on: conn) }.flatten(on: conn)
+        })
     }
 }

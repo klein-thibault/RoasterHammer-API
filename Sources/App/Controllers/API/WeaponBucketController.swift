@@ -20,7 +20,7 @@ final class WeaponBucketController {
     func getWeaponBucket(_ req: Request) throws -> Future<WeaponBucketResponse> {
         let weaponBucketId = try req.parameters.next(Int.self)
 
-        return getWeaponBucketById(weaponBucketId, conn: req)
+        return getWeaponBucket(byID: weaponBucketId, conn: req)
             .flatMap(to: WeaponBucketResponse.self, { weaponBucket in
                 return try self.weaponBucketResponse(forWeaponBucket: weaponBucket,
                                                      conn: req)
@@ -32,7 +32,7 @@ final class WeaponBucketController {
         let weaponBucketId = try req.parameters.next(Int.self)
 
         let modelFuture = UnitController().getModel(byID: modelId, conn: req)
-        let weaponBucketFuture = getWeaponBucketById(weaponBucketId, conn: req)
+        let weaponBucketFuture = getWeaponBucket(byID: weaponBucketId, conn: req)
 
         return flatMap(to: WeaponBucket.self, modelFuture, weaponBucketFuture, { (model, weaponBucket) in
             return try self.assignWeaponBucketToModel(weaponBucket: weaponBucket, model: model, conn: req)
@@ -48,7 +48,7 @@ final class WeaponBucketController {
         let weaponBucketId = try req.parameters.next(Int.self)
 
         let weaponFuture = WeaponController().getWeapon(byID: weaponId, conn: req)
-        let weaponBucketFuture = getWeaponBucketById(weaponBucketId, conn: req)
+        let weaponBucketFuture = getWeaponBucket(byID: weaponBucketId, conn: req)
 
         return flatMap(to: WeaponBucket.self, weaponFuture, weaponBucketFuture, { (weapon, weaponBucket) in
             return try self.assignWeaponToWeaponBucket(weaponBucket: weaponBucket, weapon: weapon, conn: req)
@@ -79,7 +79,7 @@ final class WeaponBucketController {
         return WeaponBucket(name: request.name).save(on: conn)
     }
 
-    func getWeaponBucketById(_ weaponBucketId: Int, conn: DatabaseConnectable) -> Future<WeaponBucket> {
+    func getWeaponBucket(byID weaponBucketId: Int, conn: DatabaseConnectable) -> Future<WeaponBucket> {
         return WeaponBucket.find(weaponBucketId, on: conn)
             .unwrap(or: RoasterHammerError.weaponBucketIsMissing)
     }
@@ -89,7 +89,7 @@ final class WeaponBucketController {
                                    conn: DatabaseConnectable) throws -> Future<WeaponBucket> {
         return weaponBucket.models.attach(model, on: conn)
             .flatMap(to: WeaponBucket.self, { _ in
-                return try self.getWeaponBucketById(weaponBucket.requireID(), conn: conn)
+                return try self.getWeaponBucket(byID: weaponBucket.requireID(), conn: conn)
             })
     }
 
@@ -98,7 +98,7 @@ final class WeaponBucketController {
                                     conn: DatabaseConnectable) throws -> Future<WeaponBucket> {
         return weaponBucket.weapons.attach(weapon, on: conn)
             .flatMap(to: WeaponBucket.self, { _ in
-                return try self.getWeaponBucketById(weaponBucket.requireID(), conn: conn)
+                return try self.getWeaponBucket(byID: weaponBucket.requireID(), conn: conn)
             })
     }
 
