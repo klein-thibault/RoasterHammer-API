@@ -171,7 +171,9 @@ final class UnitController {
         let weaponFuture = WeaponController().getWeapon(byID: weaponId, conn: req)
 
         return flatMap(selectedModelFuture, weaponBucketFuture, weaponFuture, { (selectedModel, weaponBucket, weapon) in
-            return try self.validateWeaponsForSelectedModel(selectedModel: selectedModel, conn: req)
+            return try self.validateWeaponsForSelectedModel(selectedModel: selectedModel,
+                                                            weaponBucket: weaponBucket,
+                                                            conn: req)
                 .flatMap(to: SelectedModelWeapon.self, { _ in
                     return try SelectedModelWeapon(modelId: selectedModel.requireID(),
                                                    weaponBucketId: weaponBucket.requireID(),
@@ -635,13 +637,22 @@ final class UnitController {
             })
     }
 
-    private func validateWeaponsForSelectedModel(selectedModel: SelectedModel, conn: DatabaseConnectable) throws -> Future<Void> {
+    private func validateWeaponsForSelectedModel(selectedModel: SelectedModel,
+                                                 weaponBucket: WeaponBucket,
+                                                 conn: DatabaseConnectable) throws -> Future<Void> {
+        let weaponBucketId = try weaponBucket.requireID()
         let modelFuture = Model.find(selectedModel.modelId, on: conn).unwrap(or: RoasterHammerError.modelIsMissing.error())
         let attachedWeaponsFuture = try selectedWeaponsForSelectedModel(selectedModel, conn: conn)
+        let weaponBucketWeaponsFuture = try weaponBucket.weapons.query(on: conn).all()
 
-        return map(modelFuture, attachedWeaponsFuture) { model, attachedWeapons in
+        return map(modelFuture, attachedWeaponsFuture, weaponBucketWeaponsFuture) { model, attachedWeapons, weaponBucketWeapons in
             if attachedWeapons.count >= model.weaponQuantity {
                 throw RoasterHammerError.tooManyWeaponsForModel.error()
+            }
+
+            let alreadyAttachedWeaponsFromWeaponBucket = attachedWeapons.filter { $0.weaponBucketId == weaponBucketId }
+            if alreadyAttachedWeaponsFromWeaponBucket.count + 1 > weaponBucket.maxWeaponQuantity {
+                throw RoasterHammerError.tooManyWeaponSelectionFromWeaponBucket.error()
             }
         }
     }

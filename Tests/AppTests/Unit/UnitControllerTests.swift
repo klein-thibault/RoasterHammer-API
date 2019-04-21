@@ -492,8 +492,8 @@ class UnitControllerTests: BaseTests {
         let model = unit.models[0]
 
         let weaponBucket = try WeaponBucketTestUtils.assignWeaponToModel(weaponId: weapon.requireID(),
-                                                                            modelId: model.id,
-                                                                            app: app)
+                                                                         modelId: model.id,
+                                                                         app: app)
 
         let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
         let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",

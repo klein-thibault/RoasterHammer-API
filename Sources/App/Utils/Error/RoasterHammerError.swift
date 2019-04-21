@@ -27,6 +27,7 @@ enum RoasterHammerError: Swift.Error {
     case tooFewModelsInUnit
     case tooManyWeaponsForModel
     case costIsNotANumber
+    case tooManyWeaponSelectionFromWeaponBucket
 }
 
 extension RoasterHammerError {
@@ -72,6 +73,8 @@ extension RoasterHammerError {
             return Abort(.badRequest, reason: "The model has reached its maximum of weapons")
         case .costIsNotANumber:
             return Abort(.badRequest, reason: "The cost must be a number")
+        case .tooManyWeaponSelectionFromWeaponBucket:
+            return Abort(.badRequest, reason: "Can't select more weapons from this weapon bucket")
         }
     }
 }
