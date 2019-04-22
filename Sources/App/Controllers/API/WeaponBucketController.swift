@@ -31,7 +31,7 @@ final class WeaponBucketController {
         let modelId = try req.parameters.next(Int.self)
         let weaponBucketId = try req.parameters.next(Int.self)
 
-        let modelFuture = UnitController().getModel(byID: modelId, conn: req)
+        let modelFuture = UnitDatabaseQueries().getModel(byID: modelId, conn: req)
         let weaponBucketFuture = getWeaponBucket(byID: weaponBucketId, conn: req)
 
         return flatMap(to: WeaponBucket.self, modelFuture, weaponBucketFuture, { (model, weaponBucket) in

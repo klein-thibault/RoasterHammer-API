@@ -8,11 +8,11 @@ struct WebsiteWeaponBucketController {
 
     func weaponBucketsHandler(_ req: Request) throws -> Future<View> {
         let modelId = try req.parameters.next(Int.self)
-        let unitController = UnitController()
+        let unitDatabaseQueries = UnitDatabaseQueries()
 
-        return unitController.getModel(byID: modelId, conn: req)
+        return unitDatabaseQueries.getModel(byID: modelId, conn: req)
             .flatMap(to: ModelResponse.self, { model in
-                return try unitController.modelResponse(forModel: model, conn: req)
+                return try unitDatabaseQueries.modelResponse(forModel: model, conn: req)
             })
             .flatMap(to: View.self, { model in
                 let context = WeaponBucketsContext(title: "Weapon Buckets", model: model)

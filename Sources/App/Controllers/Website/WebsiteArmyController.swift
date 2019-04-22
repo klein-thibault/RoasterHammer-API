@@ -7,7 +7,7 @@ struct WebsiteArmyController {
     func armyHandler(_ req: Request) throws -> Future<View> {
         let armyId = try req.parameters.next(Int.self)
         let armyFuture = try ArmyController().getArmy(byID: armyId, conn: req)
-        let unitsFuture = UnitController().getUnits(armyId: armyId, unitType: nil, conn: req)
+        let unitsFuture = UnitDatabaseQueries().getUnits(armyId: armyId, unitType: nil, conn: req)
 
         return flatMap(to: View.self, armyFuture, unitsFuture, { (army, units) in
             let context = ArmyContext(army: army, units: units)

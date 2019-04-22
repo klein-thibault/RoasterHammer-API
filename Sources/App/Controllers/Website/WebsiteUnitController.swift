@@ -7,7 +7,7 @@ struct WebsiteUnitController {
     // MARK: - Public Functions
 
     func unitsHandler(_ req: Request) throws -> Future<View> {
-        return UnitController()
+        return UnitDatabaseQueries()
             .getUnits(armyId: nil, unitType: nil, conn: req)
             .flatMap(to: View.self, { units in
                 let context = UnitsContext(title: "Units", units: units)
@@ -18,7 +18,7 @@ struct WebsiteUnitController {
     func unitHandler(_ req: Request) throws -> Future<View> {
         let unitId = try req.parameters.next(Int.self)
 
-        return UnitController()
+        return UnitDatabaseQueries()
             .getUnit(byID: unitId, conn: req)
             .flatMap(to: View.self, { unit in
                 let context = UnitDetailsContext(unit: unit)
@@ -40,7 +40,7 @@ struct WebsiteUnitController {
                                createUnitData: CreateUnitData) throws -> Future<Response> {
         let newUnitRequest = try createUnitRequest(forData: createUnitData)
 
-        return UnitController()
+        return UnitDatabaseQueries()
             .createUnit(request: newUnitRequest, conn: req)
             .transform(to: req.redirect(to: "/roasterhammer/units"))
     }
@@ -50,7 +50,7 @@ struct WebsiteUnitController {
 
         let armiesFuture = try ArmyController().getAllArmies(conn: req)
         let unitTypesFuture = UnitTypeController().getAllUnitTypes(conn: req)
-        let unitFuture = UnitController().getUnit(byID: unitId, conn: req)
+        let unitFuture = UnitDatabaseQueries().getUnit(byID: unitId, conn: req)
 
         return flatMap(to: View.self,
                        armiesFuture,
@@ -67,14 +67,14 @@ struct WebsiteUnitController {
     func editUnitPostHandler(_ req: Request, editUnitRequest: CreateUnitData) throws -> Future<Response> {
         let unitId = try req.parameters.next(Int.self)
         let editUnitRequest = try createUnitRequest(forData: editUnitRequest)
-        return UnitController()
+        return UnitDatabaseQueries()
             .editUnit(unitId: unitId, request: editUnitRequest, conn: req)
             .transform(to: req.redirect(to: "/roasterhammer/units"))
     }
 
     func deleteUnitHandler(_ req: Request) throws -> Future<Response> {
         let unitId = try req.parameters.next(Int.self)
-        return UnitController()
+        return UnitDatabaseQueries()
             .deleteUnit(unitId: unitId, conn: req)
             .transform(to: req.redirect(to: "/roasterhammer/units"))
     }
