@@ -2,89 +2,89 @@
 <h1>#(unit.name)</h1>
 
 #for(model in unit.models) {
-<h2>#(model.name)</h2>
-<table class="table table-bordered table-hover">
-    <thead class="thead-light">
-        <tr>
-            <th>Cost</th>
-            <th>Quantity</th>
-            <th>Weapon Quantity</th>
-            <th>Characteristics</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>#(model.cost)</td>
-            <td>Min: #(unit.minQuantity) - Max: #(unit.maxQuantity)</td>
-            <td>#(model.weaponQuantity)</td>
-            <td>
-                <table class="table table-bordered table-hover">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>M</th>
-                            <th>WS</th>
-                            <th>BS</th>
-                            <th>S</th>
-                            <th>T</th>
-                            <th>W</th>
-                            <th>A</th>
-                            <th>Ld</th>
-                            <th>Sv</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>#(model.characteristics.movement)</td>
-                            <td>#(model.characteristics.weaponSkill)</td>
-                            <td>#(model.characteristics.balisticSkill)</td>
-                            <td>#(model.characteristics.strength)</td>
-                            <td>#(model.characteristics.toughness)</td>
-                            <td>#(model.characteristics.wounds)</td>
-                            <td>#(model.characteristics.attacks)</td>
-                            <td>#(model.characteristics.leadership)</td>
-                            <td>#(model.characteristics.save)</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </td>
-        </tr>
-    </tbody>
-</table>
+    <h2>#(model.name)</h2>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>Cost</th>
+                <th>Quantity</th>
+                <th>Weapon Quantity</th>
+                <th>Characteristics</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>#(model.cost)</td>
+                <td>Min: #(unit.minQuantity) - Max: #(unit.maxQuantity)</td>
+                <td>#(model.weaponQuantity)</td>
+                <td>
+                    <table class="table table-bordered table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>M</th>
+                                <th>WS</th>
+                                <th>BS</th>
+                                <th>S</th>
+                                <th>T</th>
+                                <th>W</th>
+                                <th>A</th>
+                                <th>Ld</th>
+                                <th>Sv</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#(model.characteristics.movement)</td>
+                                <td>#(model.characteristics.weaponSkill)</td>
+                                <td>#(model.characteristics.balisticSkill)</td>
+                                <td>#(model.characteristics.strength)</td>
+                                <td>#(model.characteristics.toughness)</td>
+                                <td>#(model.characteristics.wounds)</td>
+                                <td>#(model.characteristics.attacks)</td>
+                                <td>#(model.characteristics.leadership)</td>
+                                <td>#(model.characteristics.save)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
-<h4>Weapon Buckets</h4>
-#for(weaponBucket in model.weaponBuckets) {
-<h5>#(weaponBucket.name)</h5>
-<a class="btn btn-primary" href="/roasterhammer/weapon-buckets/#(weaponBucket.id)/edit" role="button">Edit</a>
-<table class="table table-bordered table-hover">
-    <thead class="thead-light">
-        <tr>
-            <th>Name</th>
-            <th>Range</th>
-            <th>Type</th>
-            <th>S</th>
-            <th>AP</th>
-            <th>D</th>
-            <th>Cost</th>
-            <th>Ability</th>
-        </tr>
-    </thead>
-    <tbody>
-        #for(weapon in weaponBucket.weapons) {
-        <tr>
-            <td>#(weapon.name)</td>
-            <td>#(weapon.range)</td>
-            <td>#(weapon.type)</td>
-            <td>#(weapon.strength)</td>
-            <td>#(weapon.armorPiercing)</td>
-            <td>#(weapon.damage)</td>
-            <td>#(weapon.cost)</td>
-            <td>#(weapon.ability)</td>
-        </tr>
-        }
-    </tbody>
-</table>
-}
-
+    <h4>Weapon Buckets</h4>
+    <a class="btn btn-primary" href="/roasterhammer/models/#(model.id)/weapon-buckets" role="button">Add Weapon Buckets</a>
+    #for(weaponBucket in model.weaponBuckets) {
+    <h5>#(weaponBucket.name)</h5>
+    <a class="btn btn-primary" href="/roasterhammer/weapon-buckets/#(weaponBucket.id)/edit" role="button">Edit</a>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>Name</th>
+                <th>Range</th>
+                <th>Type</th>
+                <th>S</th>
+                <th>AP</th>
+                <th>D</th>
+                <th>Cost</th>
+                <th>Ability</th>
+            </tr>
+        </thead>
+        <tbody>
+            #for(weapon in weaponBucket.weapons) {
+            <tr>
+                <td>#(weapon.name)</td>
+                <td>#(weapon.range)</td>
+                <td>#(weapon.type)</td>
+                <td>#(weapon.strength)</td>
+                <td>#(weapon.armorPiercing)</td>
+                <td>#(weapon.damage)</td>
+                <td>#(weapon.cost)</td>
+                <td>#(weapon.ability)</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+    }
 }
 
 <h2>Rules</h2>

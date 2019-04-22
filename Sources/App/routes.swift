@@ -161,9 +161,9 @@ public func routes(_ router: Router) throws {
     router.post("roasterhammer", "weapons", Int.parameter, "delete", use: websiteWeaponController.deleteWeaponHandler)
     // - Weapon Buckets
     let websiteWeaponBucketController = WebsiteWeaponBucketController()
-    router.get("roasterhammer", "units", Int.parameter, "weapon-buckets", use: websiteWeaponBucketController.weaponBucketsHandler)
+    router.get("roasterhammer", "models", Int.parameter, "weapon-buckets", use: websiteWeaponBucketController.weaponBucketsHandler)
     router.post(CreateWeaponBucketData.self,
-                at: "roasterhammer", "units", Int.parameter, "weapon-buckets",
+                at: "roasterhammer", "models", Int.parameter, "weapon-buckets",
                 use: websiteWeaponBucketController.createWeaponBucketPostHandler)
     router.get("roasterhammer", "weapon-buckets", Int.parameter, "edit", use: websiteWeaponBucketController.editWeaponBucketHandler)
     router.post(EditWeaponBucketData.self,

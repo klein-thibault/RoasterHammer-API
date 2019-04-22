@@ -117,7 +117,7 @@ struct EditUnitContext: WebContextTitle, Encodable {
 
 struct WeaponBucketsContext: WebContextTitle, Encodable {
     let title: String
-    let unit: UnitResponse
+    let model: ModelResponse
 }
 
 struct CreateWeaponBucketData: Content {

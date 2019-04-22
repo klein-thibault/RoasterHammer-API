@@ -7,12 +7,15 @@ struct WebsiteWeaponBucketController {
     // MARK: - Public Functions
 
     func weaponBucketsHandler(_ req: Request) throws -> Future<View> {
-        let unitId = try req.parameters.next(Int.self)
+        let modelId = try req.parameters.next(Int.self)
         let unitController = UnitController()
 
-        return unitController.getUnit(byID: unitId, conn: req)
-            .flatMap(to: View.self, { unit in
-                let context = WeaponBucketsContext(title: "Weapon Buckets", unit: unit)
+        return unitController.getModel(byID: modelId, conn: req)
+            .flatMap(to: ModelResponse.self, { model in
+                return try unitController.modelResponse(forModel: model, conn: req)
+            })
+            .flatMap(to: View.self, { model in
+                let context = WeaponBucketsContext(title: "Weapon Buckets", model: model)
                 return try req.view().render("unitWeaponBucket", context)
             })
     }

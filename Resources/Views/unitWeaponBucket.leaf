@@ -2,9 +2,8 @@
 <h1>#(title)</h1>
 
 <form method="post">
-    #for(model in unit.models) {
     <h2>#(model.name)</h2>
-    <div class="weaponBuckets">
+        <div class="weaponBuckets">
         <!-- The add button -->
         <button type="button" class="r-btnAdd-weaponBuckets btn btn-secondary">Add</button>
 
@@ -25,7 +24,6 @@
             </p>
         </div>
     </div>
-    }
 
     <button type="submit" class="btn btn-primary">
         Submit
