@@ -352,6 +352,83 @@ final class UnitDatabaseQueries {
         return try SelectedUnit(unitId: unit.requireID(), quantity: quantity).save(on: conn)
     }
 
+    func createInitialModelsForSelectedUnit(unit: Unit,
+                                            selectedUnit: SelectedUnit,
+                                            conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
+        // Get all the models associated with the unit
+        return try unit.models.query(on: conn).all()
+            // Create all the models that come stock with the selected unit using the min quantity
+            .flatMap(to: [SelectedModel].self, { models in
+                var selectedModelFutures = [Future<SelectedModel>]()
+                for model in models {
+                    for _ in 1...model.minQuantity {
+                        let createModelFuture = try self.createSelectedModel(model: model, conn: conn)
+                        selectedModelFutures.append(createModelFuture)
+                    }
+                }
+
+                return selectedModelFutures.flatten(on: conn)
+            })
+            .flatMap(to: [SelectedUnitModel].self, { selectedModels in
+                // Attach all the newly created models to the selected unit
+                return selectedModels
+                    .map { self.attachSelectedModel($0, toSelectedUnit: selectedUnit, conn: conn) }
+                    .flatten(on: conn)
+            })
+            .map(to: SelectedUnit.self, { _ in
+                return selectedUnit
+            })
+    }
+
+    func removeAttachedWeapon(weaponId: Int,
+                              fromWeaponBucket weaponBucketId: Int,
+                              ofSelectedModel selectedModelId: Int,
+                              conn: DatabaseConnectable) -> Future<Void> {
+        return getSelectedWeaponModel(selectedModelId: selectedModelId,
+                                      weaponBucketId: weaponBucketId,
+                                      weaponId: weaponId,
+                                      conn: conn)
+            .flatMap({ selectedModelWeapon in
+                if let selectedModelWeapon = selectedModelWeapon {
+                    return selectedModelWeapon.delete(on: conn)
+                } else {
+                    return conn.future()
+                }
+            })
+    }
+
+    func getSelectedWeaponModel(selectedModelId: Int,
+                                weaponBucketId: Int,
+                                weaponId: Int,
+                                conn: DatabaseConnectable) -> Future<SelectedModelWeapon?> {
+        return SelectedModelWeapon.query(on: conn)
+            .filter(\.modelId == selectedModelId)
+            .filter(\.weaponBucketId == weaponBucketId)
+            .filter(\.weaponId == weaponId)
+            .first()
+    }
+
+    func getOrCreateSelectedWeaponModel(selectedModelId: Int,
+                                        weaponBucketId: Int,
+                                        weaponId: Int,
+                                        conn: DatabaseConnectable) -> Future<SelectedModelWeapon> {
+        return SelectedModelWeapon.query(on: conn)
+            .filter(\.modelId == selectedModelId)
+            .filter(\.weaponBucketId == weaponBucketId)
+            .filter(\.weaponId == weaponId)
+            .first()
+            .flatMap(to: SelectedModelWeapon.self, { existingSelectedModelWeapon in
+                if let existingSelectedModelWeapon = existingSelectedModelWeapon {
+                    return conn.future(existingSelectedModelWeapon)
+                } else {
+                    return SelectedModelWeapon(modelId: selectedModelId,
+                                                   weaponBucketId: weaponBucketId,
+                                                   weaponId: weaponId)
+                        .save(on: conn)
+                }
+            })
+    }
+
     // MARK: - Private Functions
 
     private func createModels(forUnit unit: Unit,
@@ -479,34 +556,6 @@ final class UnitDatabaseQueries {
                                      toSelectedUnit selectedUnit: SelectedUnit,
                                      conn: DatabaseConnectable) -> Future<SelectedUnitModel> {
         return selectedUnit.models.attach(selectedModel, on: conn)
-    }
-
-    func createInitialModelsForSelectedUnit(unit: Unit,
-                                                    selectedUnit: SelectedUnit,
-                                                    conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
-        // Get all the models associated with the unit
-        return try unit.models.query(on: conn).all()
-            // Create all the models that come stock with the selected unit using the min quantity
-            .flatMap(to: [SelectedModel].self, { models in
-                var selectedModelFutures = [Future<SelectedModel>]()
-                for model in models {
-                    for _ in 1...model.minQuantity {
-                        let createModelFuture = try self.createSelectedModel(model: model, conn: conn)
-                        selectedModelFutures.append(createModelFuture)
-                    }
-                }
-
-                return selectedModelFutures.flatten(on: conn)
-            })
-            .flatMap(to: [SelectedUnitModel].self, { selectedModels in
-                // Attach all the newly created models to the selected unit
-                return selectedModels
-                    .map { self.attachSelectedModel($0, toSelectedUnit: selectedUnit, conn: conn) }
-                    .flatten(on: conn)
-            })
-            .map(to: SelectedUnit.self, { _ in
-                return selectedUnit
-            })
     }
 
     private func selectedWeaponsForSelectedModel(_ selectedModel: SelectedModel,

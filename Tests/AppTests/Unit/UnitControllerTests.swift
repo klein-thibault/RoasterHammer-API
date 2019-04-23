@@ -488,7 +488,7 @@ class UnitControllerTests: BaseTests {
         let unitRoles = detachment.roles
         let (_, army) = try ArmyTestsUtils.createArmy(app: app)
         let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
-        let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
+        let (_, weapon) = try WeaponTestsUtils.createPistolWeapon(app: app)
         let model = unit.models[0]
 
         let weaponBucket = try WeaponBucketTestUtils.assignWeaponToModel(weaponId: weapon.requireID(),
@@ -519,13 +519,13 @@ class UnitControllerTests: BaseTests {
         XCTAssertEqual(updatedDetachmentWithWeapon.roles[0].units[0].models[0].cost, unit.cost + weapon.cost)
     }
 
-    func testSelectWeaponForSelectedModel_whenModelWeaponsAreMaxedOut() throws {
+    func testSelectWeaponForSelectedModel_replacingExistingWeapon() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
         let unitRoles = detachment.roles
         let (_, army) = try ArmyTestsUtils.createArmy(app: app)
         let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
-        let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
+        let (_, weapon) = try WeaponTestsUtils.createPistolWeapon(app: app)
         let model = unit.models[0]
 
         let weaponBucket = try WeaponBucketTestUtils.assignWeaponToModel(weaponId: weapon.requireID(),
@@ -533,7 +533,7 @@ class UnitControllerTests: BaseTests {
                                                                          app: app)
 
         let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
-        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+        var updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: addUnitToDetachmentRequest,
@@ -552,8 +552,83 @@ class UnitControllerTests: BaseTests {
             loggedInRequest: true,
             loggedInCustomer: user)
 
+        updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapon-buckets/\(weaponBucket.id)/weapons/\(modelWeapon.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        XCTAssertEqual(updatedDetachment.roles[0].units[0].models[0].selectedWeapons[0].name, modelWeapon.name)
+        XCTAssertEqual(updatedDetachment.roles[0].units[0].unit.cost, unit.cost)
+        XCTAssertEqual(updatedDetachment.roles[0].units[0].models[0].cost, unit.cost + weapon.cost)
+    }
+
+    func testSelectWeaponForSelectedModel_whenModelWeaponsAreMaxedOut() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(),
+                                                              app: app,
+                                                              weaponQuantity: 2)
+        let (_, pistolWeapon) = try WeaponTestsUtils.createPistolWeapon(app: app)
+        let (_, bolterWeapon) = try WeaponTestsUtils.createBolterWeapon(app: app)
+        let (_, heavyBolterWeapon) = try WeaponTestsUtils.createHeavyWeapon(app: app)
+        let model = unit.models[0]
+
+        var weaponBucket = try WeaponBucketTestUtils.assignWeaponToModel(weaponId: pistolWeapon.requireID(),
+                                                                         modelId: model.id,
+                                                                         app: app,
+                                                                         minWeaponQuantity: 2,
+                                                                         maxWeaponQuantity: 2)
+
+        // Add bolter to weapon bucket
+        let _ = try app.getResponse(to: "weapon-buckets/\(weaponBucket.id)/weapons/\(bolterWeapon.requireID())",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: nil,
+            decodeTo: WeaponBucket.self)
+        // Add heavy bolter to weapon bucket
+        let _ = try app.getResponse(to: "weapon-buckets/\(weaponBucket.id)/weapons/\(heavyBolterWeapon.requireID())",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: nil,
+            decodeTo: WeaponBucket.self)
+
+        weaponBucket = try app.getResponse(to: "weapon-buckets/\(weaponBucket.id)", decodeTo: WeaponBucketResponse.self)
+
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+        let updatedDetachmentRole = updatedDetachment.roles
+        let addedUnit = updatedDetachmentRole[0].units
+        let addedModels = addedUnit[0].models
+        let modelWeapon1 = weaponBucket.weapons[0]
+        let modelWeapon2 = weaponBucket.weapons[1]
+        let modelWeapon3 = weaponBucket.weapons[2]
+
+        _ = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapon-buckets/\(weaponBucket.id)/weapons/\(modelWeapon1.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        _ = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapon-buckets/\(weaponBucket.id)/weapons/\(modelWeapon2.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
         do {
-            _ = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapons/\(modelWeapon.id)",
+            _ = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapon-buckets/\(weaponBucket.id)/weapons/\(modelWeapon3.id)",
                 method: .POST,
                 headers: ["Content-Type": "application/json"],
                 decodeTo: DetachmentResponse.self,

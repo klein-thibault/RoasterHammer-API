@@ -44,8 +44,8 @@ final class WeaponBucketController {
     }
 
     func assignWeaponToWeaponBucket(_ req: Request) throws -> Future<WeaponBucketResponse> {
-        let weaponId = try req.parameters.next(Int.self)
         let weaponBucketId = try req.parameters.next(Int.self)
+        let weaponId = try req.parameters.next(Int.self)
 
         let weaponFuture = WeaponController().getWeapon(byID: weaponId, conn: req)
         let weaponBucketFuture = getWeaponBucket(byID: weaponBucketId, conn: req)

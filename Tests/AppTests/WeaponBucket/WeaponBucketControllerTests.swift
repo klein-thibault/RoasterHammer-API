@@ -48,7 +48,7 @@ class WeaponBucketControllerTests: BaseTests {
 
     func testAssignWeaponToWeaponBucket() throws {
         let (_, weaponBucket) = try WeaponBucketTestUtils.createWeaponBucket(app: app)
-        let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
+        let (_, weapon) = try WeaponTestsUtils.createPistolWeapon(app: app)
 
         let updatedWeaponBucket = try app.getResponse(to: "weapon-buckets/\(weaponBucket.id)/weapons/\(weapon.requireID())",
             method: .POST,
@@ -66,7 +66,7 @@ class WeaponBucketControllerTests: BaseTests {
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
         let unitRoles = detachment.roles
         let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
-        let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
+        let (_, weapon) = try WeaponTestsUtils.createPistolWeapon(app: app)
         let model = unit.models[0]
 
         let weaponBucketWithModel = try app.getResponse(to: "weapon-buckets/\(weaponBucket.id)/models/\(model.id)",

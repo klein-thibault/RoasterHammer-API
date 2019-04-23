@@ -7,7 +7,7 @@ import RoasterHammer_Shared
 class WeaponControllerTests: BaseTests {
 
     func testCreateWeapon() throws {
-        let (request, weapon) = try WeaponTestsUtils.createWeapon(app: app)
+        let (request, weapon) = try WeaponTestsUtils.createPistolWeapon(app: app)
         XCTAssertNotNil(weapon.id)
         XCTAssertEqual(weapon.name, request.name)
         XCTAssertEqual(weapon.range, request.range)
@@ -20,14 +20,14 @@ class WeaponControllerTests: BaseTests {
     }
 
     func testGetAllWeapons() throws {
-        let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
+        let (_, weapon) = try WeaponTestsUtils.createPistolWeapon(app: app)
         let allWeapons = try app.getResponse(to: "weapons", decodeTo: [Weapon].self)
         XCTAssertEqual(allWeapons.count, 1)
         XCTAssertEqual(allWeapons[0].id!, weapon.id!)
     }
 
     func testGetWeapon() throws {
-        let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
+        let (_, weapon) = try WeaponTestsUtils.createPistolWeapon(app: app)
         let getWeapon = try app.getResponse(to: "weapons/\(weapon.id!)", decodeTo: Weapon.self)
         XCTAssertEqual(weapon.name, getWeapon.name)
         XCTAssertEqual(weapon.range, getWeapon.range)
@@ -40,7 +40,7 @@ class WeaponControllerTests: BaseTests {
     }
 
     func testEditWeapon() throws {
-        let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
+        let (_, weapon) = try WeaponTestsUtils.createPistolWeapon(app: app)
         let editWeaponRequest = CreateWeaponData(name: "New Name",
                                                  range: "New Range",
                                                  type: "New Type",
@@ -65,7 +65,7 @@ class WeaponControllerTests: BaseTests {
     }
 
     func testDeleteWeapon() throws {
-        let (_, weapon) = try WeaponTestsUtils.createWeapon(app: app)
+        let (_, weapon) = try WeaponTestsUtils.createPistolWeapon(app: app)
         let weaponId = try weapon.requireID()
         _ = try app.sendRequest(to: "weapons/\(weaponId)", method: .DELETE)
 

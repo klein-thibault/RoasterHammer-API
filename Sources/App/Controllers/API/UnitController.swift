@@ -173,18 +173,36 @@ final class UnitController {
         let weaponFuture = WeaponController().getWeapon(byID: weaponId, conn: req)
 
         return flatMap(selectedModelFuture, weaponBucketFuture, weaponFuture, { (selectedModel, weaponBucket, weapon) in
-            return try self.unitDatabaseQueries.validateWeaponsForSelectedModel(selectedModel: selectedModel,
-                                                                                weaponBucket: weaponBucket,
-                                                                                conn: req)
+            let selectedModelId = try selectedModel.requireID()
+            let weaponBucketId = try weaponBucket.requireID()
+            let weaponId = try weapon.requireID()
+
+            return req.eventLoop
+                .future()
+                .flatMap(to: Void.self, { _ in
+                    // Automatically remove and reselect another weapon for the user if only 1 weapon can be selected
+                    if weaponBucket.minWeaponQuantity == 1 {
+                        return self.unitDatabaseQueries.removeAttachedWeapon(weaponId: weaponId,
+                                                                             fromWeaponBucket: weaponBucketId,
+                                                                             ofSelectedModel: selectedModelId,
+                                                                             conn: req)
+                    } else {
+                        return req.future()
+                    }
+                })
+                .flatMap({ _ in
+                    return try self.unitDatabaseQueries.validateWeaponsForSelectedModel(selectedModel: selectedModel,
+                                                                                        weaponBucket: weaponBucket,
+                                                                                        conn: req)
+                })
                 .flatMap(to: SelectedModelWeapon.self, { _ in
-                    return try SelectedModelWeapon(modelId: selectedModel.requireID(),
-                                                   weaponBucketId: weaponBucket.requireID(),
-                                                   weaponId: weapon.requireID())
-                        .save(on: req)
+                    return self.unitDatabaseQueries.getOrCreateSelectedWeaponModel(selectedModelId: selectedModelId,
+                                                                                   weaponBucketId: weaponBucketId,
+                                                                                   weaponId: weaponId,
+                                                                                   conn: req)
                 })
                 .flatMap(to: Detachment.self, { _ in
-                    return Detachment.find(detachmentId, on: req)
-                        .unwrap(or: RoasterHammerError.detachmentIsMissing.error())
+                    return Detachment.find(detachmentId, on: req).unwrap(or: RoasterHammerError.detachmentIsMissing.error())
                 })
                 .flatMap(to: DetachmentResponse.self, { detachment in
                     let detachmentController = DetachmentController()
@@ -192,9 +210,5 @@ final class UnitController {
                 })
         })
     }
-    
-    // MARK: - Utility Functions
-
-
 
 }

@@ -4,8 +4,12 @@ import FluentPostgreSQL
 import RoasterHammer_Shared
 
 final class WeaponBucketTestUtils {
-    static func createWeaponBucket(app: Application) throws -> (request: CreateWeaponBucketRequest, response: WeaponBucketResponse) {
-        let request = CreateWeaponBucketRequest(name: "Pistol Options", minWeaponQuantity: 1, maxWeaponQuantity: 1)
+    static func createWeaponBucket(app: Application,
+                                   minWeaponQuantity: Int = 1,
+                                   maxWeaponQuantity: Int = 1) throws -> (request: CreateWeaponBucketRequest, response: WeaponBucketResponse) {
+        let request = CreateWeaponBucketRequest(name: "Pistol Options",
+                                                minWeaponQuantity: minWeaponQuantity,
+                                                maxWeaponQuantity: maxWeaponQuantity)
         let weaponBucket = try app.getResponse(to: "weapon-buckets",
                                                method: .POST,
                                                headers: ["Content-Type": "application/json"],
@@ -17,8 +21,12 @@ final class WeaponBucketTestUtils {
 
     static func assignWeaponToModel(weaponId: Int,
                                     modelId: Int,
-                                    app: Application) throws -> WeaponBucketResponse {
-        let request = CreateWeaponBucketRequest(name: "Pistol Options", minWeaponQuantity: 1, maxWeaponQuantity: 1)
+                                    app: Application,
+                                    minWeaponQuantity: Int = 1,
+                                    maxWeaponQuantity: Int = 1) throws -> WeaponBucketResponse {
+        let request = CreateWeaponBucketRequest(name: "Pistol Options",
+                                                minWeaponQuantity: minWeaponQuantity,
+                                                maxWeaponQuantity: maxWeaponQuantity)
         let weaponBucket = try app.getResponse(to: "weapon-buckets",
                                                method: .POST,
                                                headers: ["Content-Type": "application/json"],

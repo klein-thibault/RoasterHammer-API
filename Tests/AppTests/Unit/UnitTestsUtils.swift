@@ -5,7 +5,9 @@ import RoasterHammer_Shared
 
 final class UnitTestsUtils {
 
-    static func createHQUniqueUnit(armyId: Int, app: Application) throws -> (request: CreateUnitRequest, response: UnitResponse) {
+    static func createHQUniqueUnit(armyId: Int,
+                                   app: Application,
+                                   weaponQuantity: Int = 1) throws -> (request: CreateUnitRequest, response: UnitResponse) {
         let characteristics = CreateCharacteristicsRequest(movement: "6\"",
                                                      weaponSkill: "2+",
                                                      balisticSkill: "2+",
@@ -23,7 +25,7 @@ final class UnitTestsUtils {
                                                     cost: 120,
                                                     minQuantity: 1,
                                                     maxQuantity: 1,
-                                                    weaponQuantity: 1,
+                                                    weaponQuantity: weaponQuantity,
                                                     characteristics: characteristics)
 
         let createUnitRequest = try CreateUnitRequest(name: "Kharn",
@@ -44,7 +46,9 @@ final class UnitTestsUtils {
         return (createUnitRequest, unit)
     }
 
-    static func createHQUnit(armyId: Int, app: Application) throws -> (request: CreateUnitRequest, response: UnitResponse) {
+    static func createHQUnit(armyId: Int,
+                             app: Application,
+                             weaponQuantity: Int = 1) throws -> (request: CreateUnitRequest, response: UnitResponse) {
         let characteristics = CreateCharacteristicsRequest(movement: "6\"",
                                                            weaponSkill: "2+",
                                                            balisticSkill: "2+",
@@ -62,7 +66,7 @@ final class UnitTestsUtils {
                                                     cost: 70,
                                                     minQuantity: 1,
                                                     maxQuantity: 1,
-                                                    weaponQuantity: 1,
+                                                    weaponQuantity: weaponQuantity,
                                                     characteristics: characteristics)
 
         let createUnitRequest = try CreateUnitRequest(name: "Chaos Lord",
@@ -83,7 +87,9 @@ final class UnitTestsUtils {
         return (createUnitRequest, unit)
     }
 
-    static func createTroopUnit(armyId: Int, app: Application) throws -> (request: CreateUnitRequest, response: UnitResponse) {
+    static func createTroopUnit(armyId: Int,
+                                app: Application,
+                                weaponQuantity: Int = 1) throws -> (request: CreateUnitRequest, response: UnitResponse) {
         let characteristics = CreateCharacteristicsRequest(movement: "6\"",
                                                            weaponSkill: "3+",
                                                            balisticSkill: "3+",
@@ -101,7 +107,7 @@ final class UnitTestsUtils {
                                                     cost: 15,
                                                     minQuantity: 4,
                                                     maxQuantity: 19,
-                                                    weaponQuantity: 1,
+                                                    weaponQuantity: weaponQuantity,
                                                     characteristics: characteristics)
 
         let createUnitRequest = try CreateUnitRequest(name: "Chaos Space Marines",

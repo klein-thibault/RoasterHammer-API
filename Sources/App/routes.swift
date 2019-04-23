@@ -120,6 +120,7 @@ public func routes(_ router: Router) throws {
     // Weapon Bucket
     let weaponBucketController = WeaponBucketController()
     router.post("weapon-buckets", use: weaponBucketController.createWeaponBucket)
+    router.get("weapon-buckets", Int.parameter, use: weaponBucketController.getWeaponBucket)
     router.post("weapon-buckets",
                 Int.parameter,
                 "models",
