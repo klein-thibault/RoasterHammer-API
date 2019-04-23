@@ -25,16 +25,18 @@ class RoasterControllerTests: BaseTests {
     func testGetRoasters() throws {
         let user = try app.createAndLogUser()
         let game = try GameTestsUtils.createGame(user: user, app: app)
-        let (_, roaster) = try RoasterTestsUtils.createRoaster(user: user, gameId: game.id, app: app)
+        let _ = try RoasterTestsUtils.createRoaster(user: user, gameId: game.id, app: app)
 
-        let response = try app.getResponse(to: "games/\(game.id)/roasters",
+        let roasters = try app.getResponse(to: "games/\(game.id)/roasters",
             decodeTo: [RoasterResponse].self,
             loggedInRequest: true,
             loggedInCustomer: user)
+        let roaster = roasters[0]
 
-        XCTAssertEqual(response.count, 1)
-        XCTAssertEqual(response[0].id, roaster.id)
-        XCTAssertEqual(response[0].name, roaster.name)
+        XCTAssertEqual(roasters.count, 1)
+        XCTAssertEqual(roaster.id, roaster.id)
+        XCTAssertEqual(roaster.name, roaster.name)
+        XCTAssertEqual(roaster.totalPoints, 0)
     }
 
 }

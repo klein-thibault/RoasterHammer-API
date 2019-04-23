@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/vapor/core.git",
         "state": {
           "branch": null,
-          "revision": "57368d4092f92df3131e5968c8ed24a3c7361ec0",
-          "version": "3.8.1"
+          "revision": "2731f8ba0cf274a61c9bd6ab43550f692ffaf879",
+          "version": "3.9.0"
         }
       },
       {
@@ -114,8 +114,8 @@
         "repositoryURL": "https://github.com/klein-thibault/RoasterHammer-Shared.git",
         "state": {
           "branch": null,
-          "revision": "00e72b597c2adea687b2c2da951de04783a16769",
-          "version": "0.0.17"
+          "revision": "a753b5df7d0476d2676cd763f65035a5488e7561",
+          "version": "0.0.19"
         }
       },
       {
