@@ -380,6 +380,18 @@ final class UnitDatabaseQueries {
             })
     }
 
+    func removeAllAttachedWeapons(fromWeaponBucket weaponBucketId: Int,
+                                  ofSelectedModel selectedModelId: Int,
+                                  conn: DatabaseConnectable) -> Future<Void> {
+        return SelectedModelWeapon.query(on: conn)
+            .filter(\.modelId == selectedModelId)
+            .filter(\.weaponBucketId == weaponBucketId)
+            .all()
+            .flatMap({ selectedModelWeapons in
+                return selectedModelWeapons.map { return $0.delete(on: conn) }.flatten(on: conn)
+            })
+    }
+
     func removeAttachedWeapon(weaponId: Int,
                               fromWeaponBucket weaponBucketId: Int,
                               ofSelectedModel selectedModelId: Int,

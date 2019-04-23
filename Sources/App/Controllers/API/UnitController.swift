@@ -181,11 +181,10 @@ final class UnitController {
                 .future()
                 .flatMap(to: Void.self, { _ in
                     // Automatically remove and reselect another weapon for the user if only 1 weapon can be selected
-                    if weaponBucket.minWeaponQuantity == 1 {
-                        return self.unitDatabaseQueries.removeAttachedWeapon(weaponId: weaponId,
-                                                                             fromWeaponBucket: weaponBucketId,
-                                                                             ofSelectedModel: selectedModelId,
-                                                                             conn: req)
+                    if weaponBucket.maxWeaponQuantity == 1 {
+                        return self.unitDatabaseQueries.removeAllAttachedWeapons(fromWeaponBucket: weaponBucketId,
+                                                                                 ofSelectedModel: selectedModelId,
+                                                                                 conn: req)
                     } else {
                         return req.future()
                     }
