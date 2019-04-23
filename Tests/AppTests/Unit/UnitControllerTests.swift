@@ -640,4 +640,53 @@ class UnitControllerTests: BaseTests {
         }
     }
 
+    func testUnselectWeaponForSelectedModel() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+        let (_, weapon) = try WeaponTestsUtils.createPistolWeapon(app: app)
+        let model = unit.models[0]
+
+        let weaponBucket = try WeaponBucketTestUtils.assignWeaponToModel(weaponId: weapon.requireID(),
+                                                                         modelId: model.id,
+                                                                         app: app)
+
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+        let updatedDetachmentRole = updatedDetachment.roles
+        let addedUnit = updatedDetachmentRole[0].units
+        let addedModels = addedUnit[0].models
+        let modelWeapon = weaponBucket.weapons[0]
+
+        // Assign weapon to model
+        let updatedDetachmentWithWeapon = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapon-buckets/\(weaponBucket.id)/weapons/\(modelWeapon.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+        XCTAssertEqual(updatedDetachmentWithWeapon.roles[0].units[0].models[0].selectedWeapons[0].name, modelWeapon.name)
+        XCTAssertEqual(updatedDetachmentWithWeapon.roles[0].units[0].unit.cost, unit.cost)
+        XCTAssertEqual(updatedDetachmentWithWeapon.roles[0].units[0].models[0].cost, unit.cost + weapon.cost)
+
+        // Unassign weapon to model
+        let updatedDetachmentWithoutWeapon = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapon-buckets/\(weaponBucket.id)/weapons/\(modelWeapon.id)",
+            method: .DELETE,
+            headers: ["Content-Type": "application/json"],
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+        XCTAssertEqual(updatedDetachmentWithoutWeapon.roles[0].units[0].models[0].selectedWeapons.count, 0)
+        XCTAssertEqual(updatedDetachmentWithoutWeapon.roles[0].units[0].unit.cost, unit.cost)
+        XCTAssertEqual(updatedDetachmentWithoutWeapon.roles[0].units[0].models[0].cost, unit.cost)
+    }
+
 }

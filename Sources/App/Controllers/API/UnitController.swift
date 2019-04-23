@@ -211,4 +211,21 @@ final class UnitController {
         })
     }
 
+    func unattachWeaponFromSelectedModel(_ req: Request) throws -> Future<DetachmentResponse> {
+        _ = try req.requireAuthenticated(Customer.self)
+        let detachmentId = try req.parameters.next(Int.self)
+        let modelId = try req.parameters.next(Int.self)
+        let weaponBucketId = try req.parameters.next(Int.self)
+        let weaponId = try req.parameters.next(Int.self)
+
+        return unitDatabaseQueries.removeAttachedWeapon(weaponId: weaponId,
+                                                        fromWeaponBucket: weaponBucketId,
+                                                        ofSelectedModel: modelId,
+                                                        conn: req)
+            .flatMap(to: DetachmentResponse.self, { detachment in
+                let detachmentController = DetachmentController()
+                return try detachmentController.getDetachmentById(detachmentId, conn: req)
+            })
+    }
+
 }
