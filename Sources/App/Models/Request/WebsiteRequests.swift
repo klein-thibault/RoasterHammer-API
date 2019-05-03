@@ -105,12 +105,14 @@ struct CreateUnitData: Content {
     let keywords: [String]?
     let models: DynamicFormData
     let rules: DynamicFormData
+    let existingRuleCheckbox: [String: String]
 }
 
 struct EditUnitContext: WebContextTitle, Encodable {
     let title: String
     let unit: UnitResponse
     let armies: [ArmyResponse]
+    let existingRules: [Rule]
     let unitTypes: [UnitType]
     let editing: Bool = true
 }

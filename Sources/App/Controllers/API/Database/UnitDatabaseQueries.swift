@@ -242,6 +242,14 @@ final class UnitDatabaseQueries {
             })
     }
 
+    func assignRuleToUnit(unitId: Int, rule: Rule, conn: DatabaseConnectable) -> Future<UnitRule> {
+        return Unit.find(unitId, on: conn)
+            .unwrap(or: RoasterHammerError.unitIsMissing.error())
+            .flatMap(to: UnitRule.self, { unit in
+                return unit.rules.attach(rule, on: conn)
+            })
+    }
+
     func deleteUnit(unitId: Int, conn: DatabaseConnectable) -> Future<HTTPStatus> {
         return Unit.find(unitId, on: conn)
             .unwrap(or: RoasterHammerError.unitIsMissing.error())

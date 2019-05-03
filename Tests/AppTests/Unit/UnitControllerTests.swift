@@ -142,6 +142,22 @@ class UnitControllerTests: BaseTests {
         XCTAssertEqual(editedUnit.rules[0].description, editUnitRequest.rules[0].description)
     }
 
+    func testAssignRuleToUnit() throws {
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+        let (_, rule) = try RuleTestsUtils.createRule(conn: conn)
+
+        let unitRule = try UnitDatabaseQueries().assignRuleToUnit(unitId: unit.id, rule: rule, conn: conn).wait()
+
+        XCTAssertEqual(unit.id, unitRule.unitId)
+        XCTAssertEqual(rule.id, unitRule.ruleId)
+
+        let editedUnit = try app.getResponse(to: "units/\(unit.id)", decodeTo: UnitResponse.self)
+        XCTAssertTrue(editedUnit.rules.count == 2)
+        XCTAssertEqual(editedUnit.rules[1].name, rule.name)
+        XCTAssertEqual(editedUnit.rules[1].description, rule.description)
+    }
+
     func testDeleteUnit() throws {
         let (_, army) = try ArmyTestsUtils.createArmy(app: app)
         let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)

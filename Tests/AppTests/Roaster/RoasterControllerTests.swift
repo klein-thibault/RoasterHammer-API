@@ -36,7 +36,7 @@ class RoasterControllerTests: BaseTests {
         XCTAssertEqual(roasters.count, 1)
         XCTAssertEqual(roaster.id, roaster.id)
         XCTAssertEqual(roaster.name, roaster.name)
-        XCTAssertEqual(roaster.totalPoints, 0)
+        XCTAssertEqual(roaster.totalCost, 0)
     }
 
 }

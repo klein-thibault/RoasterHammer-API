@@ -51,14 +51,23 @@ struct WebsiteUnitController {
         let armiesFuture = try ArmyController().getAllArmies(conn: req)
         let unitTypesFuture = UnitTypeController().getAllUnitTypes(conn: req)
         let unitFuture = UnitDatabaseQueries().getUnit(byID: unitId, conn: req)
+        let existingRulesFuture = RuleController().getAllRules(conn: req)
 
         return flatMap(to: View.self,
                        armiesFuture,
                        unitTypesFuture,
-                       unitFuture, { (armies, unitTypes, unit) in
+                       existingRulesFuture,
+                       unitFuture, { (armies, unitTypes, existingRules, unit) in
+                        let filteredRules = existingRules.filter({ existingRule in
+                            return !unit.rules.contains(where: { rule in
+                                return rule.name == existingRule.name
+                                    && rule.description == existingRule.description
+                            })
+                        })
                         let context = EditUnitContext(title: "Edit Unit",
                                                       unit: unit,
                                                       armies: armies,
+                                                      existingRules: filteredRules,
                                                       unitTypes: unitTypes)
                         return try req.view().render("createUnit", context)
         })
@@ -66,10 +75,19 @@ struct WebsiteUnitController {
 
     func editUnitPostHandler(_ req: Request, editUnitRequest: CreateUnitData) throws -> Future<Response> {
         let unitId = try req.parameters.next(Int.self)
-        let editUnitRequest = try createUnitRequest(forData: editUnitRequest)
-        return UnitDatabaseQueries()
-            .editUnit(unitId: unitId, request: editUnitRequest, conn: req)
-            .transform(to: req.redirect(to: "/roasterhammer/units"))
+        let existingRuleIds = editUnitRequest.existingRuleCheckbox.keys.compactMap { $0.intValue }
+        let ruleController = RuleController()
+        let existingRulesFuture = existingRuleIds.map { return ruleController.getRuleByID($0, conn: req) }.flatten(on: req)
+
+        return existingRulesFuture.flatMap(to: Response.self, { existingRules in
+            let editUnitRequest = try self.createUnitRequest(forData: editUnitRequest)
+            return UnitDatabaseQueries()
+                .editUnit(unitId: unitId, request: editUnitRequest, conn: req)
+                .flatMap(to: [UnitRule].self, { unit in
+                    return try self.assignExistingRulesToUnit(unit: unit, rules: existingRules, conn: req)
+                })
+                .transform(to: req.redirect(to: "/roasterhammer/units"))
+        })
     }
 
     func deleteUnitHandler(_ req: Request) throws -> Future<Response> {
@@ -146,6 +164,15 @@ struct WebsiteUnitController {
         }
 
         return models
+    }
+
+    private func assignExistingRulesToUnit(unit: Unit, rules: [Rule], conn: DatabaseConnectable) throws -> Future<[UnitRule]> {
+        return try rules.map {
+            UnitDatabaseQueries().assignRuleToUnit(unitId: try unit.requireID(),
+                                                  rule: $0,
+                                                  conn: conn)
+            }
+            .flatten(on: conn)
     }
 
 }
