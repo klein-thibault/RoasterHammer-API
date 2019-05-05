@@ -210,9 +210,17 @@ public func routes(_ router: Router) throws {
     router.post("roasterhammer", "factions", Int.parameter, "delete", use: websiteFactionController.deleteFactionHandler)
     // - Rules
     let websiteRuleController = WebsiteRuleController()
-    router.get("roasterhammer/rules", use: websiteRuleController.rulesHandler)
-    router.get("roasterhammer/rules", Int.parameter, use: websiteRuleController.ruleHandler)
-    router.get("roasterhammer/rules", Int.parameter, "edit", use: websiteRuleController.editRuleHandler)
+    router.get("roasterhammer", "rules", use: websiteRuleController.rulesHandler)
+    router.get("roasterhammer", "rules", "create", use: websiteRuleController.createRuleHandler)
+    router.post(EditRuleData.self,
+                at: "roasterhammer", "rules", "create",
+                use: websiteRuleController.createRulePostHandler)
+    router.get("roasterhammer", "rules", Int.parameter, use: websiteRuleController.ruleHandler)
+    router.get("roasterhammer", "rules", Int.parameter, "edit", use: websiteRuleController.editRuleHandler)
+    router.post(EditRuleData.self,
+                at: "roasterhammer", "rules", Int.parameter, "edit",
+                use: websiteRuleController.editRulePostHandler)
+    router.post("roasterhammer", "rules", Int.parameter, "delete", use: websiteRuleController.deleteRuleHandler)
 
     // QA
     //    let qaController = QAController()

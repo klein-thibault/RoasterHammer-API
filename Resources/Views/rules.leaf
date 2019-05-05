@@ -1,5 +1,8 @@
 #set("content") {
 <h1>Rules</h1>
+<p></p>
+<a class="btn btn-primary" href="/roasterhammer/rules/create" role="button">Add New Rule</a>
+<p></p>
 <table class="table table-bordered table-hover">
     <thead class="thead-light">
         <tr>

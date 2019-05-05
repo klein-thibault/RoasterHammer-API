@@ -145,3 +145,8 @@ struct RuleContext: Encodable {
     let rule: Rule
     let editing: Bool
 }
+
+struct EditRuleData: Content {
+    let name: String
+    let description: String
+}
