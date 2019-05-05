@@ -23,6 +23,12 @@ public func routes(_ router: Router) throws {
     protectedAuthRouter.get("games", use: gameController.games)
     protectedAuthRouter.get("games", Int.parameter, use: gameController.gameById)
 
+    // Rule
+    let ruleController = RuleController()
+    router.get("rules", use: ruleController.getRules)
+    router.get("rules", Int.parameter, use: ruleController.getRuleById)
+    router.post("rules", use: ruleController.createRule)
+
     // Roaster
     let roasterController = RoasterController()
     protectedAuthRouter.post("games", Int.parameter, "roasters", use: roasterController.createRoster)
@@ -202,6 +208,11 @@ public func routes(_ router: Router) throws {
                 at: "roasterhammer", "factions", Int.parameter, "edit",
                 use: websiteFactionController.editFactionPostHandler)
     router.post("roasterhammer", "factions", Int.parameter, "delete", use: websiteFactionController.deleteFactionHandler)
+    // - Rules
+    let websiteRuleController = WebsiteRuleController()
+    router.get("roasterhammer/rules", use: websiteRuleController.rulesHandler)
+    router.get("roasterhammer/rules", Int.parameter, use: websiteRuleController.ruleHandler)
+    router.get("roasterhammer/rules", Int.parameter, "edit", use: websiteRuleController.editRuleHandler)
 
     // QA
     //    let qaController = QAController()

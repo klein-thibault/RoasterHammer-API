@@ -1,0 +1,16 @@
+#set("content") {
+<form method="post">
+    <div class="form-group">
+        <input type="text" class="form-control" name="name" value="#(rule.name)"/>
+    </div>
+    <div class="form-group">
+        <input type="text" class="form-control" name="description" value="#(rule.description)"/>
+    </div>
+    #if(editing) {
+    <button type="submit" class="btn btn-primary">
+        Update
+    </button>
+    }
+</form>
+}
+#embed("base")

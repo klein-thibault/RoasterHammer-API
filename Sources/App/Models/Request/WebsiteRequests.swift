@@ -135,3 +135,13 @@ struct EditWeaponBucketContext: WebContextTitle, Encodable {
 struct EditWeaponBucketData: Content {
     let weaponCheckbox: [String: String]
 }
+
+struct RulesContext: WebContextTitle, Encodable {
+    let title: String
+    let rules: [Rule]
+}
+
+struct RuleContext: Encodable {
+    let rule: Rule
+    let editing: Bool
+}

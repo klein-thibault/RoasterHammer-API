@@ -1,0 +1,27 @@
+#set("content") {
+<h1>Rules</h1>
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        #for(rule in rules) {
+        <tr>
+            <td><a href="/roasterhammer/rules/#(rule.id)">#(rule.name)</a></td>
+            <td>#(rule.description)</td>
+            <td>
+                <form method="post" action="/roasterhammer/rules/#(rule.id)/delete">
+                    <a class="btn btn-primary" href="/roasterhammer/rules/#(rule.id)/edit" role="button">Edit</a>
+                    <input class="btn btn-danger" type="submit" value="Delete"/>
+                </form>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+}
+#embed("base")
