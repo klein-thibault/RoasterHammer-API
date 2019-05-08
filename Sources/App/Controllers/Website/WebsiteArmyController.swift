@@ -47,22 +47,31 @@ struct WebsiteArmyController {
 
     func editArmyHandler(_ req: Request) throws -> Future<View> {
         let armyId = try req.parameters.next(Int.self)
+        let armyFuture = try ArmyController().getArmy(byID: armyId, conn: req)
+        let existingRulesFuture = RuleController().getAllRules(conn: req)
 
-        return try ArmyController().getArmy(byID: armyId, conn: req)
-            .flatMap(to: View.self, { army in
-                let context = EditArmyContext(title: "Edit Army", army: army)
-                return try req.view().render("createArmy", context)
-            })
+        return flatMap(to: View.self, armyFuture, existingRulesFuture, { (army, existingRules) in
+            let context = EditArmyContext(title: "Edit Army", army: army, existingRules: existingRules)
+            return try req.view().render("createArmy", context)
+        })
     }
 
     func editArmyPostHandler(_ req: Request, editArmyRequest: CreateArmyAndRulesData) throws -> Future<Response> {
         let armyId = try req.parameters.next(Int.self)
         let rules = WebRequestUtils().addRuleRequest(forRuleData: editArmyRequest.rules)
         let editArmy = EditArmyRequest(name: editArmyRequest.armyName, rules: rules)
+        let existingRuleIds = editArmyRequest.existingRuleCheckbox.keys.compactMap { $0.intValue }
+        let ruleController = RuleController()
+        let existingRulesFuture = existingRuleIds.map { return ruleController.getRuleByID($0, conn: req) }.flatten(on: req)
 
-        return ArmyController()
-            .editArmy(armyId: armyId, request: editArmy, conn: req)
-            .transform(to: req.redirect(to: "/roasterhammer/armies/\(armyId)"))
+        return existingRulesFuture.flatMap(to: Response.self, { existingRules in
+            return ArmyController()
+                .editArmy(armyId: armyId, request: editArmy, conn: req)
+                .flatMap(to: [ArmyRule].self, { army in
+                    return try self.assignExistingRulesToArmy(army: army, rules: existingRules, conn: req)
+                })
+                .transform(to: req.redirect(to: "/roasterhammer/armies/\(armyId)"))
+        })
     }
 
     func deleteArmyHandler(_ req: Request) throws -> Future<Response> {

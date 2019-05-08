@@ -33,6 +33,7 @@ struct CreateArmyContext: WebContextTitle, Encodable {
 struct EditArmyContext: WebContextTitle, Encodable {
     let title: String
     let army: ArmyResponse
+    let existingRules: [Rule]
     let editing: Bool = true
 }
 
