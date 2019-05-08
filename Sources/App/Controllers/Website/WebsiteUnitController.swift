@@ -29,9 +29,13 @@ struct WebsiteUnitController {
     func createUnitHandler(_ req: Request) throws -> Future<View> {
         let armiesFuture = try ArmyController().getAllArmies(conn: req)
         let unitTypesFuture = UnitTypeController().getAllUnitTypes(conn: req)
+        let existingRulesFuture = RuleController().getAllRules(conn: req)
 
-        return flatMap(to: View.self, armiesFuture, unitTypesFuture) { (armies, unitTypes) in
-            let context = CreateUnitContext(title: "Create A Unit", armies: armies, unitTypes: unitTypes)
+        return flatMap(to: View.self, armiesFuture, unitTypesFuture, existingRulesFuture) { (armies, unitTypes, existingRules) in
+            let context = CreateUnitContext(title: "Create A Unit",
+                                            armies: armies,
+                                            unitTypes: unitTypes,
+                                            existingRules: existingRules)
             return try req.view().render("createUnit", context)
         }
     }
@@ -39,10 +43,20 @@ struct WebsiteUnitController {
     func createUnitPostHandler(_ req: Request,
                                createUnitData: CreateUnitData) throws -> Future<Response> {
         let newUnitRequest = try createUnitRequest(forData: createUnitData)
+        let existingRuleIds = createUnitData.existingRuleCheckbox.keys.compactMap { $0.intValue }
+        let ruleController = RuleController()
+        let existingRulesFuture = existingRuleIds.map { return ruleController.getRuleByID($0, conn: req) }.flatten(on: req)
 
-        return UnitDatabaseQueries()
-            .createUnit(request: newUnitRequest, conn: req)
-            .transform(to: req.redirect(to: "/roasterhammer/units"))
+        return existingRulesFuture.flatMap(to: Response.self, { existingRules in
+            return UnitDatabaseQueries()
+                .createUnit(request: newUnitRequest, conn: req)
+                .flatMap(to: [UnitRule].self, { unit in
+                    return try self.assignExistingRulesToUnit(unit: unit, rules: existingRules, conn: req)
+                })
+                .transform(to: req.redirect(to: "/roasterhammer/units"))
+        })
+
+
     }
 
     func editUnitHandler(_ req: Request) throws -> Future<View> {

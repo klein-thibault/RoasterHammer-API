@@ -134,31 +134,32 @@
 
     <h3>Unit Rules</h3>
 
+    #if(count(existingRules) > 0) {
+    <h4>Existing Rules</h4>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>Rule</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            #for(existingRule in existingRules) {
+            <tr>
+                <td>
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" name="existingRuleCheckbox[#(existingRule.id)]" id="checkbox-#(existingRule.id)">
+                            <label class="form-check-label" for="exampleCheck1">#(existingRule.name)</label>
+                            </div>
+                </td>
+                <td>#(existingRule.description)</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+    }
+
     #if(editing) {
-        #if(count(existingRules) > 0) {
-            <h4>Existing Rules</h4>
-            <table class="table table-bordered table-hover">
-                <thead class="thead-light">
-                    <tr>
-                        <th>Rule</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    #for(existingRule in existingRules) {
-                        <tr>
-                            <td>
-                                <div class="form-group form-check">
-                                    <input type="checkbox" class="form-check-input" name="existingRuleCheckbox[#(existingRule.id)]" id="checkbox-#(existingRule.id)">
-                                    <label class="form-check-label" for="exampleCheck1">#(existingRule.name)</label>
-                                </div>
-                            </td>
-                            <td>#(existingRule.description)</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
         #if(count(unit.rules) > 0) {
             <div class="rules">
                 <!-- The add button -->

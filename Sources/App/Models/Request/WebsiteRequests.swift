@@ -93,6 +93,7 @@ struct CreateUnitContext: WebContextTitle, Encodable {
     let title: String
     let armies: [ArmyResponse]
     let unitTypes: [UnitType]
+    let existingRules: [Rule]
 }
 
 struct CreateUnitData: Content {
