@@ -4,6 +4,8 @@ import RoasterHammer_Shared
 
 struct WebsiteArmyController {
 
+    // MARK: - Public Functions
+
     func armyHandler(_ req: Request) throws -> Future<View> {
         let armyId = try req.parameters.next(Int.self)
         let armyFuture = try ArmyController().getArmy(byID: armyId, conn: req)
@@ -16,20 +18,31 @@ struct WebsiteArmyController {
     }
 
     func createArmyHandler(_ req: Request) throws -> Future<View> {
-        let context = CreateArmyContext(title: "Create An Army")
-        return try req.view().render("createArmy", context)
+        let existingRulesFuture = RuleController().getAllRules(conn: req)
+
+        return existingRulesFuture.flatMap(to: View.self, { existingRules in
+            let context = CreateArmyContext(title: "Create An Army",
+                                            existingRules: existingRules)
+            return try req.view().render("createArmy", context)
+        })
     }
 
     func createArmyPostHandler(_ req: Request, createArmyRequest: CreateArmyAndRulesData) throws -> Future<Response> {
         let rules = WebRequestUtils().addRuleRequest(forRuleData: createArmyRequest.rules)
         let newArmyRequest = CreateArmyRequest(name: createArmyRequest.armyName,
                                                rules: rules)
+        let existingRuleIds = createArmyRequest.existingRuleCheckbox.keys.compactMap { $0.intValue }
+        let ruleController = RuleController()
+        let existingRulesFuture = existingRuleIds.map { return ruleController.getRuleByID($0, conn: req) }.flatten(on: req)
 
-        return ArmyController()
-            .createArmy(request: newArmyRequest, conn: req)
-            .map(to: Response.self, { _ in
-                return req.redirect(to: "/roasterhammer")
-            })
+        return existingRulesFuture.flatMap(to: Response.self, { existingRules in
+            return ArmyController()
+                .createArmy(request: newArmyRequest, conn: req)
+                .flatMap(to: [ArmyRule].self, { army in
+                    return try self.assignExistingRulesToArmy(army: army, rules: existingRules, conn: req)
+                })
+                .transform(to: req.redirect(to: "/roasterhammer"))
+        })
     }
 
     func editArmyHandler(_ req: Request) throws -> Future<View> {
@@ -57,6 +70,16 @@ struct WebsiteArmyController {
         return ArmyController()
             .deleteArmy(armyId: armyId, conn: req)
             .transform(to: req.redirect(to: "/roasterhammer"))
+    }
+
+    // MARK: - Private Functions
+
+    private func assignExistingRulesToArmy(army: Army,
+                                           rules: [Rule],
+                                           conn: DatabaseConnectable) throws -> Future<[ArmyRule]> {
+        let armyController = ArmyController()
+        return rules.map { armyController.assignRule($0, toArmy: army, conn: conn) }
+            .flatten(on: conn)
     }
 
 }

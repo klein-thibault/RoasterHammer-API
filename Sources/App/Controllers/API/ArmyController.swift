@@ -109,6 +109,10 @@ final class ArmyController {
             .transform(to: HTTPStatus.ok)
     }
 
+    func assignRule(_ rule: Rule, toArmy army: Army, conn: DatabaseConnectable) -> Future<ArmyRule> {
+        return army.rules.attach(rule, on: conn)
+    }
+
     // MARK: - Private Functions
 
     private func createRules(forArmy army: Army,

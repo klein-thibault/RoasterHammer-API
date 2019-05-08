@@ -8,6 +8,10 @@
 
     <h3>Army Rules</h3>
 
+    #if(count(existingRules) > 0) {
+        #embed("existingRules")
+    }
+
     #if(editing) {
         #if(count(army.rules) > 0) {
             <div class="rules">

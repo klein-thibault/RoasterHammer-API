@@ -27,6 +27,7 @@ struct UnitDetailsContext: Encodable {
 
 struct CreateArmyContext: WebContextTitle, Encodable {
     let title: String
+    let existingRules: [Rule]
 }
 
 struct EditArmyContext: WebContextTitle, Encodable {
@@ -38,6 +39,7 @@ struct EditArmyContext: WebContextTitle, Encodable {
 struct CreateArmyAndRulesData: AddRuleData, Content {
     let armyName: String
     let rules: DynamicFormData
+    let existingRuleCheckbox: [String: String]
 }
 
 struct CreateFactionContext: WebContextTitle, Encodable {
