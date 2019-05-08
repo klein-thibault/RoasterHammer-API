@@ -38,11 +38,6 @@
                             Create A Faction
                         </a>
                     </li>
-                    <li class="nav-item #if(title == "Create A Unit"){active}">
-                        <a href="/roasterhammer/units/create" class="nav-link">
-                            Create A Unit
-                        </a>
-                    </li>
                     <li class="nav-item #if(title == "Create A Weapon"){active}">
                         <a href="/roasterhammer/weapons/create" class="nav-link">
                             Create A Weapon
