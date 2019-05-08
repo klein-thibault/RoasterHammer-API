@@ -3,6 +3,9 @@
 <h1>#(army.name)</h1>
 
 <h2>Army Factions</h2>
+<p></p>
+<a class="btn btn-primary" href="/roasterhammer/factions/create" role="button">Add New Faction</a>
+<p></p>
 #for(faction in army.factions) {
 <h3>#(faction.name)</h3>
 <table class="table table-bordered table-hover">
