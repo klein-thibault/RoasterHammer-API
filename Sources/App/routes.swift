@@ -41,6 +41,7 @@ public func routes(_ router: Router) throws {
     router.get("armies", use: armyController.armies)
     router.patch("armies", Int.parameter, use: armyController.editArmy)
     router.delete("armies", Int.parameter, use: armyController.deleteArmy)
+    router.get("armies", Int.parameter, "factions", use: armyController.getAllFactionsForArmy)
 
     // Faction
     let factionController = FactionController()

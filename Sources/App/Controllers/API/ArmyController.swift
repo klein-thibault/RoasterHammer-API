@@ -38,6 +38,23 @@ final class ArmyController {
         return deleteArmy(armyId: armyId, conn: req)
     }
 
+    func getAllFactionsForArmy(_ req: Request) throws -> Future<[FactionResponse]> {
+        let armyId = try req.parameters.next(Int.self)
+
+        return Army.find(armyId, on: req)
+            .unwrap(or: RoasterHammerError.armyIsMissing.error())
+            .flatMap(to: [Faction].self, { army in
+                return try army.factions.query(on: req).all()
+            })
+            .flatMap(to: [FactionResponse].self, { factions in
+                let factionController = FactionController()
+
+                return try factions
+                    .map { try factionController.factionResponse(faction: $0, conn: req) }
+                    .flatten(on: req)
+            })
+    }
+
     // MARK: - Utility Functions
 
     func getAllArmies(conn: DatabaseConnectable) throws -> Future<[ArmyResponse]> {

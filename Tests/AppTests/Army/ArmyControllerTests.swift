@@ -108,4 +108,11 @@ class ArmyControllerTests: BaseTests {
         XCTAssertEqual(armyFromRule.count, 0)
     }
 
+    func testGetArmyFactions() throws {
+        let (_, army) = try ArmyTestsUtils.createArmyWithFaction(app: app)
+
+        let factions = try app.getResponse(to: "armies/\(army.requireID())/factions", decodeTo: [FactionResponse].self)
+        XCTAssertTrue(factions.count == 1)
+    }
+
 }
