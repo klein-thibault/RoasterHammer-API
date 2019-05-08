@@ -1,5 +1,8 @@
 #set("content") {
 <h1>#(title)</h1>
+<p></p>
+<a class="btn btn-primary" href="/roasterhammer/weapons/create" role="button">Add New Weapon</a>
+<p></p>
 <table class="table table-bordered table-hover">
     <thead class="thead-light">
         <tr>
