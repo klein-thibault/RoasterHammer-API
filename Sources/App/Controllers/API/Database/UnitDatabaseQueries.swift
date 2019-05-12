@@ -107,7 +107,7 @@ final class UnitDatabaseQueries {
                             .map(to: SelectedUnitResponse.self, { selectedModels in
                                 // Sorted by models with lower max quantity to have sergeants etc on top
                                 let sortedSelectedModels = selectedModels.sorted(by: { $0.model.maxQuantity < $1.model.maxQuantity })
-                                let selectedUnitDTO = SelectedUnitDTO(id: try selectedUnit.requireID())
+                                let selectedUnitDTO = SelectedUnitDTO(id: try selectedUnit.requireID(), isWarlord: selectedUnit.isWarlord)
                                 return SelectedUnitResponse(selectedUnit: selectedUnitDTO,
                                                             unit: unit,
                                                             models: sortedSelectedModels)
@@ -356,8 +356,22 @@ final class UnitDatabaseQueries {
         }
     }
 
-    func createSelectedUnit(unit: Unit, quantity: Int, conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
-        return try SelectedUnit(unitId: unit.requireID(), quantity: quantity).save(on: conn)
+    func validateWarlordSelectionForUnit(_ unit: SelectedUnit, role: Role, conn: DatabaseConnectable) throws -> Future<Void> {
+        if role.name != Constants.RoleName.hq {
+            throw RoasterHammerError.warlordSelectionInvalidRole.error()
+        }
+
+        return conn.future()
+    }
+
+    func createSelectedUnit(unit: Unit,
+                            quantity: Int,
+                            isWarlord: Bool,
+                            conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
+        return try SelectedUnit(unitId: unit.requireID(),
+                                quantity: quantity,
+                                isWarlord: isWarlord)
+            .save(on: conn)
     }
 
     func createInitialModelsForSelectedUnit(unit: Unit,
@@ -446,6 +460,17 @@ final class UnitDatabaseQueries {
                                                    weaponId: weaponId)
                         .save(on: conn)
                 }
+            })
+    }
+
+    func removeExistingWarlordSelectionInRole(_ role: Role, conn: DatabaseConnectable) throws -> Future<Void> {
+        return try role.units.query(on: conn).filter(\.isWarlord == true).all()
+            .flatMap({ units in
+                return units.map({ unit in
+                    unit.isWarlord = false
+                    _ = unit.save(on: conn)
+                    return conn.future()
+                }).flatten(on: conn)
             })
     }
 

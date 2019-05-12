@@ -91,6 +91,7 @@ public func configure(_ config: inout Config,
     migrations.add(migration: CreateModelWeaponBucket.self, database: .psql)
     migrations.add(migration: CreateWeaponBucketWeapon.self, database: .psql)
     migrations.add(migration: PopulateUnitTypeData.self, database: .psql)
+    migrations.add(migration: AddIsWarlordToSelectedUnit.self, database: .psql)
     services.register(migrations)
 
     // Configure the command line tool to add Fluent commands like revert and migrate database

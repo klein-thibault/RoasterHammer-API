@@ -28,6 +28,7 @@ enum RoasterHammerError: Swift.Error {
     case tooManyWeaponsForModel
     case costIsNotANumber
     case tooManyWeaponSelectionFromWeaponBucket
+    case warlordSelectionInvalidRole
 }
 
 extension RoasterHammerError {
@@ -75,6 +76,8 @@ extension RoasterHammerError {
             return Abort(.badRequest, reason: "The cost must be a number")
         case .tooManyWeaponSelectionFromWeaponBucket:
             return Abort(.badRequest, reason: "Can't select more weapons from this weapon bucket")
+        case .warlordSelectionInvalidRole:
+            return Abort(.badRequest, reason: "Your warlord selection must be a \(Constants.RoleName.hq)")
         }
     }
 }

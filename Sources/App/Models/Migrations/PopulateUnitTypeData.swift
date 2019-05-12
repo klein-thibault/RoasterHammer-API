@@ -2,14 +2,14 @@ import FluentPostgreSQL
 
 struct PopulateUnitTypeData: PostgreSQLMigration {
     static let unitTypes = [
-        "HQ",
-        "Troop",
-        "Elite",
-        "Fast Attack",
-        "Heavy Support",
-        "Flyer",
-        "Dedicated Transport",
-        "Lord of War"
+        Constants.RoleName.hq,
+        Constants.RoleName.troop,
+        Constants.RoleName.elite,
+        Constants.RoleName.fastAttack,
+        Constants.RoleName.heavySupport,
+        Constants.RoleName.flyer,
+        Constants.RoleName.dedicatedTransport,
+        Constants.RoleName.lordOfWar
     ]
 
     static func prepare(on conn: PostgreSQLConnection) -> EventLoopFuture<Void> {

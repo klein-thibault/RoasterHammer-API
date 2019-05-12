@@ -5,6 +5,7 @@ final class SelectedUnit: PostgreSQLModel {
     var id: Int?
     var unitId: Int
     var quantity: Int
+    var isWarlord: Bool
     var roles: Siblings<SelectedUnit, Role, UnitRole> {
         return siblings()
     }
@@ -12,9 +13,10 @@ final class SelectedUnit: PostgreSQLModel {
         return siblings()
     }
 
-    init(unitId: Int, quantity: Int) {
+    init(unitId: Int, quantity: Int, isWarlord: Bool) {
         self.unitId = unitId
         self.quantity = quantity
+        self.isWarlord = isWarlord
     }
 }
 

@@ -74,6 +74,7 @@ final class UnitController {
                                 // Create the selected unit
                                 return try self.unitDatabaseQueries.createSelectedUnit(unit: unit,
                                                                                        quantity: request.unitQuantity,
+                                                                                       isWarlord: false,
                                                                                        conn: req)
                             })
                             .flatMap(to: SelectedUnit.self, { selectedUnit in
@@ -106,6 +107,33 @@ final class UnitController {
 
         return flatMap(unitFuture, roleFuture, detachmentFuture, { (unit, role, detachment) in
             return role.units.detach(unit, on: req)
+                .flatMap(to: DetachmentResponse.self, { _ in
+                    // Return the updated detachment
+                    let detachmentController = DetachmentController()
+                    return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                })
+        })
+    }
+
+    func setUnitAsWarlord(_ req: Request) throws -> Future<DetachmentResponse> {
+        _ = try req.requireAuthenticated(Customer.self)
+        let detachmentId = try req.parameters.next(Int.self)
+        let roleId = try req.parameters.next(Int.self)
+        let unitId = try req.parameters.next(Int.self)
+
+        let unitFuture = SelectedUnit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let roleFuture = Role.find(roleId, on: req).unwrap(or: RoasterHammerError.roleIsMissing.error())
+        let detachmentFuture = Detachment.find(detachmentId, on: req).unwrap(or: RoasterHammerError.detachmentIsMissing.error())
+
+        return flatMap(unitFuture, roleFuture, detachmentFuture, { (unit, role, detachment) in
+            return try self.unitDatabaseQueries.validateWarlordSelectionForUnit(unit, role: role, conn: req)
+                .flatMap({ _ in
+                    try self.unitDatabaseQueries.removeExistingWarlordSelectionInRole(role, conn: req)
+                })
+                .flatMap(to: SelectedUnit.self, { _ in
+                    unit.isWarlord = !unit.isWarlord
+                    return unit.save(on: req)
+                })
                 .flatMap(to: DetachmentResponse.self, { _ in
                     // Return the updated detachment
                     let detachmentController = DetachmentController()

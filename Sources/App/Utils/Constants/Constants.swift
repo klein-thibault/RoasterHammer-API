@@ -15,5 +15,7 @@ struct Constants {
         static let fastAttack = "Fast Attack"
         static let heavySupport = "Heavy Support"
         static let flyer = "Flyer"
+        static let dedicatedTransport = "Dedicated Transport"
+        static let lordOfWar = "Lord of War"
     }
 }

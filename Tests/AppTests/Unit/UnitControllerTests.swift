@@ -195,6 +195,7 @@ class UnitControllerTests: BaseTests {
         let addedModelCharacteristics = addedUnit[0].unit.models[0].characteristics
         XCTAssertEqual(addedUnit[0].unit.name, unit.name)
         XCTAssertEqual(addedUnit[0].unit.cost, unit.cost)
+        XCTAssertFalse(addedUnit[0].isWarlord)
 
         // Make sure that the expected amount of models have been added
         let expectedModelsCount = addedUnit[0].unit.models.reduce(0) { $0 + $1.minQuantity }
@@ -340,6 +341,173 @@ class UnitControllerTests: BaseTests {
 
         let updatedDetachmentRoleAfterRemovingModel = detachmentAfterRemovingModel.roles
         XCTAssertTrue(updatedDetachmentRoleAfterRemovingModel[0].units.count == 0)
+    }
+
+    func testSetUnitAsWarlord() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let futureWarlord = updatedDetachment.roles[0].units[0]
+        XCTAssertFalse(futureWarlord.isWarlord)
+
+        let detachmentWithWarlord = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)/warlord",
+            method: .PATCH,
+            headers: ["Content-Type": "application/json"],
+            data: nil,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let warlord = detachmentWithWarlord.roles[0].units[0]
+        XCTAssertTrue(warlord.isWarlord)
+    }
+
+    func testSetUnitAsWarlord_whenUnitIsNotAHQ() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createTroopUnit(armyId: army.requireID(), app: app)
+
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[1].id)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let futureWarlord = updatedDetachment.roles[1].units[0]
+        XCTAssertFalse(futureWarlord.isWarlord)
+
+        do {
+            _ = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[1].id)/units/\(unit.id)/warlord",
+                method: .PATCH,
+                headers: ["Content-Type": "application/json"],
+                data: nil,
+                decodeTo: DetachmentResponse.self,
+                loggedInRequest: true,
+                loggedInCustomer: user)
+            XCTFail("Should have received an error")
+        } catch {
+            XCTAssertNotNil(error)
+        }
+    }
+
+    func testSetUnitAsWarlord_whenUnitIsAlreadyWarlord() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let futureWarlord = updatedDetachment.roles[0].units[0]
+        XCTAssertFalse(futureWarlord.isWarlord)
+
+        let detachmentWithWarlord = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)/warlord",
+            method: .PATCH,
+            headers: ["Content-Type": "application/json"],
+            data: nil,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        XCTAssertTrue(detachmentWithWarlord.roles[0].units[0].isWarlord)
+
+        let detachmentWithNoWarlord = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)/warlord",
+            method: .PATCH,
+            headers: ["Content-Type": "application/json"],
+            data: nil,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        XCTAssertFalse(detachmentWithNoWarlord.roles[0].units[0].isWarlord)
+    }
+
+    func testSetUnitAsWarlord_whenAnotherUnitIsWarlord() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit1) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+        let (_, unit2) = try UnitTestsUtils.createHQUnit(armyId: army.requireID(), app: app)
+
+        let addUnitToDetachmentRequest1 = AddUnitToDetachmentRequest(unitQuantity: unit1.maxQuantity)
+        _ = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit1.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest1,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let addUnitToDetachmentRequest2 = AddUnitToDetachmentRequest(unitQuantity: unit2.maxQuantity)
+        let updatedDetachment = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit2.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest2,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        for unit in updatedDetachment.roles[0].units {
+            XCTAssertFalse(unit.isWarlord)
+        }
+
+        let detachmentWithWarlord1 = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit1.id)/warlord",
+            method: .PATCH,
+            headers: ["Content-Type": "application/json"],
+            data: nil,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        for unit in detachmentWithWarlord1.roles[0].units {
+            if unit.id == unit1.id {
+                XCTAssertTrue(unit.isWarlord)
+            } else {
+                XCTAssertFalse(unit.isWarlord)
+            }
+        }
+
+        let detachmentWithWarlord2 = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit2.id)/warlord",
+            method: .PATCH,
+            headers: ["Content-Type": "application/json"],
+            data: nil,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        for unit in detachmentWithWarlord2.roles[0].units {
+            if unit.id == unit2.id {
+                XCTAssertTrue(unit.isWarlord)
+            } else {
+                XCTAssertFalse(unit.isWarlord)
+            }
+        }
     }
 
     func testAddModelToUnit() throws {
