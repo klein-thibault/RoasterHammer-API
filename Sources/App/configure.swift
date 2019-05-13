@@ -56,6 +56,8 @@ public func configure(_ config: inout Config,
     SelectedUnitModel.defaultDatabase = .psql
     ModelWeaponBucket.defaultDatabase = .psql
     WeaponBucketWeapon.defaultDatabase = .psql
+    Relic.defaultDatabase = .psql
+    RelicKeyword.defaultDatabase = .psql
     migrations.add(model: Customer.self, database: .psql)
     migrations.add(model: UserToken.self, database: .psql)
     migrations.add(model: NodeElement.self, database: .psql)
@@ -92,6 +94,8 @@ public func configure(_ config: inout Config,
     migrations.add(migration: CreateWeaponBucketWeapon.self, database: .psql)
     migrations.add(migration: PopulateUnitTypeData.self, database: .psql)
     migrations.add(migration: AddIsWarlordToSelectedUnit.self, database: .psql)
+    migrations.add(migration: CreateRelic.self, database: .psql)
+    migrations.add(migration: CreateRelicKeyword.self, database: .psql)
     services.register(migrations)
 
     // Configure the command line tool to add Fluent commands like revert and migrate database
