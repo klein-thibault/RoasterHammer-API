@@ -16,6 +16,9 @@ final class Army: PostgreSQLModel {
     var rules: Siblings<Army, Rule, ArmyRule> {
         return siblings()
     }
+    var relics: Children<Army, Relic> {
+        return children(\.armyId)
+    }
 
     init(name: String) {
         self.name = name

@@ -78,16 +78,28 @@ final class ArmyController {
                       conn: DatabaseConnectable) throws -> Future<ArmyResponse> {
         let factionsFuture = try army.factions.query(on: conn).all()
         let rulesFuture = try army.rules.query(on: conn).all()
+        let relicsFuture = try army.relics.query(on: conn).all()
         
-        return flatMap(to: ArmyResponse.self, factionsFuture, rulesFuture, { (factions, rules) in
+        return flatMap(to: ArmyResponse.self, factionsFuture, rulesFuture, relicsFuture, { (factions, rules, relics) in
+            // Get all faction responses
             let factionController = FactionController()
-            return try factions.map { try factionController.factionResponse(faction: $0, conn: conn) }
+            let factionResponsesFuture = try factions.map {
+                try factionController.factionResponse(faction: $0, conn: conn)
+                }
                 .flatten(on: conn)
-                .map(to: ArmyResponse.self, { factions in
-                    let armyDTO = ArmyDTO(id: try army.requireID(), name: army.name)
-                    let rulesResponse = RuleController().rulesResponse(forRules: rules)
-                    return ArmyResponse(army: armyDTO, factions: factions, rules: rulesResponse)
-                })
+
+            // Get all relic responses
+            let relicController = RelicController()
+            let relicResponsesFuture = try relics.map {
+                try relicController.relicResponse(forRelic: $0, conn: conn)
+                }
+                .flatten(on: conn)
+
+            return map(to: ArmyResponse.self, factionResponsesFuture, relicResponsesFuture, { (factions, relics) in
+                let armyDTO = ArmyDTO(id: try army.requireID(), name: army.name)
+                let rulesResponse = RuleController().rulesResponse(forRules: rules)
+                return ArmyResponse(army: armyDTO, factions: factions, rules: rulesResponse, relics: relics)
+            })
         })
     }
 

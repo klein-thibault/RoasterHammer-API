@@ -39,6 +39,7 @@ public func routes(_ router: Router) throws {
     let armyController = ArmyController()
     router.post("armies", use: armyController.createArmy)
     router.get("armies", use: armyController.armies)
+    router.get("armies", Int.parameter, use: armyController.getArmy)
     router.patch("armies", Int.parameter, use: armyController.editArmy)
     router.delete("armies", Int.parameter, use: armyController.deleteArmy)
     router.get("armies", Int.parameter, "factions", use: armyController.getAllFactionsForArmy)
@@ -49,6 +50,11 @@ public func routes(_ router: Router) throws {
     router.get("factions", use: factionController.getAllFactions)
     router.patch("factions", Int.parameter, use: factionController.editFaction)
     router.delete("factions", Int.parameter, use: factionController.deleteFaction)
+
+    // Relic
+    let relicController = RelicController()
+    router.post("armies", Int.parameter, "relics", use: relicController.createRelic)
+    router.delete("relics", Int.parameter, use: relicController.deleteRelic)
 
     // Detachment
     let detachmentController = DetachmentController()
