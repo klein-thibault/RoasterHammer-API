@@ -237,6 +237,11 @@ public func routes(_ router: Router) throws {
                 use: websiteRuleController.editRulePostHandler)
     router.post("roasterhammer", "rules", Int.parameter, "delete", use: websiteRuleController.deleteRuleHandler)
 
+    // - Relics
+    let websiteRelicController = WebsiteRelicController()
+    router.get("roasterhammer", "armies", Int.parameter, "relics", use: websiteRelicController.relicsHandler)
+    router.get("roasterhammer", "armies", Int.parameter, "relics", "create", use: websiteRelicController.createRelicHandler)
+
     // QA
     //    let qaController = QAController()
     //    router.post("qa/node", use: qaController.addNodeQA)

@@ -70,6 +70,58 @@
 </table>
 }
 
+<h2>Army Relics</h2>
+<p></p>
+<a class="btn btn-primary" href="/roasterhammer/armies/#(army.id)/relics" role="button">Edit</a>
+<p></p>
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        #for(relic in army.relics) {
+        <tr>
+            <td>#(relic.name)</td>
+            <td>
+                #(relic.description)
+
+                #if(relic.weapon) {
+                <table class="table table-bordered table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Range</th>
+                            <th>Type</th>
+                            <th>S</th>
+                            <th>AP</th>
+                            <th>D</th>
+                            <th>Cost</th>
+                            <th>Ability</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#(relic.weapon.name)</td>
+                            <td>#(relic.weapon.range)</td>
+                            <td>#(relic.weapon.type)</td>
+                            <td>#(relic.weapon.strength)</td>
+                            <td>#(relic.weapon.armorPiercing)</td>
+                            <td>#(relic.weapon.damage)</td>
+                            <td>#(relic.weapon.cost)</td>
+                            <td>#(relic.weapon.ability)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                }
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+
 #/*
 It’s good practice to use a POST request for actions that modify the database, such as create or delete.
 This enables you to protect them with CSRF (Cross Site Request Forgery) tokens in the future, for example.

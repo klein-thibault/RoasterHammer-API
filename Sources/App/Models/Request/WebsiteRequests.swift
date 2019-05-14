@@ -154,3 +154,11 @@ struct EditRuleData: Content {
     let name: String
     let description: String
 }
+
+struct RelicContext: Encodable {
+    let army: ArmyResponse
+}
+
+struct CreateRelicContext: Encodable {
+    let armyId: Int
+}

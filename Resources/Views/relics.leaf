@@ -1,0 +1,59 @@
+#set("content") {
+<h1>Relics</h1>
+<p></p>
+<a class="btn btn-primary" href="/roasterhammer/armies/#(army.id)/relics/create" role="button">Add New Relic</a>
+<p></p>
+#if(army.relics) {
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        #for(relic in army.relics) {
+        <tr>
+            <td>#(relic.name)</td>
+            <td>
+                #(relic.description)
+
+                #if(relic.weapon) {
+                <table class="table table-bordered table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Range</th>
+                            <th>Type</th>
+                            <th>S</th>
+                            <th>AP</th>
+                            <th>D</th>
+                            <th>Cost</th>
+                            <th>Ability</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#(relic.weapon.name)</td>
+                            <td>#(relic.weapon.range)</td>
+                            <td>#(relic.weapon.type)</td>
+                            <td>#(relic.weapon.strength)</td>
+                            <td>#(relic.weapon.armorPiercing)</td>
+                            <td>#(relic.weapon.damage)</td>
+                            <td>#(relic.weapon.cost)</td>
+                            <td>#(relic.weapon.ability)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                }
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+} else {
+<h2>There are no relics in this army.</h2>
+}
+}
+#embed("base")
+
