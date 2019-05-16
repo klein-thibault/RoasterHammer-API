@@ -241,6 +241,9 @@ public func routes(_ router: Router) throws {
     let websiteRelicController = WebsiteRelicController()
     router.get("roasterhammer", "armies", Int.parameter, "relics", use: websiteRelicController.relicsHandler)
     router.get("roasterhammer", "armies", Int.parameter, "relics", "create", use: websiteRelicController.createRelicHandler)
+    router.post(CreateRelicData.self,
+                at: "roasterhammer", "armies", Int.parameter, "relics", "create",
+                use: websiteRelicController.createRelicPostHandler)
 
     // QA
     //    let qaController = QAController()

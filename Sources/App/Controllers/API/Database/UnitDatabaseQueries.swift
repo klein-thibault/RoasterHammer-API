@@ -532,7 +532,7 @@ final class UnitDatabaseQueries {
     private func createKeywords(forUnit unit: Unit,
                                 keywords: [KeywordName],
                                 conn: DatabaseConnectable) -> Future<Unit> {
-        let keywordsFuture = keywords.map { Keyword(name: $0).save(on: conn) }.flatten(on: conn)
+        let keywordsFuture = KeywordController().getKeywordsWithNames(keywords, conn: conn)
         return keywordsFuture
             .flatMap(to: [UnitKeyword].self) { keywords in
                 return keywords.map { unit.keywords.attach($0, on: conn) }.flatten(on: conn)

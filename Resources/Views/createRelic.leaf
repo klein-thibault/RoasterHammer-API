@@ -1,5 +1,5 @@
 #set("content") {
-<h1>Create New Relic</h1>
+<h1>#(title)</h1>
 <form method="post">
     <div class="form-group">
         <label>Relic Name</label>
@@ -10,11 +10,20 @@
         <input type="text" class="form-control" name="description"/>
     </div>
 
+    <div class="form-group">
+        <label for="keywords">Keywords</label>
+        <select name="keywords[]" class="form-control" id="keywords" placeholder="Keywords" multiple="multiple"></select>
+    </div>
+
+    <div class="form-group">
+        <input type="hidden" class="form-control" name="armyId" value="#(armyId)"/>
+    </div>
+
+    #embed("weaponSelectionForm")
+
     <button type="submit" class="btn btn-primary">
         Submit
     </button>
 </form>
 }
 #embed("base")
-
-

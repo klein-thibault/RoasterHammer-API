@@ -159,6 +159,16 @@ struct RelicContext: Encodable {
     let army: ArmyResponse
 }
 
-struct CreateRelicContext: Encodable {
+struct CreateRelicContext: WebContextTitle, Encodable {
+    let title: String
     let armyId: Int
+    let weapons: [Weapon]
+}
+
+struct CreateRelicData: Content {
+    let name: String
+    let description: String
+    let armyId: Int
+    let keywords: [String]?
+    let weaponCheckbox: [String: String]
 }

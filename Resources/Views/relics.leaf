@@ -19,6 +19,7 @@
                 #(relic.description)
 
                 #if(relic.weapon) {
+                <p></p>
                 <table class="table table-bordered table-hover">
                     <thead class="thead-light">
                         <tr>

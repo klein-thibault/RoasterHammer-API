@@ -11,11 +11,7 @@ final class RelicController {
 
         return try req.content.decode(AddRelicRequest.self)
             .flatMap(to: Relic.self, { request in
-                return Relic(name: request.name,
-                             description: request.description,
-                             armyId: armyId,
-                             weaponId: request.weaponId)
-                    .save(on: req)
+                self.createRelic(request: request, armyId: armyId, conn: req)
             })
             .flatMap(to: ArmyResponse.self, { relic in
                 return try ArmyController().getArmy(byID: armyId, conn: req)
@@ -37,7 +33,7 @@ final class RelicController {
     func relicResponse(forRelic relic: Relic, conn: DatabaseConnectable) throws -> Future<RelicResponse> {
         let keywordsFuture = try relic.keywords.query(on: conn).all()
         let weaponFuture = Weapon.find(relic.weaponId ?? 0, on: conn)
-
+        
         return map(to: RelicResponse.self, keywordsFuture, weaponFuture, { (keywords, weapon) in
             var weaponResponse: WeaponResponse? = nil
 
@@ -50,6 +46,24 @@ final class RelicController {
 
             return RelicResponse(relicDTO: relicDTO, weapon: weaponResponse, keywords: keywordNames)
         })
+    }
+
+    func createRelic(request: AddRelicRequest, armyId: Int, conn: DatabaseConnectable) -> Future<Relic> {
+        return Relic(name: request.name,
+                     description: request.description,
+                     armyId: armyId,
+                     weaponId: request.weaponId)
+            .save(on: conn)
+            .flatMap(to: Relic.self, { relic in
+                return KeywordController().getKeywordsForIds(request.keywordIds, conn: conn)
+                    .flatMap(to: [RelicKeyword].self, { keywords in
+                        return keywords.map { relic.keywords.attach($0, on: conn) }
+                            .flatten(on: conn)
+                    })
+                    .map(to: Relic.self, { _ in
+                        return relic
+                    })
+            })
     }
 
     // MARK: - Private Functions
