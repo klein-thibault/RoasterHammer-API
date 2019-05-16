@@ -5,6 +5,10 @@ final class KeywordController {
 
     // MARK: - Utilities Functions
 
+    func getAllKeywords(conn: DatabaseConnectable) -> Future<[Keyword]> {
+        return Keyword.query(on: conn).all()
+    }
+
     func getKeywordForId(_ id: Int, conn: DatabaseConnectable) -> Future<Keyword> {
         return Keyword.find(id, on: conn).unwrap(or: RoasterHammerError.keywordIsMissing.error())
     }
