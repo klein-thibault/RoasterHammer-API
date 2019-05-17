@@ -9,6 +9,7 @@
         <tr>
             <th>Name</th>
             <th>Description</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -47,6 +48,11 @@
                     </tbody>
                 </table>
                 }
+            </td>
+            <td>
+                <form method="post" action="/roasterhammer/armies/#(army.id)/relics/#(relic.id)/delete">
+                    <input class="btn btn-danger" type="submit" value="Delete"/>
+                </form>
             </td>
         </tr>
         }

@@ -244,6 +244,8 @@ public func routes(_ router: Router) throws {
     router.post(CreateRelicData.self,
                 at: "roasterhammer", "armies", Int.parameter, "relics", "create",
                 use: websiteRelicController.createRelicPostHandler)
+    router.post("roasterhammer", "armies", Int.parameter, "relics", Int.parameter, "delete",
+                use: websiteRelicController.deleteRelicHandler)
 
     // QA
     //    let qaController = QAController()

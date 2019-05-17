@@ -66,6 +66,14 @@ final class RelicController {
             })
     }
 
+    func deleteRelicById(_ id: Int, conn: DatabaseConnectable) -> Future<HTTPStatus> {
+        return Relic
+            .find(id, on: conn)
+            .unwrap(or: RoasterHammerError.relicIsMissing.error())
+            .delete(on: conn)
+            .transform(to: .ok)
+    }
+
     // MARK: - Private Functions
 
     private func getRelicByID(_ id: Int, conn: DatabaseConnectable) -> Future<Relic> {

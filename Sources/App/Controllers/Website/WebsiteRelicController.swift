@@ -42,4 +42,13 @@ struct WebsiteRelicController {
             .transform(to: req.redirect(to: "/roasterhammer/armies/\(createRelicData.armyId)/relics"))
     }
 
+    func deleteRelicHandler(_ req: Request) throws -> Future<Response> {
+        let armyId = try req.parameters.next(Int.self)
+        let relicId = try req.parameters.next(Int.self)
+
+        return RelicController()
+            .deleteRelicById(relicId, conn: req)
+            .transform(to: req.redirect(to: "/roasterhammer/armies/\(armyId)/relics"))
+    }
+
 }
