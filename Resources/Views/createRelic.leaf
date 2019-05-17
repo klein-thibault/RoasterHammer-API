@@ -12,7 +12,11 @@
 
     <div class="form-group">
         <label for="keywords">Keywords</label>
-        <select name="keywords[]" class="form-control" id="keywords" placeholder="Keywords" multiple="multiple"></select>
+        <select name="keywords[]" class="form-control" id="keywords" placeholder="Keywords" multiple="multiple">
+            #for(keyword in keywords) {
+            <option>#(keyword.name)</option>
+            }
+        </select>
     </div>
 
     <div class="form-group">

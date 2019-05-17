@@ -97,6 +97,7 @@ struct CreateUnitContext: WebContextTitle, Encodable {
     let armies: [ArmyResponse]
     let unitTypes: [UnitType]
     let existingRules: [Rule]
+    let keywords: [Keyword]
 }
 
 struct CreateUnitData: Content {
@@ -163,6 +164,7 @@ struct CreateRelicContext: WebContextTitle, Encodable {
     let title: String
     let armyId: Int
     let weapons: [Weapon]
+    let keywords: [Keyword]
 }
 
 struct CreateRelicData: Content {

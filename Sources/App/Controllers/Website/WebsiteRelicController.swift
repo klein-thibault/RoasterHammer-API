@@ -18,9 +18,10 @@ struct WebsiteRelicController {
     func createRelicHandler(_ req: Request) throws -> Future<View> {
         let armyId = try req.parameters.next(Int.self)
         let weaponsFuture = WeaponController().getAllWeapons(conn: req)
+        let keywordsFuture = KeywordController().getAllKeywords(conn: req)
 
-        return weaponsFuture.flatMap(to: View.self, { weapons in
-            let context = CreateRelicContext(title: "Create New Relic", armyId: armyId, weapons: weapons)
+        return flatMap(to: View.self, weaponsFuture, keywordsFuture, { (weapons, keywords) in
+            let context = CreateRelicContext(title: "Create New Relic", armyId: armyId, weapons: weapons, keywords: keywords)
             return try req.view().render("createRelic", context)
         })
     }

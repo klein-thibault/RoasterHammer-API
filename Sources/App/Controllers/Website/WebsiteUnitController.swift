@@ -30,12 +30,18 @@ struct WebsiteUnitController {
         let armiesFuture = try ArmyController().getAllArmies(conn: req)
         let unitTypesFuture = UnitTypeController().getAllUnitTypes(conn: req)
         let existingRulesFuture = RuleController().getAllRules(conn: req)
+        let keywordsFuture = KeywordController().getAllKeywords(conn: req)
 
-        return flatMap(to: View.self, armiesFuture, unitTypesFuture, existingRulesFuture) { (armies, unitTypes, existingRules) in
+        return flatMap(to: View.self,
+                       armiesFuture,
+                       unitTypesFuture,
+                       existingRulesFuture,
+                       keywordsFuture) { (armies, unitTypes, existingRules, keywords) in
             let context = CreateUnitContext(title: "Create A Unit",
                                             armies: armies,
                                             unitTypes: unitTypes,
-                                            existingRules: existingRules)
+                                            existingRules: existingRules,
+                                            keywords: keywords)
             return try req.view().render("createUnit", context)
         }
     }
