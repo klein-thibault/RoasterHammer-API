@@ -174,3 +174,18 @@ struct CreateRelicData: Content {
     let keywords: [String]?
     let weaponCheckbox: [String: String]
 }
+
+struct WarlordTraitContext: Encodable {
+    let army: ArmyResponse
+}
+
+struct CreateWarlordTraitContext: WebContextTitle, Encodable {
+    let title: String
+    let armyId: Int
+}
+
+struct CreateWarlordTraitData: Content {
+    let name: String
+    let description: String
+    let armyId: Int
+}

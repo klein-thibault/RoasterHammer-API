@@ -11,10 +11,7 @@ final class WarlordTraitController {
 
         return try req.content.decode(AddWarlordTraitRequest.self)
             .flatMap(to: WarlordTrait.self, { request in
-                return WarlordTrait(name: request.name,
-                                    description: request.description,
-                                    armyId: armyId)
-                    .save(on: req)
+                self.createWarlordTrait(request: request, armyId: armyId, conn: req)
             })
             .map(to: WarlordTraitResponse.self, { warlordTrait in
                 return try self.warlordTraitResponse(forWarlordTrait: warlordTrait)
@@ -33,6 +30,15 @@ final class WarlordTraitController {
                                                   name: warlordTrait.name,
                                                   description: warlordTrait.description)
         return WarlordTraitResponse(warlordTraitDTO: warlordTraitDTO)
+    }
+
+    func createWarlordTrait(request: AddWarlordTraitRequest,
+                            armyId: Int,
+                            conn: DatabaseConnectable) -> Future<WarlordTrait> {
+        return WarlordTrait(name: request.name,
+                            description: request.description,
+                            armyId: armyId)
+            .save(on: conn)
     }
 
     func deleteWarlordTraitById(_ id: Int, conn: DatabaseConnectable) -> Future<HTTPStatus> {

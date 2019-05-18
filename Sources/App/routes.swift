@@ -241,7 +241,6 @@ public func routes(_ router: Router) throws {
                 at: "roasterhammer", "rules", Int.parameter, "edit",
                 use: websiteRuleController.editRulePostHandler)
     router.post("roasterhammer", "rules", Int.parameter, "delete", use: websiteRuleController.deleteRuleHandler)
-
     // - Relics
     let websiteRelicController = WebsiteRelicController()
     router.get("roasterhammer", "armies", Int.parameter, "relics", use: websiteRelicController.relicsHandler)
@@ -251,6 +250,15 @@ public func routes(_ router: Router) throws {
                 use: websiteRelicController.createRelicPostHandler)
     router.post("roasterhammer", "armies", Int.parameter, "relics", Int.parameter, "delete",
                 use: websiteRelicController.deleteRelicHandler)
+    // - Warlord Traits
+    let websiteWarlordTraitController = WebsiteWarlordTraitController()
+    router.get("roasterhammer", "armies", Int.parameter, "warlord-traits", use: websiteWarlordTraitController.warlordTraitsHandler)
+    router.get("roasterhammer", "armies", Int.parameter, "warlord-traits", "create", use: websiteWarlordTraitController.createWarlordTraitHandler)
+    router.post(CreateWarlordTraitData.self,
+                at: "roasterhammer", "armies", Int.parameter, "warlord-traits", "create",
+                use: websiteWarlordTraitController.createWarlordTraitPostHandler)
+    router.post("roasterhammer", "armies", Int.parameter, "warlord-traits", Int.parameter, "delete",
+                use: websiteWarlordTraitController.deleteWarlordTraitHandler)
 
     // QA
     //    let qaController = QAController()
