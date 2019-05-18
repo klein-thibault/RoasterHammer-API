@@ -21,11 +21,7 @@ final class RelicController {
     func deleteRelic(_ req: Request) throws -> Future<HTTPStatus> {
         let relicId = try req.parameters.next(Int.self)
 
-        return getRelicByID(relicId, conn: req)
-            .flatMap({ relic in
-                return relic.delete(on: req)
-            })
-            .transform(to: HTTPStatus.ok)
+        return deleteRelicById(relicId, conn: req)
     }
 
     // MARK: - Utils Functions

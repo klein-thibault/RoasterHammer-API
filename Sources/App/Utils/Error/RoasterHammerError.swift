@@ -22,6 +22,7 @@ enum RoasterHammerError: Swift.Error {
     case characteristicsAreMissing
     case relicIsMissing
     case keywordIsMissing
+    case warlordTraitIsMissing
     case addingUnitToWrongRole
     case addingUniqueUnitMoreThanOnce
     case tooManyUnitsInDetachment
@@ -66,6 +67,8 @@ extension RoasterHammerError {
             return Abort(.badRequest, reason: "The relic could not be found")
         case .keywordIsMissing:
             return Abort(.badRequest, reason: "The keyword could not be found")
+        case .warlordTraitIsMissing:
+            return Abort(.badRequest, reason: "The warlord trait could not be found")
         case .addingUnitToWrongRole:
             return Abort(.badRequest, reason: "Can't add this unit to this detachment role")
         case .addingUniqueUnitMoreThanOnce:

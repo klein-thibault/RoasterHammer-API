@@ -79,8 +79,9 @@ final class ArmyController {
         let factionsFuture = try army.factions.query(on: conn).all()
         let rulesFuture = try army.rules.query(on: conn).all()
         let relicsFuture = try army.relics.query(on: conn).all()
+        let warlordTraitsFuture = try army.warlordTraits.query(on: conn).all()
         
-        return flatMap(to: ArmyResponse.self, factionsFuture, rulesFuture, relicsFuture, { (factions, rules, relics) in
+        return flatMap(to: ArmyResponse.self, factionsFuture, rulesFuture, relicsFuture, warlordTraitsFuture, { (factions, rules, relics, warlordTraits) in
             // Get all faction responses
             let factionController = FactionController()
             let factionResponsesFuture = try factions.map {
@@ -95,10 +96,20 @@ final class ArmyController {
                 }
                 .flatten(on: conn)
 
+            // Get all warlord trait responses
+            let warlordTraitController = WarlordTraitController()
+            let warlordTraitResponses = try warlordTraits.map {
+                try warlordTraitController.warlordTraitResponse(forWarlordTrait: $0)
+            }
+
             return map(to: ArmyResponse.self, factionResponsesFuture, relicResponsesFuture, { (factions, relics) in
                 let armyDTO = ArmyDTO(id: try army.requireID(), name: army.name)
                 let rulesResponse = RuleController().rulesResponse(forRules: rules)
-                return ArmyResponse(army: armyDTO, factions: factions, rules: rulesResponse, relics: relics)
+                return ArmyResponse(army: armyDTO,
+                                    factions: factions,
+                                    rules: rulesResponse,
+                                    relics: relics,
+                                    warlordTraits: warlordTraitResponses)
             })
         })
     }

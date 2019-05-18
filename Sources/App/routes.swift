@@ -162,6 +162,11 @@ public func routes(_ router: Router) throws {
                 Int.parameter,
                 use: weaponBucketController.assignWeaponToWeaponBucket)
 
+    // Warlord Traits
+    let warlordTraitsController = WarlordTraitController()
+    router.post("armies", Int.parameter, "warlord-traits", use: warlordTraitsController.createWarlordTrait)
+    router.delete("warlord-traits", Int.parameter, use: warlordTraitsController.deleteWarlordTrait)
+
     // Website
     let websiteController = WebsiteController()
     router.get("roasterhammer", use: websiteController.indexHandler)

@@ -75,6 +75,7 @@ public func configure(_ config: inout Config,
     migrations.add(model: Faction.self, database: .psql)
     migrations.add(model: Model.self, database: .psql)
     migrations.add(model: WeaponBucket.self, database: .psql)
+    migrations.add(model: WarlordTrait.self, database: .psql)
     migrations.add(migration: CreateNodeElementClosure.self, database: .psql)
     migrations.add(migration: CreateGameRule.self, database: .psql)
     migrations.add(migration: CreateRoasterRule.self, database: .psql)
