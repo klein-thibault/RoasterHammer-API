@@ -9,6 +9,9 @@ final class WarlordTrait: PostgreSQLModel {
     var army: Parent<WarlordTrait, Army> {
         return parent(\.armyId)
     }
+    var units: Siblings<WarlordTrait, Unit, UnitWarlordTrait> {
+        return siblings()
+    }
 
     init(name: String, description: String, armyId: Int) {
         self.name = name

@@ -37,12 +37,12 @@ struct WebsiteUnitController {
                        unitTypesFuture,
                        existingRulesFuture,
                        keywordsFuture) { (armies, unitTypes, existingRules, keywords) in
-            let context = CreateUnitContext(title: "Create A Unit",
-                                            armies: armies,
-                                            unitTypes: unitTypes,
-                                            existingRules: existingRules,
-                                            keywords: keywords)
-            return try req.view().render("createUnit", context)
+                        let context = CreateUnitContext(title: "Create A Unit",
+                                                        armies: armies,
+                                                        unitTypes: unitTypes,
+                                                        existingRules: existingRules,
+                                                        keywords: keywords)
+                        return try req.view().render("createUnit", context)
         }
     }
 

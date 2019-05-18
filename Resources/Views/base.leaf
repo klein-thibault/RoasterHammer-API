@@ -85,6 +85,7 @@
             <script src="/scripts/repeater-rules-script.js"></script>
             <script src="/scripts/repeater-models-script.js"></script>
             <script src="/scripts/create-keywords.js"></script>
+            <script src="/scripts/select-army.js"></script>
         }
 
         #if(title == "Weapon Buckets") {

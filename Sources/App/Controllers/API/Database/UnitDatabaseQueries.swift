@@ -116,12 +116,14 @@ final class UnitDatabaseQueries {
     }
 
     func unitResponse(forUnit unit: Unit, conn: DatabaseConnectable) throws -> Future<UnitResponse> {
+        let armyController = ArmyController()
+        let warlordTraitController = WarlordTraitController()
         let unitModelsFuture = try unit.models.query(on: conn).all()
         let unitKeywordsFuture = try unit.keywords.query(on: conn).all()
         let unitTypeFuture = unit.unitType.get(on: conn)
         let unitRulesFuture = try unit.rules.query(on: conn).all()
-        let armyController = ArmyController()
         let unitArmyFuture = try armyController.getArmy(byID: unit.armyId, conn: conn)
+        let availableWarlordTraits = try unit.availableWarlordTrait.query(on: conn).all()
 
         return flatMap(to: UnitResponse.self,
                        unitModelsFuture,
@@ -129,25 +131,31 @@ final class UnitDatabaseQueries {
                        unitTypeFuture,
                        unitRulesFuture,
                        unitArmyFuture) { (models, keywords, unitType, rules, army) in
-                        return try models
-                            .map { try self.modelResponse(forModel: $0, conn: conn) }
-                            .flatten(on: conn)
-                            .map(to: UnitResponse.self, { modelResponses in
-                                let keywordStrings = keywords.map { $0.name }
-                                let unitTypeString = unitType.name
-                                let unitDTO = UnitDTO(id: try unit.requireID(),
-                                                      name: unit.name,
-                                                      isUnique: unit.isUnique,
-                                                      minQuantity: unit.minQuantity,
-                                                      maxQuantity: unit.maxQuantity)
-                                let rulesResponse = RuleController().rulesResponse(forRules: rules)
-                                return UnitResponse(unit: unitDTO,
-                                                    unitType: unitTypeString,
-                                                    army: army,
-                                                    models: modelResponses,
-                                                    keywords: keywordStrings,
-                                                    rules: rulesResponse)
-                            })
+                        return availableWarlordTraits.flatMap(to: UnitResponse.self, { warlordTraits in
+                            let warlordTraitResponses = try warlordTraits
+                                .map { try warlordTraitController.warlordTraitResponse(forWarlordTrait: $0) }
+
+                            return try models
+                                .map { try self.modelResponse(forModel: $0, conn: conn) }
+                                .flatten(on: conn)
+                                .map(to: UnitResponse.self, { modelResponses in
+                                    let keywordStrings = keywords.map { $0.name }
+                                    let unitTypeString = unitType.name
+                                    let unitDTO = UnitDTO(id: try unit.requireID(),
+                                                          name: unit.name,
+                                                          isUnique: unit.isUnique,
+                                                          minQuantity: unit.minQuantity,
+                                                          maxQuantity: unit.maxQuantity)
+                                    let rulesResponse = RuleController().rulesResponse(forRules: rules)
+                                    return UnitResponse(unit: unitDTO,
+                                                        unitType: unitTypeString,
+                                                        army: army,
+                                                        models: modelResponses,
+                                                        keywords: keywordStrings,
+                                                        rules: rulesResponse,
+                                                        availableWarlordTraits: warlordTraitResponses)
+                                })
+                        })
         }
     }
 
@@ -471,6 +479,17 @@ final class UnitDatabaseQueries {
                     _ = unit.save(on: conn)
                     return conn.future()
                 }).flatten(on: conn)
+            })
+    }
+
+    func addAvailableWarlordTraitsToUnit(_ unit: Unit,
+                                         warlordTraits: [WarlordTrait],
+                                         conn: DatabaseConnectable) throws -> Future<Unit> {
+        return warlordTraits
+            .map { unit.availableWarlordTrait.attach($0, on: conn) }
+            .flatten(on: conn)
+            .map(to: Unit.self, { _ in
+                return unit
             })
     }
 

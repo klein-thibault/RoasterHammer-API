@@ -21,6 +21,9 @@ final class Unit: PostgreSQLModel {
     var keywords: Siblings<Unit, Keyword, UnitKeyword> {
         return siblings()
     }
+    var availableWarlordTrait: Siblings<Unit, WarlordTrait, UnitWarlordTrait> {
+        return siblings()
+    }
     var unitType: Parent<Unit, UnitType> {
         return parent(\.unitTypeId)
     }
