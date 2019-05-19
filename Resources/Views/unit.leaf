@@ -1,6 +1,7 @@
 #set("content") {
 <h1>#(unit.name)</h1>
 
+#if(unit.unitType == "HQ") {
 <h2>Available Warlord Traits</h2>
 <p></p>
 <a class="btn btn-primary" href="/roasterhammer/armies/#(army.id)/units/#(unit.id)/warlord-traits" role="button">Update Available Warlord Traits</a>
@@ -27,6 +28,7 @@
         }
     </tbody>
 </table>
+}
 
 #for(model in unit.models) {
     <h2>#(model.name)</h2>
