@@ -16,29 +16,33 @@ struct WebsiteUnitController {
     }
 
     func unitHandler(_ req: Request) throws -> Future<View> {
+        let armyId = try req.parameters.next(Int.self)
         let unitId = try req.parameters.next(Int.self)
 
-        return UnitDatabaseQueries()
-            .getUnit(byID: unitId, conn: req)
-            .flatMap(to: View.self, { unit in
-                let context = UnitDetailsContext(unit: unit)
-                return try req.view().render("unit", context)
-            })
+        let armyFuture = try ArmyController().getArmy(byID: armyId, conn: req)
+        let unitFuture = UnitDatabaseQueries().getUnit(byID: unitId, conn: req)
+
+        return flatMap(to: View.self, armyFuture, unitFuture, { (army, unit) in
+            let warlordTraits = army.warlordTraits.subtracting(unit.availableWarlordTraits)
+            let context = UnitDetailsContext(unit: unit, army: army, warlordTraits: warlordTraits)
+            return try req.view().render("unit", context)
+        })
     }
 
     func createUnitHandler(_ req: Request) throws -> Future<View> {
-        let armiesFuture = try ArmyController().getAllArmies(conn: req)
+        let armyId = try req.parameters.next(Int.self)
+        let armyFuture = try ArmyController().getArmy(byID: armyId, conn: req)
         let unitTypesFuture = UnitTypeController().getAllUnitTypes(conn: req)
         let existingRulesFuture = RuleController().getAllRules(conn: req)
         let keywordsFuture = KeywordController().getAllKeywords(conn: req)
 
         return flatMap(to: View.self,
-                       armiesFuture,
+                       armyFuture,
                        unitTypesFuture,
                        existingRulesFuture,
-                       keywordsFuture) { (armies, unitTypes, existingRules, keywords) in
+                       keywordsFuture) { (army, unitTypes, existingRules, keywords) in
                         let context = CreateUnitContext(title: "Create A Unit",
-                                                        armies: armies,
+                                                        army: army,
                                                         unitTypes: unitTypes,
                                                         existingRules: existingRules,
                                                         keywords: keywords)
@@ -59,7 +63,7 @@ struct WebsiteUnitController {
                 .flatMap(to: [UnitRule].self, { unit in
                     return try self.assignExistingRulesToUnit(unit: unit, rules: existingRules, conn: req)
                 })
-                .transform(to: req.redirect(to: "/roasterhammer/units"))
+                .transform(to: req.redirect(to: "/roasterhammer/armies/\(createUnitData.armyId)"))
         })
 
 
@@ -115,6 +119,51 @@ struct WebsiteUnitController {
         return UnitDatabaseQueries()
             .deleteUnit(unitId: unitId, conn: req)
             .transform(to: req.redirect(to: "/roasterhammer/units"))
+    }
+
+    func warlordTraitsHandler(_ req: Request) throws -> Future<View> {
+        let armyId = try req.parameters.next(Int.self)
+        let unitId = try req.parameters.next(Int.self)
+
+        let armyFuture = try ArmyController().getArmy(byID: armyId, conn: req)
+        let unitFuture = UnitDatabaseQueries().getUnit(byID: unitId, conn: req)
+
+        return flatMap(to: View.self, armyFuture, unitFuture, { (army, unit) in
+            let warlordTraits = army.warlordTraits.subtracting(unit.availableWarlordTraits)
+            let context = UnitDetailsContext(unit: unit, army: army, warlordTraits: warlordTraits)
+            return try req.view().render("unitWarlordTraits", context)
+        })
+    }
+
+    func warlordTraitsPostHandler(_ req: Request, assignWarlordTraits: AssignWarlordTraitData) throws -> Future<Response> {
+        let armyId = try req.parameters.next(Int.self)
+        let unitId = try req.parameters.next(Int.self)
+        let warlordTraitIds = assignWarlordTraits.warlordTraitCheckbox.keys.compactMap { $0.intValue }
+
+        let unitFuture = Unit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let warlordTraitController = WarlordTraitController()
+        let warlordTraitsFuture = warlordTraitIds.map { warlordTraitController.getWarlordById($0, conn: req) }.flatten(on: req)
+
+        return flatMap(to: Response.self, unitFuture, warlordTraitsFuture, { (unit, warlordTraits) in
+            return UnitDatabaseQueries()
+                .addAvailableWarlordTraitsToUnit(unit, warlordTraits: warlordTraits, conn: req)
+                .transform(to: req.redirect(to: "/roasterhammer/armies/\(armyId)/units/\(unitId)"))
+        })
+    }
+
+    func deleteWarlordTraitFromUnitHandler(_ req: Request) throws -> Future<Response> {
+        let armyId = try req.parameters.next(Int.self)
+        let unitId = try req.parameters.next(Int.self)
+        let warlordTraitId = try req.parameters.next(Int.self)
+
+        let unitFuture = Unit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let warlordTraitFuture = WarlordTraitController().getWarlordById(warlordTraitId, conn: req)
+
+        return flatMap(to: Response.self, unitFuture, warlordTraitFuture, { (unit, warlordTrait) in
+            return UnitDatabaseQueries()
+                .removeWarlordTraitFromUnit(unit, warlordTrait: warlordTrait, conn: req)
+                .transform(to: req.redirect(to: "/roasterhammer/armies/\(armyId)/units/\(unitId)"))
+        })
     }
 
     // MARK: - Private Functions
@@ -189,8 +238,8 @@ struct WebsiteUnitController {
     private func assignExistingRulesToUnit(unit: Unit, rules: [Rule], conn: DatabaseConnectable) throws -> Future<[UnitRule]> {
         return try rules.map {
             UnitDatabaseQueries().assignRuleToUnit(unitId: try unit.requireID(),
-                                                  rule: $0,
-                                                  conn: conn)
+                                                   rule: $0,
+                                                   conn: conn)
             }
             .flatten(on: conn)
     }

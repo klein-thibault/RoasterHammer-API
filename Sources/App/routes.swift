@@ -173,16 +173,23 @@ public func routes(_ router: Router) throws {
     // - Units
     let websiteUnitController = WebsiteUnitController()
     router.get("roasterhammer", "units", use: websiteUnitController.unitsHandler)
-    router.get("roasterhammer", "units", Int.parameter, use: websiteUnitController.unitHandler)
-    router.get("roasterhammer", "units", "create", use: websiteUnitController.createUnitHandler)
+    router.get("roasterhammer", "armies", Int.parameter, "units", Int.parameter, use: websiteUnitController.unitHandler)
+    router.get("roasterhammer", "armies", Int.parameter, "units", "create", use: websiteUnitController.createUnitHandler)
     router.post(CreateUnitData.self,
-                at: "roasterhammer", "units", "create",
+                at: "roasterhammer", "armies", Int.parameter, "units", "create",
                 use: websiteUnitController.createUnitPostHandler)
     router.get("roasterhammer", "units", Int.parameter, "edit", use: websiteUnitController.editUnitHandler)
     router.post(CreateUnitData.self,
                 at: "roasterhammer", "units", Int.parameter, "edit",
                 use: websiteUnitController.editUnitPostHandler)
     router.post("roasterhammer", "units", Int.parameter, "delete", use: websiteUnitController.deleteUnitHandler)
+    router.get("roasterhammer", "armies", Int.parameter, "units", Int.parameter, "warlord-traits",
+               use: websiteUnitController.warlordTraitsHandler)
+    router.post(AssignWarlordTraitData.self,
+                at: "roasterhammer", "armies", Int.parameter, "units", Int.parameter, "warlord-traits",
+                use: websiteUnitController.warlordTraitsPostHandler)
+    router.post("roasterhammer", "armies", Int.parameter, "units", Int.parameter, "warlord-traits", Int.parameter, "delete",
+                use: websiteUnitController.deleteWarlordTraitFromUnitHandler)
     // - Weapons
     let websiteWeaponController = WebsiteWeaponController()
     router.get("roasterhammer", "weapons", use: websiteWeaponController.weaponsHandler)

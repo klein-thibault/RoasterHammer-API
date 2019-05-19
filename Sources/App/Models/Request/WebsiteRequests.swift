@@ -23,6 +23,8 @@ struct UnitsContext: WebContextTitle, Encodable {
 
 struct UnitDetailsContext: Encodable {
     let unit: UnitResponse
+    let army: ArmyResponse
+    let warlordTraits: [WarlordTraitResponse]
 }
 
 struct CreateArmyContext: WebContextTitle, Encodable {
@@ -94,7 +96,7 @@ struct CreateWeaponData: Content {
 
 struct CreateUnitContext: WebContextTitle, Encodable {
     let title: String
-    let armies: [ArmyResponse]
+    let army: ArmyResponse
     let unitTypes: [UnitType]
     let existingRules: [Rule]
     let keywords: [Keyword]
@@ -188,4 +190,8 @@ struct CreateWarlordTraitData: Content {
     let name: String
     let description: String
     let armyId: Int
+}
+
+struct AssignWarlordTraitData: Content {
+    let warlordTraitCheckbox: [String: String]
 }

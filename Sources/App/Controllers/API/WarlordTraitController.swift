@@ -41,6 +41,12 @@ final class WarlordTraitController {
             .save(on: conn)
     }
 
+    func getWarlordById(_ id: Int, conn: DatabaseConnectable) -> Future<WarlordTrait> {
+        return WarlordTrait
+            .find(id, on: conn)
+            .unwrap(or: RoasterHammerError.warlordTraitIsMissing.error())
+    }
+
     func deleteWarlordTraitById(_ id: Int, conn: DatabaseConnectable) -> Future<HTTPStatus> {
         return WarlordTrait
             .find(id, on: conn)

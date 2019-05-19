@@ -484,10 +484,19 @@ final class UnitDatabaseQueries {
 
     func addAvailableWarlordTraitsToUnit(_ unit: Unit,
                                          warlordTraits: [WarlordTrait],
-                                         conn: DatabaseConnectable) throws -> Future<Unit> {
+                                         conn: DatabaseConnectable) -> Future<Unit> {
         return warlordTraits
             .map { unit.availableWarlordTrait.attach($0, on: conn) }
             .flatten(on: conn)
+            .map(to: Unit.self, { _ in
+                return unit
+            })
+    }
+
+    func removeWarlordTraitFromUnit(_ unit: Unit, warlordTrait: WarlordTrait, conn: DatabaseConnectable) -> Future<Unit> {
+        return unit
+            .availableWarlordTrait
+            .detach(warlordTrait, on: conn)
             .map(to: Unit.self, { _ in
                 return unit
             })

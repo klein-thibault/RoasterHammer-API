@@ -28,15 +28,9 @@
             }
         </select>
     </div>
+
     <div class="form-group">
-        <label for="armyId">Army</label>
-        <select name="armyId" class="form-control" id="armyId">
-            #for(army in armies) {
-                <option value="#(army.id)">
-                    #(army.name)
-                </option>
-            }
-        </select>
+        <input type="hidden" name="armyId" id="armyId" value="#(army.id)"/>
     </div>
 
     <div class="form-group">

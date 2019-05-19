@@ -58,6 +58,7 @@ public func configure(_ config: inout Config,
     WeaponBucketWeapon.defaultDatabase = .psql
     Relic.defaultDatabase = .psql
     RelicKeyword.defaultDatabase = .psql
+    UnitWarlordTrait.defaultDatabase = .psql
     migrations.add(model: Customer.self, database: .psql)
     migrations.add(model: UserToken.self, database: .psql)
     migrations.add(model: NodeElement.self, database: .psql)
