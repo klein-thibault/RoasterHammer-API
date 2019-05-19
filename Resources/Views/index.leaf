@@ -1,5 +1,8 @@
 #set("content") {
 <h1>#(title)</h1>
+<p></p>
+<a class="btn btn-primary" href="/roasterhammer/armies/create" role="button">Add New Army</a>
+<p></p>
 <h2>Armies</h1>
     #if(armies) {
     <table class="table table-bordered table-hover">

@@ -28,11 +28,6 @@
                     <li class="nav-item #if(title == "Homepage"){active}">
                         <a href="/roasterhammer" class="nav-link">Home</a>
                     </li>
-                    <li class="nav-item #if(title == "Create An Army"){active}">
-                        <a href="/roasterhammer/armies/create" class="nav-link">
-                            Create An Army
-                        </a>
-                    </li>
                     <li class="nav-item #if(title == "Weapons"){active}">
                         <a href="/roasterhammer/weapons" class="nav-link">
                             Weapons
