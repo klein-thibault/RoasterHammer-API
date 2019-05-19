@@ -47,19 +47,17 @@ struct CreateArmyAndRulesData: AddRuleData, Content {
 
 struct CreateFactionContext: WebContextTitle, Encodable {
     let title: String
-    let armies: [ArmyResponse]
+    let army: ArmyResponse
 }
 
 struct EditFactionContext: WebContextTitle, Encodable {
     let title: String
     let faction: FactionResponse
-    let armies: [ArmyResponse]
     let editing: Bool = true
 }
 
 struct CreateFactionAndRulesData: AddRuleData, Content {
     let factionName: String
-    let armyId: Int
     let rules: DynamicFormData
 }
 

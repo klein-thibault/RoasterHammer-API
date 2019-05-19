@@ -4,7 +4,7 @@
 
 <h2>Army Factions</h2>
 <p></p>
-<a class="btn btn-primary" href="/roasterhammer/factions/create" role="button">Add New Faction</a>
+<a class="btn btn-primary" href="/roasterhammer/armies/#(army.id)/factions/create" role="button">Add New Faction</a>
 <p></p>
 #for(faction in army.factions) {
 <h3>#(faction.name)</h3>
@@ -24,8 +24,8 @@
         }
     </tbody>
 </table>
-<form method="post" action="/roasterhammer/factions/#(faction.id)/delete">
-    <a class="btn btn-primary" href="/roasterhammer/factions/#(faction.id)/edit" role="button">Edit</a>
+<form method="post" action="/roasterhammer/armies/#(army.id)/factions/#(faction.id)/delete">
+    <a class="btn btn-primary" href="/roasterhammer/armies/#(army.id)/factions/#(faction.id)/edit" role="button">Edit</a>
     <input class="btn btn-danger" type="submit" value="Delete"/>
 </form>
 }

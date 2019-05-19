@@ -226,15 +226,15 @@ public func routes(_ router: Router) throws {
     router.post("roasterhammer", "armies", Int.parameter, "delete", use: websiteArmyController.deleteArmyHandler)
     // - Factions
     let websiteFactionController = WebsiteFactionController()
-    router.get("roasterhammer", "factions", "create", use: websiteFactionController.createFactionHandler)
+    router.get("roasterhammer", "armies", Int.parameter, "factions", "create", use: websiteFactionController.createFactionHandler)
     router.post(CreateFactionAndRulesData.self,
-                at: "roasterhammer", "factions", "create",
+                at: "roasterhammer", "armies", Int.parameter, "factions", "create",
                 use: websiteFactionController.createFactionPostHandler)
-    router.get("roasterhammer", "factions", Int.parameter, "edit", use: websiteFactionController.editFactionHandler)
+    router.get("roasterhammer", "armies", Int.parameter, "factions", Int.parameter, "edit", use: websiteFactionController.editFactionHandler)
     router.post(CreateFactionAndRulesData.self,
-                at: "roasterhammer", "factions", Int.parameter, "edit",
+                at: "roasterhammer", "armies", Int.parameter, "factions", Int.parameter, "edit",
                 use: websiteFactionController.editFactionPostHandler)
-    router.post("roasterhammer", "factions", Int.parameter, "delete", use: websiteFactionController.deleteFactionHandler)
+    router.post("roasterhammer", "armies", Int.parameter, "factions", Int.parameter, "delete", use: websiteFactionController.deleteFactionHandler)
     // - Rules
     let websiteRuleController = WebsiteRuleController()
     router.get("roasterhammer", "rules", use: websiteRuleController.rulesHandler)
