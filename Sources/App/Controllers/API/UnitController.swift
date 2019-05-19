@@ -115,6 +115,34 @@ final class UnitController {
         })
     }
 
+    func editSelectedUnit(_ req: Request) throws -> Future<DetachmentResponse> {
+        _ = try req.requireAuthenticated(Customer.self)
+        let detachmentId = try req.parameters.next(Int.self)
+        let roleId = try req.parameters.next(Int.self)
+        let unitId = try req.parameters.next(Int.self)
+
+        let requestFuture = try req.content.decode(EditSelectedUnitRequest.self)
+        let unitFuture = SelectedUnit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let roleFuture = Role.find(roleId, on: req).unwrap(or: RoasterHammerError.roleIsMissing.error())
+        let detachmentFuture = Detachment.find(detachmentId, on: req).unwrap(or: RoasterHammerError.detachmentIsMissing.error())
+
+        return flatMap(to: DetachmentResponse.self,
+                       requestFuture,
+                       unitFuture,
+                       roleFuture,
+                       detachmentFuture, { (request, unit, role, detachment) in
+                        let warlordTraitUpdateFuture = try self.unitDatabaseQueries.updateSelectedUnitWarlordTrait(unit, warlordTraitId: request.warlordTraitId, conn: req)
+                        let relicUpdateFuture = try self.unitDatabaseQueries.updateSelectedUnitRelic(unit, relicId: request.relicId, conn: req)
+
+                        return map(to: SelectedUnit.self, warlordTraitUpdateFuture, relicUpdateFuture, { (warlordTraitUpdate, relicUpdate) in
+                            return unit
+                        }).flatMap(to: DetachmentResponse.self, { _ in
+                            let detachmentController = DetachmentController()
+                            return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                        })
+        })
+    }
+
     func setUnitAsWarlord(_ req: Request) throws -> Future<DetachmentResponse> {
         _ = try req.requireAuthenticated(Customer.self)
         let detachmentId = try req.parameters.next(Int.self)

@@ -131,7 +131,6 @@ final class DetachmentController {
                         if let selectedFaction = selectedFaction {
                             let selectedFactionResponse = try FactionController().factionResponse(faction: selectedFaction,
                                                                                                   conn: conn)
-                            
                             return map(roleResponsesFuture,
                                        armyResponse,
                                        selectedFactionResponse, { (roleResponses, armyResponse, selectedFactionResponse) in

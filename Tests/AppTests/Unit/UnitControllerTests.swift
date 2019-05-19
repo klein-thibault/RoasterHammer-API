@@ -924,4 +924,187 @@ class UnitControllerTests: BaseTests {
         XCTAssertEqual(updatedDetachmentWithoutWeapon.roles[0].units[0].models[0].cost, unit.cost)
     }
 
+    func testUpdateSelectedModelWarlordTrait() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+        let (_, warlordTrait) = try WarlordTraitTestsUtils.createWarlordTrait(app: app)
+
+        // Add warlord trait to army
+        let addWarlordTraitRequest = AddWarlordTraitRequest(name: "Warlord Trait Name",
+                                                            description: "Warlord Trait Description")
+        try app.sendRequest(to: "armies/\(army.requireID())/warlord-traits",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addWarlordTraitRequest)
+
+        // Add unit to detachment
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        try app.sendRequest(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        // Set unit as warlord
+        _ = try app.sendRequest(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)/warlord",
+            method: .PATCH,
+            headers: ["Content-Type": "application/json"],
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        // Update detachment to assign warlord trait
+        let updateSelectedUnitWarlordTraitRequest = EditSelectedUnitRequest(warlordTraitId: warlordTrait.id, relicId: nil)
+        let detachmentWithUnitWithWarlordTrait = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .PATCH,
+            headers: ["Content-Type": "application/json"],
+            data: updateSelectedUnitWarlordTraitRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let selectedUnit = detachmentWithUnitWithWarlordTrait.roles[0].units[0]
+        XCTAssertNotNil(selectedUnit.warlordTrait)
+        XCTAssertNil(selectedUnit.relic)
+    }
+
+    func testUpdateSelectedModelWarlordTrait_whenUnitIsNotTheWarlord() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+        let (_, warlordTrait) = try WarlordTraitTestsUtils.createWarlordTrait(app: app)
+
+        // Add warlord trait to army
+        let addWarlordTraitRequest = AddWarlordTraitRequest(name: "Warlord Trait Name",
+                                                            description: "Warlord Trait Description")
+        try app.sendRequest(to: "armies/\(army.requireID())/warlord-traits",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addWarlordTraitRequest)
+
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        try app.sendRequest(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        // Update detachment to assign warlord trait
+        let updateSelectedUnitWarlordTraitRequest = EditSelectedUnitRequest(warlordTraitId: warlordTrait.id, relicId: nil)
+
+        do {
+            _ = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+                method: .PATCH,
+                headers: ["Content-Type": "application/json"],
+                data: updateSelectedUnitWarlordTraitRequest,
+                decodeTo: DetachmentResponse.self,
+                loggedInRequest: true,
+                loggedInCustomer: user)
+            XCTFail("Should have thrown an error")
+        } catch {
+            XCTAssertNotNil(error)
+        }
+    }
+
+    func testUpdateSelectedModelRelic() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+
+        // Add relic to army
+        let request = AddRelicRequest(name: "Relic Name",
+                                      description: "Relic Desc",
+                                      weaponId: nil,
+                                      keywordIds: [])
+        let armyWithRelic = try app.getResponse(to: "armies/\(army.requireID())/relics",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: request,
+            decodeTo: ArmyResponse.self)
+        let relic = armyWithRelic.relics[0]
+
+        // Add unit to detachment
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        try app.sendRequest(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        // Set unit as warlord
+        _ = try app.sendRequest(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)/warlord",
+            method: .PATCH,
+            headers: ["Content-Type": "application/json"],
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        // Update detachment to assign warlord trait
+        let updateSelectedUnitRelicRequest = EditSelectedUnitRequest(warlordTraitId: nil, relicId: relic.id)
+        let detachmentWithUnitWithWarlordTrait = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .PATCH,
+            headers: ["Content-Type": "application/json"],
+            data: updateSelectedUnitRelicRequest,
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        let selectedUnit = detachmentWithUnitWithWarlordTrait.roles[0].units[0]
+        XCTAssertNil(selectedUnit.warlordTrait)
+        XCTAssertNotNil(selectedUnit.relic)
+    }
+
+    func testUpdateSelectedModelRelic_whenUnitIsNotTheWarlord() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+
+        // Add relic to army
+        let request = AddRelicRequest(name: "Relic Name",
+                                      description: "Relic Desc",
+                                      weaponId: nil,
+                                      keywordIds: [])
+        let armyWithRelic = try app.getResponse(to: "armies/\(army.requireID())/relics",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: request,
+            decodeTo: ArmyResponse.self)
+        let relic = armyWithRelic.relics[0]
+
+        // Add unit to detachment
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        try app.sendRequest(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        // Update detachment to assign warlord trait
+        let updateSelectedUnitRelicRequest = EditSelectedUnitRequest(warlordTraitId: nil, relicId: relic.id)
+
+        do {
+            _ = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+                method: .PATCH,
+                headers: ["Content-Type": "application/json"],
+                data: updateSelectedUnitRelicRequest,
+                decodeTo: DetachmentResponse.self,
+                loggedInRequest: true,
+                loggedInCustomer: user)
+            XCTFail("Should have thrown an error")
+        } catch {
+            XCTAssertNotNil(error)
+        }
+    }
+
 }

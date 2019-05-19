@@ -104,6 +104,13 @@ public func routes(_ router: Router) throws {
                               Int.parameter,
                               "units",
                               Int.parameter,
+                              use: unitController.editSelectedUnit)
+    protectedAuthRouter.patch("detachments",
+                              Int.parameter,
+                              "roles",
+                              Int.parameter,
+                              "units",
+                              Int.parameter,
                               "warlord",
                               use: unitController.setUnitAsWarlord)
     protectedAuthRouter.post("detachments",

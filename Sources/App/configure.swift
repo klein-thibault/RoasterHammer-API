@@ -99,6 +99,7 @@ public func configure(_ config: inout Config,
     migrations.add(migration: CreateRelic.self, database: .psql)
     migrations.add(migration: CreateRelicKeyword.self, database: .psql)
     migrations.add(migration: CreateUnitWarlordTrait.self, database: .psql)
+    migrations.add(migration: AddWarlordTraitIdAndRelicIdToSelectedUnit.self, database: .psql)
     services.register(migrations)
 
     // Configure the command line tool to add Fluent commands like revert and migrate database

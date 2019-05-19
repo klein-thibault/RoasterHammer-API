@@ -98,20 +98,32 @@ final class UnitDatabaseQueries {
                 return try self.unitResponse(forUnit: unit, conn: conn)
         }
         let selectedModels = try selectedUnit.models.query(on: conn).all()
+        let warlordTraitFuture = WarlordTrait.find(selectedUnit.warlordTraitId ?? -1, on: conn)
+        let relicFuture = Relic.find(selectedUnit.relicId ?? -1, on: conn)
 
-        return flatMap(unitFuture,
-                       selectedModels, { (unit, selectedModels) in
-                        return try selectedModels.map { try self.selectedModelResponse(forSelectedModel: $0,
-                                                                                       conn: conn) }
-                            .flatten(on: conn)
-                            .map(to: SelectedUnitResponse.self, { selectedModels in
-                                // Sorted by models with lower max quantity to have sergeants etc on top
-                                let sortedSelectedModels = selectedModels.sorted(by: { $0.model.maxQuantity < $1.model.maxQuantity })
-                                let selectedUnitDTO = SelectedUnitDTO(id: try selectedUnit.requireID(), isWarlord: selectedUnit.isWarlord)
-                                return SelectedUnitResponse(selectedUnit: selectedUnitDTO,
-                                                            unit: unit,
-                                                            models: sortedSelectedModels)
-                            })
+        return flatMap(to: SelectedUnitResponse.self, unitFuture, selectedModels, warlordTraitFuture, relicFuture, { (unit, selectedModels, warlordTrait, relic) in
+            var warlordTraitResponse: WarlordTraitResponse? = nil
+            if let warlordTrait = warlordTrait {
+                warlordTraitResponse = try WarlordTraitController().warlordTraitResponse(forWarlordTrait: warlordTrait)
+            }
+
+            if let relic = relic {
+                return try RelicController().relicResponse(forRelic: relic, conn: conn).flatMap(to: SelectedUnitResponse.self, { relicResponse in
+                    return try self.makeSelectedUnitResponse(selectedUnit: selectedUnit,
+                                                             unit: unit,
+                                                             warlordTrait: warlordTraitResponse,
+                                                             relic: relicResponse,
+                                                             selectedModels: selectedModels,
+                                                             conn: conn)
+                })
+            } else {
+                return try self.makeSelectedUnitResponse(selectedUnit: selectedUnit,
+                                                         unit: unit,
+                                                         warlordTrait: warlordTraitResponse,
+                                                         relic: nil,
+                                                         selectedModels: selectedModels,
+                                                         conn: conn)
+            }
         })
     }
 
@@ -509,6 +521,22 @@ final class UnitDatabaseQueries {
             })
     }
 
+    func updateSelectedUnitWarlordTrait(_ selectedUnit: SelectedUnit, warlordTraitId: Int?, conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
+        if !selectedUnit.isWarlord {
+            throw RoasterHammerError.warlordTraitAssignedToNonWarlordUnit.error()
+        }
+        selectedUnit.warlordTraitId = warlordTraitId
+        return selectedUnit.save(on: conn)
+    }
+
+    func updateSelectedUnitRelic(_ selectedUnit: SelectedUnit, relicId: Int?, conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
+        if !selectedUnit.isWarlord {
+            throw RoasterHammerError.relicAssignedToNonWarlordUnit.error()
+        }
+        selectedUnit.relicId = relicId
+        return selectedUnit.save(on: conn)
+    }
+
     // MARK: - Private Functions
 
     private func createModels(forUnit unit: Unit,
@@ -641,5 +669,26 @@ final class UnitDatabaseQueries {
     private func selectedWeaponsForSelectedModel(_ selectedModel: SelectedModel,
                                                  conn: DatabaseConnectable) throws -> Future<[SelectedModelWeapon]> {
         return try SelectedModelWeapon.query(on: conn).filter(\.modelId == selectedModel.requireID()).all()
+    }
+
+    private func makeSelectedUnitResponse(selectedUnit: SelectedUnit,
+                                          unit: UnitResponse,
+                                          warlordTrait: WarlordTraitResponse?,
+                                          relic: RelicResponse?,
+                                          selectedModels: [SelectedModel],
+                                          conn: DatabaseConnectable) throws -> Future<SelectedUnitResponse> {
+        return try selectedModels.map { try self.selectedModelResponse(forSelectedModel: $0,
+                                                                       conn: conn) }
+            .flatten(on: conn)
+            .map(to: SelectedUnitResponse.self, { selectedModels in
+                // Sorted by models with lower max quantity to have sergeants etc on top
+                let sortedSelectedModels = selectedModels.sorted(by: { $0.model.maxQuantity < $1.model.maxQuantity })
+                let selectedUnitDTO = SelectedUnitDTO(id: try selectedUnit.requireID(), isWarlord: selectedUnit.isWarlord)
+                return SelectedUnitResponse(selectedUnit: selectedUnitDTO,
+                                            unit: unit,
+                                            models: sortedSelectedModels,
+                                            warlordTrait: warlordTrait,
+                                            relic: relic)
+            })
     }
 }
