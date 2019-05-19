@@ -32,6 +32,7 @@ enum RoasterHammerError: Swift.Error {
     case costIsNotANumber
     case tooManyWeaponSelectionFromWeaponBucket
     case warlordSelectionInvalidRole
+    case warlordTraitAssignedToInvalidUnit
 }
 
 extension RoasterHammerError {
@@ -86,7 +87,9 @@ extension RoasterHammerError {
         case .tooManyWeaponSelectionFromWeaponBucket:
             return Abort(.badRequest, reason: "Can't select more weapons from this weapon bucket")
         case .warlordSelectionInvalidRole:
-            return Abort(.badRequest, reason: "Your warlord selection must be a \(Constants.RoleName.hq)")
+            return Abort(.badRequest, reason: "Your warlord selection must be a \(Constants.RoleName.hq.uppercased())")
+        case .warlordTraitAssignedToInvalidUnit:
+            return Abort(.badRequest, reason: "A unit must be a \(Constants.RoleName.hq.uppercased())")
         }
     }
 }

@@ -485,11 +485,18 @@ final class UnitDatabaseQueries {
     func addAvailableWarlordTraitsToUnit(_ unit: Unit,
                                          warlordTraits: [WarlordTrait],
                                          conn: DatabaseConnectable) -> Future<Unit> {
-        return warlordTraits
-            .map { unit.availableWarlordTrait.attach($0, on: conn) }
-            .flatten(on: conn)
-            .map(to: Unit.self, { _ in
-                return unit
+        return unit.unitType.get(on: conn)
+            .flatMap(to: Unit.self, { unitType in
+                if unitType.name != Constants.RoleName.hq {
+                    throw RoasterHammerError.warlordTraitAssignedToInvalidUnit.error()
+                }
+
+                return warlordTraits
+                    .map { unit.availableWarlordTrait.attach($0, on: conn) }
+                    .flatten(on: conn)
+                    .map(to: Unit.self, { _ in
+                        return unit
+                    })
             })
     }
 

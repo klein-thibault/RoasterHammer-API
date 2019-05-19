@@ -173,6 +173,57 @@ class UnitControllerTests: BaseTests {
         }
     }
 
+    func testAssignWarlordTraitToUnit() throws {
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unitResponse) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+        let (_, warlordTraitResponse) = try WarlordTraitTestsUtils.createWarlordTrait(app: app)
+
+        let unit = try Unit.find(unitResponse.id, on: conn).unwrap(or: RoasterHammerError.unitIsMissing.error()).wait()
+        let warlordTrait = try WarlordTrait.find(warlordTraitResponse.id, on: conn).unwrap(or: RoasterHammerError.warlordTraitIsMissing.error()).wait()
+        let unitWithWarlordTrait = try UnitDatabaseQueries().addAvailableWarlordTraitsToUnit(unit, warlordTraits: [warlordTrait], conn: conn).wait()
+        let unitWithWarlordTraitResponse = try UnitDatabaseQueries().unitResponse(forUnit: unitWithWarlordTrait, conn: conn).wait()
+
+        XCTAssertEqual(unitWithWarlordTraitResponse.availableWarlordTraits.count, 1)
+        XCTAssertEqual(unitWithWarlordTraitResponse.availableWarlordTraits[0].name, warlordTraitResponse.name)
+        XCTAssertEqual(unitWithWarlordTraitResponse.availableWarlordTraits[0].description, warlordTraitResponse.description)
+    }
+
+    func testAssignWarlordTraitToUnit_whenUnitIsNotHQ() throws {
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unitResponse) = try UnitTestsUtils.createTroopUnit(armyId: army.requireID(), app: app)
+        let (_, warlordTraitResponse) = try WarlordTraitTestsUtils.createWarlordTrait(app: app)
+
+        let unit = try Unit.find(unitResponse.id, on: conn).unwrap(or: RoasterHammerError.unitIsMissing.error()).wait()
+        let warlordTrait = try WarlordTrait.find(warlordTraitResponse.id, on: conn).unwrap(or: RoasterHammerError.warlordTraitIsMissing.error()).wait()
+
+        do {
+            _ = try UnitDatabaseQueries().addAvailableWarlordTraitsToUnit(unit, warlordTraits: [warlordTrait], conn: conn).wait()
+            XCTFail("Should have returned an error")
+        } catch {
+            XCTAssertNotNil(error)
+        }
+    }
+
+    func testUnassignWarlordTraitFromUnit() throws {
+        let (_, army) = try ArmyTestsUtils.createArmy(app: app)
+        let (_, unitResponse) = try UnitTestsUtils.createHQUniqueUnit(armyId: army.requireID(), app: app)
+        let (_, warlordTraitResponse) = try WarlordTraitTestsUtils.createWarlordTrait(app: app)
+
+        let unit = try Unit.find(unitResponse.id, on: conn).unwrap(or: RoasterHammerError.unitIsMissing.error()).wait()
+        let warlordTrait = try WarlordTrait.find(warlordTraitResponse.id, on: conn).unwrap(or: RoasterHammerError.warlordTraitIsMissing.error()).wait()
+        let unitWithWarlordTrait = try UnitDatabaseQueries().addAvailableWarlordTraitsToUnit(unit, warlordTraits: [warlordTrait], conn: conn).wait()
+        let unitWithWarlordTraitResponse = try UnitDatabaseQueries().unitResponse(forUnit: unitWithWarlordTrait, conn: conn).wait()
+
+        XCTAssertEqual(unitWithWarlordTraitResponse.availableWarlordTraits.count, 1)
+        XCTAssertEqual(unitWithWarlordTraitResponse.availableWarlordTraits[0].name, warlordTraitResponse.name)
+        XCTAssertEqual(unitWithWarlordTraitResponse.availableWarlordTraits[0].description, warlordTraitResponse.description)
+
+        let unitWithoutWarlordTrait = try UnitDatabaseQueries().removeWarlordTraitFromUnit(unitWithWarlordTrait, warlordTrait: warlordTrait, conn: conn).wait()
+        let unitWithoutWarlordTraitResponse = try UnitDatabaseQueries().unitResponse(forUnit: unitWithoutWarlordTrait, conn: conn).wait()
+
+        XCTAssertEqual(unitWithoutWarlordTraitResponse.availableWarlordTraits.count, 0)
+    }
+
     func testAddUnitToDetachment() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
