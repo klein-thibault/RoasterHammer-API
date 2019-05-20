@@ -10,6 +10,9 @@ final class Keyword: PostgreSQLModel {
     var relics: Siblings<Keyword, Relic, RelicKeyword> {
         return siblings()
     }
+    var psychicPowers: Siblings<Keyword, PsychicPower, PsychicPowerKeyword> {
+        return siblings()
+    }
 
     init(name: String) {
         self.name = name
