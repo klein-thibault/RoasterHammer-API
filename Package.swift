@@ -16,7 +16,7 @@ let package = Package(
         // Web templating language framework package
         .package(url: "https://github.com/vapor/leaf.git", from: "3.0.2"),
 
-        .package(url: "https://github.com/klein-thibault/RoasterHammer-Shared.git", from: "0.0.28")
+        .package(url: "https://github.com/klein-thibault/RoasterHammer-Shared.git", from: "0.0.29")
     ],
     targets: [
         .target(name: "App", dependencies: ["Vapor", "FluentPostgreSQL", "Authentication", "Leaf", "RoasterHammer-Shared"]),

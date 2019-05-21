@@ -80,37 +80,50 @@ final class ArmyController {
         let rulesFuture = try army.rules.query(on: conn).all()
         let relicsFuture = try army.relics.query(on: conn).all()
         let warlordTraitsFuture = try army.warlordTraits.query(on: conn).all()
+        let psychicPowersFuture = try army.psychicPowers.query(on: conn).all()
         
-        return flatMap(to: ArmyResponse.self, factionsFuture, rulesFuture, relicsFuture, warlordTraitsFuture, { (factions, rules, relics, warlordTraits) in
-            // Get all faction responses
-            let factionController = FactionController()
-            let factionResponsesFuture = try factions.map {
-                try factionController.factionResponse(faction: $0, conn: conn)
-                }
-                .flatten(on: conn)
+        return flatMap(to: ArmyResponse.self,
+                       factionsFuture,
+                       rulesFuture,
+                       relicsFuture,
+                       warlordTraitsFuture,
+                       psychicPowersFuture, { (factions, rules, relics, warlordTraits, psychicPowers) in
+                        // Get all faction responses
+                        let factionController = FactionController()
+                        let factionResponsesFuture = try factions.map {
+                            try factionController.factionResponse(faction: $0, conn: conn)
+                            }
+                            .flatten(on: conn)
 
-            // Get all relic responses
-            let relicController = RelicController()
-            let relicResponsesFuture = try relics.map {
-                try relicController.relicResponse(forRelic: $0, conn: conn)
-                }
-                .flatten(on: conn)
+                        // Get all relic responses
+                        let relicController = RelicController()
+                        let relicResponsesFuture = try relics.map {
+                            try relicController.relicResponse(forRelic: $0, conn: conn)
+                            }
+                            .flatten(on: conn)
 
-            // Get all warlord trait responses
-            let warlordTraitController = WarlordTraitController()
-            let warlordTraitResponses = try warlordTraits.map {
-                try warlordTraitController.warlordTraitResponse(forWarlordTrait: $0)
-            }
+                        // Get all warlord trait responses
+                        let warlordTraitController = WarlordTraitController()
+                        let warlordTraitResponses = try warlordTraits.map {
+                            try warlordTraitController.warlordTraitResponse(forWarlordTrait: $0)
+                        }
 
-            return map(to: ArmyResponse.self, factionResponsesFuture, relicResponsesFuture, { (factions, relics) in
-                let armyDTO = ArmyDTO(id: try army.requireID(), name: army.name)
-                let rulesResponse = RuleController().rulesResponse(forRules: rules)
-                return ArmyResponse(army: armyDTO,
-                                    factions: factions,
-                                    rules: rulesResponse,
-                                    relics: relics,
-                                    warlordTraits: warlordTraitResponses)
-            })
+                        // Get all psychic power responses
+                        let psychicPowerController = PsychicPowerController()
+                        let psychicPowerResponses = try psychicPowers.map {
+                            try psychicPowerController.psychicPowerResponse(forPsychicPower: $0, conn: conn)
+                        }.flatten(on: conn)
+
+                        return map(to: ArmyResponse.self, factionResponsesFuture, relicResponsesFuture, psychicPowerResponses, { (factions, relics, psychicPowers) in
+                            let armyDTO = ArmyDTO(id: try army.requireID(), name: army.name)
+                            let rulesResponse = RuleController().rulesResponse(forRules: rules)
+                            return ArmyResponse(army: armyDTO,
+                                                factions: factions,
+                                                rules: rulesResponse,
+                                                relics: relics,
+                                                warlordTraits: warlordTraitResponses,
+                                                psychicPowers: psychicPowers)
+                        })
         })
     }
 

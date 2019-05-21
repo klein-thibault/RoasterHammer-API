@@ -10,12 +10,12 @@ final class RelicTestsUtils {
                                       description: "Relic Desc",
                                       weaponId: nil,
                                       keywordIds: [])
-        let relic = try app.getResponse(to: "armies/\(army.requireID())/relics",
+        let armyWithRelic = try app.getResponse(to: "armies/\(army.requireID())/relics",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: request,
             decodeTo: ArmyResponse.self)
 
-        return (request, relic)
+        return (request, armyWithRelic)
     }
 }

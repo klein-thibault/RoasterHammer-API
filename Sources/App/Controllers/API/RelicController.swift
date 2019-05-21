@@ -24,7 +24,7 @@ final class RelicController {
         return deleteRelicById(relicId, conn: req)
     }
 
-    // MARK: - Utils Functions
+    // MARK: - Utilities Functions
 
     func relicResponse(forRelic relic: Relic, conn: DatabaseConnectable) throws -> Future<RelicResponse> {
         let keywordsFuture = try relic.keywords.query(on: conn).all()
