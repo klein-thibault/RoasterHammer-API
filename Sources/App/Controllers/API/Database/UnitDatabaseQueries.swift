@@ -100,30 +100,33 @@ final class UnitDatabaseQueries {
         let selectedModels = try selectedUnit.models.query(on: conn).all()
         let warlordTraitFuture = WarlordTrait.find(selectedUnit.warlordTraitId ?? -1, on: conn)
         let relicFuture = Relic.find(selectedUnit.relicId ?? -1, on: conn)
+        let psychicPowerFuture = PsychicPower.find(selectedUnit.psychicPowerId ?? -1, on: conn)
 
-        return flatMap(to: SelectedUnitResponse.self, unitFuture, selectedModels, warlordTraitFuture, relicFuture, { (unit, selectedModels, warlordTrait, relic) in
-            var warlordTraitResponse: WarlordTraitResponse? = nil
-            if let warlordTrait = warlordTrait {
-                warlordTraitResponse = try WarlordTraitController().warlordTraitResponse(forWarlordTrait: warlordTrait)
-            }
+        return flatMap(to: SelectedUnitResponse.self,
+                       unitFuture,
+                       selectedModels,
+                       warlordTraitFuture,
+                       relicFuture,
+                       psychicPowerFuture, { (unit, selectedModels, warlordTrait, relic, psychicPower) in
+                        var warlordTraitResponse: WarlordTraitResponse? = nil
+                        if let warlordTrait = warlordTrait {
+                            warlordTraitResponse = try WarlordTraitController().warlordTraitResponse(forWarlordTrait: warlordTrait)
+                        }
 
-            if let relic = relic {
-                return try RelicController().relicResponse(forRelic: relic, conn: conn).flatMap(to: SelectedUnitResponse.self, { relicResponse in
-                    return try self.makeSelectedUnitResponse(selectedUnit: selectedUnit,
-                                                             unit: unit,
-                                                             warlordTrait: warlordTraitResponse,
-                                                             relic: relicResponse,
-                                                             selectedModels: selectedModels,
-                                                             conn: conn)
-                })
-            } else {
-                return try self.makeSelectedUnitResponse(selectedUnit: selectedUnit,
-                                                         unit: unit,
-                                                         warlordTrait: warlordTraitResponse,
-                                                         relic: nil,
-                                                         selectedModels: selectedModels,
-                                                         conn: conn)
-            }
+                        let relicResponseFuture = try RelicController().relicResponseOptional(forRelic: relic, conn: conn)
+                        let psychicPowerResponseFuture = try PsychicPowerController().psychicPowerResponseOptional(forPsychicPower: psychicPower, conn: conn)
+
+                        return flatMap(to: SelectedUnitResponse.self,
+                                       relicResponseFuture,
+                                       psychicPowerResponseFuture, { (relicResponse, psychicPowerResponse) in
+                            return try self.makeSelectedUnitResponse(selectedUnit: selectedUnit,
+                                                                     unit: unit,
+                                                                     warlordTrait: warlordTraitResponse,
+                                                                     relic: relicResponse,
+                                                                     psychicPower: psychicPowerResponse,
+                                                                     selectedModels: selectedModels,
+                                                                     conn: conn)
+                        })
         })
     }
 
@@ -135,7 +138,8 @@ final class UnitDatabaseQueries {
         let unitTypeFuture = unit.unitType.get(on: conn)
         let unitRulesFuture = try unit.rules.query(on: conn).all()
         let unitArmyFuture = try armyController.getArmy(byID: unit.armyId, conn: conn)
-        let availableWarlordTraits = try unit.availableWarlordTrait.query(on: conn).all()
+        let availableWarlordTraitsFuture = try unit.availableWarlordTrait.query(on: conn).all()
+        let availablePsychicPowersFuture = try unit.availablePsychicPower.query(on: conn).all()
 
         return flatMap(to: UnitResponse.self,
                        unitModelsFuture,
@@ -143,30 +147,35 @@ final class UnitDatabaseQueries {
                        unitTypeFuture,
                        unitRulesFuture,
                        unitArmyFuture) { (models, keywords, unitType, rules, army) in
-                        return availableWarlordTraits.flatMap(to: UnitResponse.self, { warlordTraits in
+                        return flatMap(to: UnitResponse.self, availableWarlordTraitsFuture, availablePsychicPowersFuture, { (warlordTraits, psychicPowers) in
                             let warlordTraitResponses = try warlordTraits
                                 .map { try warlordTraitController.warlordTraitResponse(forWarlordTrait: $0) }
-
-                            return try models
+                            let modelResponsesFuture = try models
                                 .map { try self.modelResponse(forModel: $0, conn: conn) }
                                 .flatten(on: conn)
-                                .map(to: UnitResponse.self, { modelResponses in
-                                    let keywordStrings = keywords.map { $0.name }
-                                    let unitTypeString = unitType.name
-                                    let unitDTO = UnitDTO(id: try unit.requireID(),
-                                                          name: unit.name,
-                                                          isUnique: unit.isUnique,
-                                                          minQuantity: unit.minQuantity,
-                                                          maxQuantity: unit.maxQuantity)
-                                    let rulesResponse = RuleController().rulesResponse(forRules: rules)
-                                    return UnitResponse(unit: unitDTO,
-                                                        unitType: unitTypeString,
-                                                        army: army,
-                                                        models: modelResponses,
-                                                        keywords: keywordStrings,
-                                                        rules: rulesResponse,
-                                                        availableWarlordTraits: warlordTraitResponses)
-                                })
+                            let psychicPowerController = PsychicPowerController()
+                            let psychicPowersResponseFuture = try psychicPowers
+                                .map { try psychicPowerController.psychicPowerResponse(forPsychicPower: $0, conn: conn) }
+                                .flatten(on: conn)
+
+                            return map(to: UnitResponse.self, modelResponsesFuture, psychicPowersResponseFuture, { (modelResponses, psychicPowerResponses) in
+                                let keywordStrings = keywords.map { $0.name }
+                                let unitTypeString = unitType.name
+                                let unitDTO = UnitDTO(id: try unit.requireID(),
+                                                      name: unit.name,
+                                                      isUnique: unit.isUnique,
+                                                      minQuantity: unit.minQuantity,
+                                                      maxQuantity: unit.maxQuantity)
+                                let rulesResponse = RuleController().rulesResponse(forRules: rules)
+                                return UnitResponse(unit: unitDTO,
+                                                    unitType: unitTypeString,
+                                                    army: army,
+                                                    models: modelResponses,
+                                                    keywords: keywordStrings,
+                                                    rules: rulesResponse,
+                                                    availableWarlordTraits: warlordTraitResponses,
+                                                    availablePsychicPowers: psychicPowerResponses)
+                            })
                         })
         }
     }
@@ -496,7 +505,7 @@ final class UnitDatabaseQueries {
 
     func addAvailableWarlordTraitsToUnit(_ unit: Unit,
                                          warlordTraits: [WarlordTrait],
-                                         conn: DatabaseConnectable) -> Future<Unit> {
+                                         conn: DatabaseConnectable) throws -> Future<Unit> {
         return unit.unitType.get(on: conn)
             .flatMap(to: Unit.self, { unitType in
                 if unitType.name != Constants.RoleName.hq {
@@ -505,6 +514,24 @@ final class UnitDatabaseQueries {
 
                 return warlordTraits
                     .map { unit.availableWarlordTrait.attach($0, on: conn) }
+                    .flatten(on: conn)
+                    .map(to: Unit.self, { _ in
+                        return unit
+                    })
+            })
+    }
+
+    func addAvailablePsychicPowersToUnit(_ unit: Unit,
+                                         psychicPowers: [PsychicPower],
+                                         conn: DatabaseConnectable) throws -> Future<Unit> {
+        return try unitResponse(forUnit: unit, conn: conn)
+            .flatMap(to: Unit.self, { unitResponse in
+                if !unitResponse.isPsycher() {
+                    throw RoasterHammerError.psychicPowerAssignedToNonPsycher.error()
+                }
+
+                return psychicPowers
+                    .map { unit.availablePsychicPower.attach($0, on: conn) }
                     .flatten(on: conn)
                     .map(to: Unit.self, { _ in
                         return unit
@@ -521,7 +548,9 @@ final class UnitDatabaseQueries {
             })
     }
 
-    func updateSelectedUnitWarlordTrait(_ selectedUnit: SelectedUnit, warlordTraitId: Int?, conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
+    func updateSelectedUnitWarlordTrait(_ selectedUnit: SelectedUnit,
+                                        warlordTraitId: Int?,
+                                        conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
         if !selectedUnit.isWarlord {
             throw RoasterHammerError.warlordTraitAssignedToNonWarlordUnit.error()
         }
@@ -529,12 +558,28 @@ final class UnitDatabaseQueries {
         return selectedUnit.save(on: conn)
     }
 
-    func updateSelectedUnitRelic(_ selectedUnit: SelectedUnit, relicId: Int?, conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
+    func updateSelectedUnitRelic(_ selectedUnit: SelectedUnit,
+                                 relicId: Int?,
+                                 conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
         if !selectedUnit.isWarlord {
             throw RoasterHammerError.relicAssignedToNonWarlordUnit.error()
         }
         selectedUnit.relicId = relicId
         return selectedUnit.save(on: conn)
+    }
+
+    func updateSelectedUnitPsychicPower(_ selectedUnit: SelectedUnit,
+                                        psychicPowerId: Int?,
+                                        conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
+        return try selectedUnitResponse(forSelectedUnit: selectedUnit, conn: conn)
+            .flatMap(to: SelectedUnit.self, { selectedUnitResponse in
+                if !selectedUnitResponse.isPsycher() {
+                    throw RoasterHammerError.psychicPowerAssignedToNonPsycher.error()
+                }
+
+                selectedUnit.psychicPowerId = psychicPowerId
+                return selectedUnit.save(on: conn)
+            })
     }
 
     // MARK: - Private Functions
@@ -675,6 +720,7 @@ final class UnitDatabaseQueries {
                                           unit: UnitResponse,
                                           warlordTrait: WarlordTraitResponse?,
                                           relic: RelicResponse?,
+                                          psychicPower: PsychicPowerResponse?,
                                           selectedModels: [SelectedModel],
                                           conn: DatabaseConnectable) throws -> Future<SelectedUnitResponse> {
         return try selectedModels.map { try self.selectedModelResponse(forSelectedModel: $0,
@@ -688,7 +734,8 @@ final class UnitDatabaseQueries {
                                             unit: unit,
                                             models: sortedSelectedModels,
                                             warlordTrait: warlordTrait,
-                                            relic: relic)
+                                            relic: relic,
+                                            psychicPower: psychicPower)
             })
     }
 }

@@ -145,7 +145,7 @@ struct WebsiteUnitController {
         let warlordTraitsFuture = warlordTraitIds.map { warlordTraitController.getWarlordById($0, conn: req) }.flatten(on: req)
 
         return flatMap(to: Response.self, unitFuture, warlordTraitsFuture, { (unit, warlordTraits) in
-            return UnitDatabaseQueries()
+            return try UnitDatabaseQueries()
                 .addAvailableWarlordTraitsToUnit(unit, warlordTraits: warlordTraits, conn: req)
                 .transform(to: req.redirect(to: "/roasterhammer/armies/\(armyId)/units/\(unitId)"))
         })

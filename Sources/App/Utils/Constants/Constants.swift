@@ -18,4 +18,7 @@ struct Constants {
         static let dedicatedTransport = "Dedicated Transport"
         static let lordOfWar = "Lord of War"
     }
+    struct Keyword {
+        static let psycher = "psycher"
+    }
 }

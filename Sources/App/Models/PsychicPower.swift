@@ -9,6 +9,9 @@ final class PsychicPower: PostgreSQLModel {
     var army: Parent<PsychicPower, Army> {
         return parent(\.armyId)
     }
+    var units: Siblings<PsychicPower, Unit, UnitPsychicPower> {
+        return siblings()
+    }
     var keywords: Siblings<PsychicPower, Keyword, PsychicPowerKeyword> {
         return siblings()
     }

@@ -27,6 +27,9 @@ final class Unit: PostgreSQLModel {
     var unitType: Parent<Unit, UnitType> {
         return parent(\.unitTypeId)
     }
+    var availablePsychicPower: Siblings<Unit, PsychicPower, UnitPsychicPower> {
+        return siblings()
+    }
 
     init(name: String,
          isUnique: Bool,

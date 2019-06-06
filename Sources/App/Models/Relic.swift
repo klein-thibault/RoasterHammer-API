@@ -23,3 +23,4 @@ final class Relic: PostgreSQLModel {
 }
 
 extension Relic: Content { }
+extension Relic: PostgreSQLMigration { }

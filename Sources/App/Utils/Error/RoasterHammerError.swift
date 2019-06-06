@@ -36,6 +36,7 @@ enum RoasterHammerError: Swift.Error {
     case warlordTraitAssignedToInvalidUnit
     case warlordTraitAssignedToNonWarlordUnit
     case relicAssignedToNonWarlordUnit
+    case psychicPowerAssignedToNonPsycher
 }
 
 extension RoasterHammerError {
@@ -97,6 +98,8 @@ extension RoasterHammerError {
             return Abort(.badRequest, reason: "The unit must be a \(Constants.RoleName.hq.uppercased())")
         case .warlordTraitAssignedToNonWarlordUnit, .relicAssignedToNonWarlordUnit:
             return Abort(.badRequest, reason: "The unit must be your warlord")
+        case .psychicPowerAssignedToNonPsycher:
+            return Abort(.badRequest, reason: "The unit must be a psycher")
         }
     }
 }

@@ -44,6 +44,17 @@ final class RelicController {
         })
     }
 
+    func relicResponseOptional(forRelic relic: Relic?, conn: DatabaseConnectable) throws -> Future<RelicResponse?> {
+        guard let relic = relic else {
+            return conn.future(nil)
+        }
+
+        return try relicResponse(forRelic: relic, conn: conn)
+            .map(to: RelicResponse?.self, { relicResponse in
+                return relicResponse
+        })
+    }
+
     func createRelic(request: AddRelicRequest, armyId: Int, conn: DatabaseConnectable) -> Future<Relic> {
         return Relic(name: request.name,
                      description: request.description,

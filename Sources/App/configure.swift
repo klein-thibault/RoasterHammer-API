@@ -60,6 +60,7 @@ public func configure(_ config: inout Config,
     RelicKeyword.defaultDatabase = .psql
     UnitWarlordTrait.defaultDatabase = .psql
     PsychicPowerKeyword.defaultDatabase = .psql
+    UnitPsychicPower.defaultDatabase = .psql
     migrations.add(model: Customer.self, database: .psql)
     migrations.add(model: UserToken.self, database: .psql)
     migrations.add(model: NodeElement.self, database: .psql)
@@ -78,6 +79,7 @@ public func configure(_ config: inout Config,
     migrations.add(model: Model.self, database: .psql)
     migrations.add(model: WeaponBucket.self, database: .psql)
     migrations.add(model: WarlordTrait.self, database: .psql)
+    migrations.add(model: Relic.self, database: .psql)
     migrations.add(model: PsychicPower.self, database: .psql)
     migrations.add(migration: CreateNodeElementClosure.self, database: .psql)
     migrations.add(migration: CreateGameRule.self, database: .psql)
@@ -98,11 +100,12 @@ public func configure(_ config: inout Config,
     migrations.add(migration: CreateWeaponBucketWeapon.self, database: .psql)
     migrations.add(migration: PopulateUnitTypeData.self, database: .psql)
     migrations.add(migration: AddIsWarlordToSelectedUnit.self, database: .psql)
-    migrations.add(migration: CreateRelic.self, database: .psql)
     migrations.add(migration: CreateRelicKeyword.self, database: .psql)
     migrations.add(migration: CreateUnitWarlordTrait.self, database: .psql)
     migrations.add(migration: AddWarlordTraitIdAndRelicIdToSelectedUnit.self, database: .psql)
     migrations.add(migration: CreatePsychicPowerKeyword.self, database: .psql)
+    migrations.add(migration: CreateUnitPsychicPower.self, database: .psql)
+    migrations.add(migration: AddPsychicPowerToSelectedUnit.self, database: .psql)
     services.register(migrations)
 
     // Configure the command line tool to add Fluent commands like revert and migrate database

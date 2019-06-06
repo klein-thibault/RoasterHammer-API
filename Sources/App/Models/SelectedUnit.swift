@@ -8,6 +8,7 @@ final class SelectedUnit: PostgreSQLModel {
     var isWarlord: Bool
     var warlordTraitId: Int?
     var relicId: Int?
+    var psychicPowerId: Int?
     var roles: Siblings<SelectedUnit, Role, UnitRole> {
         return siblings()
     }
