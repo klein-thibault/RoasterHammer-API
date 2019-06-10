@@ -1111,7 +1111,7 @@ class UnitControllerTests: BaseTests {
         }
     }
 
-    func testUpdateSelectedModelPsychicPower() throws {
+    func testAttachPsychicPowerToSelectedUnit() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
         let unitRoles = detachment.roles
@@ -1151,12 +1151,12 @@ class UnitControllerTests: BaseTests {
         XCTAssertTrue(selectedUnit.psychicPowers.count == 1)
     }
 
-    func testUpdateSelectedModelPsychicPower_whenUnitIsNotAPsycher() throws {
+    func testAttachPsychicPowerToSelectedUnit_whenUnitIsNotAPsycher() throws {
         let user = try app.createAndLogUser()
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
         let unitRoles = detachment.roles
         let (_, army) = try PsychicPowerTestsUtils.createPsychicPower(app: app)
-        let (_, unit) = try UnitTestsUtils.createHQUnit(armyId: army.id, app: app)
+        let (_, unit) = try UnitTestsUtils.createPsychicUnit(armyId: army.id, app: app)
         let psychicPower = army.psychicPowers[0]
 
         // Add warlord trait to army
@@ -1189,6 +1189,117 @@ class UnitControllerTests: BaseTests {
         } catch {
             XCTAssertNotNil(error)
         }
+    }
+
+    func testAttachPsychicPowerToSelectedUnit_whenUnitHasTooManyPsychicPowersAttached() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let (_, army) = try PsychicPowerTestsUtils.createPsychicPower(app: app)
+        let (_, unit) = try UnitTestsUtils.createPsychicUnit(armyId: army.id, app: app)
+        let psychicPower1 = army.psychicPowers[0]
+        let (_, psychicPower2) = try PsychicPowerTestsUtils.addPsychicPowerToArmy(army: army, app: app)
+        let (_, psychicPower3) = try PsychicPowerTestsUtils.addPsychicPowerToArmy(army: army, app: app)
+
+        // Add warlord trait to army
+        let addPsychicPowerRequest = CreatePsychicPowerRequest(name: "Power name",
+                                                               description: "Power description",
+                                                               keywordIds: [])
+        try app.sendRequest(to: "armies/\(army.id)/psychic-powers",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addPsychicPowerRequest)
+
+        // Add unit to detachment
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        try app.sendRequest(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        // Attach first psychic power, no error as expected
+        _ = try app.getResponse(to: "detachments/\(detachment.id)/units/\(unit.id)/psychic-powers/\(psychicPower1.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        // Attach second psychic power, no error as expected
+        _ = try app.getResponse(to: "detachments/\(detachment.id)/units/\(unit.id)/psychic-powers/\(psychicPower2.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        // Update detachment to select psychic power
+        do {
+            // Attach third psychic power, 1 too many, should throw an error
+            _ = try app.getResponse(to: "detachments/\(detachment.id)/units/\(unit.id)/psychic-powers/\(psychicPower3.id)",
+                method: .POST,
+                headers: ["Content-Type": "application/json"],
+                decodeTo: DetachmentResponse.self,
+                loggedInRequest: true,
+                loggedInCustomer: user)
+            XCTFail("Should have thrown an error")
+        } catch {
+            XCTAssertNotNil(error)
+        }
+    }
+
+    func testDetachPsychicPowerFromSelectedUnit() throws {
+        let user = try app.createAndLogUser()
+        let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
+        let unitRoles = detachment.roles
+        let (_, army) = try PsychicPowerTestsUtils.createPsychicPower(app: app)
+        let (_, unit) = try UnitTestsUtils.createPsychicUnit(armyId: army.id, app: app)
+        let psychicPower = army.psychicPowers[0]
+
+        // Add psychic power to army
+        let addPsychicPowerRequest = CreatePsychicPowerRequest(name: "Power name",
+                                                               description: "Power description",
+                                                               keywordIds: [])
+        try app.sendRequest(to: "armies/\(army.id)/psychic-powers",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addPsychicPowerRequest)
+
+        // Add unit to detachment
+        let addUnitToDetachmentRequest = AddUnitToDetachmentRequest(unitQuantity: unit.maxQuantity)
+        try app.sendRequest(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: addUnitToDetachmentRequest,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        // Update detachment to select psychic power
+        let detachmentWithUnitWithPsychicPower = try app.getResponse(to: "detachments/\(detachment.id)/units/\(unit.id)/psychic-powers/\(psychicPower.id)",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        var selectedUnit = detachmentWithUnitWithPsychicPower.roles[0].units[0]
+        XCTAssertNil(selectedUnit.warlordTrait)
+        XCTAssertNil(selectedUnit.relic)
+        XCTAssertTrue(selectedUnit.psychicPowers.count == 1)
+
+        let detachmentWithUnitWithoutPsychicPower = try app.getResponse(to: "detachments/\(detachment.id)/units/\(unit.id)/psychic-powers/\(psychicPower.id)",
+            method: .DELETE,
+            headers: ["Content-Type": "application/json"],
+            decodeTo: DetachmentResponse.self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        selectedUnit = detachmentWithUnitWithoutPsychicPower.roles[0].units[0]
+        XCTAssertNil(selectedUnit.warlordTrait)
+        XCTAssertNil(selectedUnit.relic)
+        XCTAssertTrue(selectedUnit.psychicPowers.count == 0)
     }
 
 }

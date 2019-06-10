@@ -297,7 +297,10 @@ final class UnitController {
         let psychicPowerFuture = PsychicPowerController().getPsychicPower(byID: psychicPowerId, conn: req)
 
         return flatMap(selectedUnitFuture, psychicPowerFuture, { (selectedUnit, psychicPower) in
-            return try self.unitDatabaseQueries.attachSelectedUnitPsychicPower(selectedUnit, psychicPower: psychicPower, conn: req)
+            return try self.unitDatabaseQueries.validatePsychicPowersForSelectedUnit(selectedUnit: selectedUnit, conn: req)
+                .flatMap(to: SelectedUnit.self) { _ in
+                    return try self.unitDatabaseQueries.attachSelectedUnitPsychicPower(selectedUnit, psychicPower: psychicPower, conn: req)
+                }
                 .flatMap(to: Detachment.self, { _ in
                     return Detachment.find(detachmentId, on: req).unwrap(or: RoasterHammerError.detachmentIsMissing.error())
                 })

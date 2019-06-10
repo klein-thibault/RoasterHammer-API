@@ -37,6 +37,7 @@ enum RoasterHammerError: Swift.Error {
     case warlordTraitAssignedToNonWarlordUnit
     case relicAssignedToNonWarlordUnit
     case psychicPowerAssignedToNonPsycher
+    case tooManyPsychicPowersForUnit
 }
 
 extension RoasterHammerError {
@@ -100,6 +101,8 @@ extension RoasterHammerError {
             return Abort(.badRequest, reason: "The unit must be your warlord")
         case .psychicPowerAssignedToNonPsycher:
             return Abort(.badRequest, reason: "The unit must be a psycher")
+        case .tooManyPsychicPowersForUnit:
+            return Abort(.badRequest, reason: "Can't select more psychic powers")
         }
     }
 }

@@ -18,4 +18,18 @@ final class PsychicPowerTestsUtils {
 
         return (request, armyWithPsychicPower)
     }
+
+    static func addPsychicPowerToArmy(army: ArmyResponse, app: Application) throws -> (request: CreatePsychicPowerRequest, response: ArmyResponse) {
+        let request = CreatePsychicPowerRequest(name: "Psychic Power Name",
+                                                description: "Psychic Power Description",
+                                                keywordIds: [])
+
+        let armyWithPsychicPower = try app.getResponse(to: "armies/\(army.id)/psychic-powers",
+            method: .POST,
+            headers: ["Content-Type": "application/json"],
+            data: request,
+            decodeTo: ArmyResponse.self)
+
+        return (request, armyWithPsychicPower)
+    }
 }

@@ -583,6 +583,18 @@ final class UnitDatabaseQueries {
         return selectedUnit.save(on: conn)
     }
 
+    func validatePsychicPowersForSelectedUnit(selectedUnit: SelectedUnit,
+                                               conn: DatabaseConnectable) throws -> Future<Void> {
+        let unitFuture = Unit.find(selectedUnit.unitId, on: conn).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let attachedPsychicPowers = try selectedUnit.psychicPowers.query(on: conn).all()
+
+        return map(unitFuture, attachedPsychicPowers) { unit, attachedPsychicPowers in
+            if attachedPsychicPowers.count >= unit.maxPsychicPowerQuantity {
+                throw RoasterHammerError.tooManyPsychicPowersForUnit.error()
+            }
+        }
+    }
+
     func attachSelectedUnitPsychicPower(_ selectedUnit: SelectedUnit,
                                         psychicPower: PsychicPower,
                                         conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
