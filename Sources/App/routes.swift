@@ -278,6 +278,15 @@ public func routes(_ router: Router) throws {
                 use: websiteWarlordTraitController.createWarlordTraitPostHandler)
     router.post("roasterhammer", "armies", Int.parameter, "warlord-traits", Int.parameter, "delete",
                 use: websiteWarlordTraitController.deleteWarlordTraitHandler)
+    // - Psychic Powers
+    let websitePsychicPowerController = WebsitePsychicPowerController()
+    router.get("roasterhammer", "armies", Int.parameter, "psychic-powers", use: websitePsychicPowerController.psychicPowersHandler)
+    router.get("roasterhammer", "armies", Int.parameter, "psychic-powers", "create", use: websitePsychicPowerController.createPsychicPowerHandler)
+    router.post(CreatePsychicPowerData.self,
+                at: "roasterhammer", "armies", Int.parameter, "psychic-powers", "create",
+                use: websitePsychicPowerController.createPsychicPowerPostHandler)
+    router.post("roasterhammer", "armies", Int.parameter, "psychic-powers", Int.parameter, "delete",
+                use: websitePsychicPowerController.deletePsychicPowerHandler)
 
     // QA
     //    let qaController = QAController()

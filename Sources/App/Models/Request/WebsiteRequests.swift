@@ -25,6 +25,8 @@ struct UnitDetailsContext: Encodable {
     let unit: UnitResponse
     let army: ArmyResponse
     let warlordTraits: [WarlordTraitResponse]
+    let isPsycher: Bool
+    let psychicPowers: [PsychicPowerResponse]
 }
 
 struct CreateArmyContext: WebContextTitle, Encodable {
@@ -192,4 +194,19 @@ struct CreateWarlordTraitData: Content {
 
 struct AssignWarlordTraitData: Content {
     let warlordTraitCheckbox: [String: String]
+}
+
+struct PsychicPowerContext: Encodable {
+    let army: ArmyResponse
+}
+
+struct CreatePsychicPowerContext: WebContextTitle, Encodable {
+    let title: String
+    let armyId: Int
+}
+
+struct CreatePsychicPowerData: Content {
+    let name: String
+    let description: String
+    let armyId: Int
 }

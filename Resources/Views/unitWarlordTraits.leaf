@@ -1,7 +1,7 @@
 #set("content") {
 <h1>#(unit.name)</h1>
 <h2>Warlord Trait Options</h2>
-<label>Select what warlord traits this unit can select</label>
+<label>Select what warlord traits this unit can use</label>
 <p></p>
 <form method="post">
     <table class="table table-bordered table-hover">

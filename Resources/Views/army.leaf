@@ -152,6 +152,27 @@
     </tbody>
 </table>
 
+<h2>Army Psychic Powers</h2>
+<p></p>
+<a class="btn btn-primary" href="/roasterhammer/armies/#(army.id)/psychic-powers" role="button">Edit</a>
+<p></p>
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        #for(psychicPower in army.psychicPowers) {
+        <tr>
+            <td>#(psychicPower.name)</td>
+            <td>#(psychicPower.description)</td>
+        </tr>
+        }
+    </tbody>
+</table>
+
 #/*
 It’s good practice to use a POST request for actions that modify the database, such as create or delete.
 This enables you to protect them with CSRF (Cross Site Request Forgery) tokens in the future, for example.

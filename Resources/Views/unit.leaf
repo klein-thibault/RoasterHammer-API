@@ -30,6 +30,35 @@
 </table>
 }
 
+#if(isPsycher) {
+<h2>Available Psychic Powers</h2>
+<p></p>
+<a class="btn btn-primary" href="/roasterhammer/armies/#(army.id)/units/#(unit.id)/psychic-powers" role="button">Update Available Psychic Powers</a>
+<p></p>
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        #for(psychicPower in psychicPowers) {
+        <tr>
+            <td>#(psychicPower.name)</td>
+            <td>#(psychicPower.description)</td>
+            <td>
+                <form method="post" action="/roasterhammer/armies/#(army.id)/units/#(unit.id)/psychic-powers/#(psychicPower.id)/delete">
+                    <input class="btn btn-danger" type="submit" value="Delete"/>
+                </form>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+}
+
 #for(model in unit.models) {
     <h2>#(model.name)</h2>
     <table class="table table-bordered table-hover">

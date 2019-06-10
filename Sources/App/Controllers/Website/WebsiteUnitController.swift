@@ -24,7 +24,10 @@ struct WebsiteUnitController {
 
         return flatMap(to: View.self, armyFuture, unitFuture, { (army, unit) in
             let warlordTraits = army.warlordTraits.subtracting(unit.availableWarlordTraits)
-            let context = UnitDetailsContext(unit: unit, army: army, warlordTraits: warlordTraits)
+            let context = UnitDetailsContext(unit: unit,
+                                             army: army,
+                                             warlordTraits: warlordTraits,
+                                             isPsycher: unit.isPsycher(), psychicPowers: army.psychicPowers)
             return try req.view().render("unit", context)
         })
     }
@@ -130,7 +133,10 @@ struct WebsiteUnitController {
 
         return flatMap(to: View.self, armyFuture, unitFuture, { (army, unit) in
             let warlordTraits = army.warlordTraits.subtracting(unit.availableWarlordTraits)
-            let context = UnitDetailsContext(unit: unit, army: army, warlordTraits: warlordTraits)
+            let context = UnitDetailsContext(unit: unit,
+                                             army: army,
+                                             warlordTraits: warlordTraits,
+                                             isPsycher: unit.isPsycher(), psychicPowers: army.psychicPowers)
             return try req.view().render("unitWarlordTraits", context)
         })
     }

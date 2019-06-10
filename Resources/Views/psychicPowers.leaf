@@ -1,0 +1,33 @@
+#set("content") {
+<h1>Psychic Powers</h1>
+<p></p>
+<a class="btn btn-primary" href="/roasterhammer/armies/#(army.id)/psychic-powers/create" role="button">Add New Psychic Power</a>
+<p></p>
+#if(army.psychicPowers) {
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        #for(psychicPower in army.psychicPowers) {
+        <tr>
+            <td>#(psychicPower.name)</td>
+            <td>#(psychicPower.description)</td>
+            <td>
+                <form method="post" action="/roasterhammer/armies/#(army.id)/psychic-powers/#(psychicPower.id)/delete">
+                    <input class="btn btn-danger" type="submit" value="Delete"/>
+                </form>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+} else {
+<h2>There are no psychic powers in this army.</h2>
+}
+}
+#embed("base")

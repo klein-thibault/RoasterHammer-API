@@ -1,0 +1,22 @@
+#set("content") {
+<h1>#(title)</h1>
+<form method="post">
+    <div class="form-group">
+        <label>Psychic Power Name</label>
+        <input type="text" class="form-control" name="name"/>
+    </div>
+    <div class="form-group">
+        <label>Psychic Power Description</label>
+        <input type="text" class="form-control" name="description"/>
+    </div>
+
+    <div class="form-group">
+        <input type="hidden" class="form-control" name="armyId" value="#(armyId)"/>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Submit
+    </button>
+</form>
+}
+#embed("base")
