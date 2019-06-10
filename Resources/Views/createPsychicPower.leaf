@@ -14,6 +14,11 @@
         <input type="hidden" class="form-control" name="armyId" value="#(armyId)"/>
     </div>
 
+    <div class="form-group">
+        <label for="keywords">Keywords</label>
+        <select name="keywords[]" class="form-control" id="keywords" multiple="multiple"></select>
+    </div>
+
     <button type="submit" class="btn btn-primary">
         Submit
     </button>

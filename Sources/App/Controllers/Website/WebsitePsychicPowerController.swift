@@ -23,12 +23,16 @@ struct WebsitePsychicPowerController {
 
     func createPsychicPowerPostHandler(_ req: Request,
                                        createPsychicPowerData: CreatePsychicPowerData) throws -> Future<Response> {
-        // TODO: handle keywords for psychic power creation
-        let request = CreatePsychicPowerRequest(name: createPsychicPowerData.name,
-                                                description: createPsychicPowerData.description,
-                                                keywordIds: [])
-        return PsychicPowerController()
-            .createPsychicPower(request: request, armyId: createPsychicPowerData.armyId, conn: req)
+        let keywords = createPsychicPowerData.keywords ?? []
+        return KeywordController().getKeywordsWithNames(keywords, conn: req)
+            .flatMap(to: PsychicPower.self) { keywords in
+                let keywordIds = try keywords.map { try $0.requireID() }
+                let request = CreatePsychicPowerRequest(name: createPsychicPowerData.name,
+                                                        description: createPsychicPowerData.description,
+                                                        keywordIds: keywordIds)
+                return PsychicPowerController()
+                    .createPsychicPower(request: request, armyId: createPsychicPowerData.armyId, conn: req)
+            }
             .transform(to: req.redirect(to: "/roasterhammer/armies/\(createPsychicPowerData.armyId)/psychic-powers"))
     }
 

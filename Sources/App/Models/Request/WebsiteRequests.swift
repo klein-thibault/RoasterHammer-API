@@ -211,4 +211,5 @@ struct CreatePsychicPowerData: Content {
     let name: String
     let description: String
     let armyId: Int
+    let keywords: [String]?
 }
