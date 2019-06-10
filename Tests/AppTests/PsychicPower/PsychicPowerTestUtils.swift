@@ -10,12 +10,12 @@ final class PsychicPowerTestsUtils {
                                                 description: "Psychic Power Description",
                                                 keywordIds: [])
 
-        let armyWithWarlordTrait = try app.getResponse(to: "armies/\(army.requireID())/psychic-powers",
+        let armyWithPsychicPower = try app.getResponse(to: "armies/\(army.requireID())/psychic-powers",
             method: .POST,
             headers: ["Content-Type": "application/json"],
             data: request,
             decodeTo: ArmyResponse.self)
 
-        return (request, armyWithWarlordTrait)
+        return (request, armyWithPsychicPower)
     }
 }

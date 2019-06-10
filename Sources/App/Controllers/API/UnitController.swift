@@ -131,10 +131,17 @@ final class UnitController {
                        unitFuture,
                        roleFuture,
                        detachmentFuture, { (request, unit, role, detachment) in
-                        let warlordTraitUpdateFuture = try self.unitDatabaseQueries.updateSelectedUnitWarlordTrait(unit, warlordTraitId: request.warlordTraitId, conn: req)
-                        let relicUpdateFuture = try self.unitDatabaseQueries.updateSelectedUnitRelic(unit, relicId: request.relicId, conn: req)
+                        let warlordTraitUpdateFuture = try self.unitDatabaseQueries.updateSelectedUnitWarlordTrait(unit,
+                                                                                                                   warlordTraitId: request.warlordTraitId,
+                                                                                                                   conn: req)
+                        let relicUpdateFuture = try self.unitDatabaseQueries.updateSelectedUnitRelic(unit,
+                                                                                                     relicId: request.relicId,
+                                                                                                     conn: req)
+                        let psychicPowerUpdateFuture = try self.unitDatabaseQueries.updateSelectedUnitPsychicPower(unit,
+                                                                                                                   psychicPowerId: request.psychicPowerId,
+                                                                                                                   conn: req)
 
-                        return map(to: SelectedUnit.self, warlordTraitUpdateFuture, relicUpdateFuture, { (warlordTraitUpdate, relicUpdate) in
+                        return map(to: SelectedUnit.self, warlordTraitUpdateFuture, relicUpdateFuture, psychicPowerUpdateFuture, { (warlordTraitUpdate, relicUpdate, psychicPowerUpdate) in
                             return unit
                         }).flatMap(to: DetachmentResponse.self, { _ in
                             let detachmentController = DetachmentController()

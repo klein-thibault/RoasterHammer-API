@@ -551,6 +551,10 @@ final class UnitDatabaseQueries {
     func updateSelectedUnitWarlordTrait(_ selectedUnit: SelectedUnit,
                                         warlordTraitId: Int?,
                                         conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
+        guard let warlordTraitId = warlordTraitId else {
+            return conn.future(selectedUnit)
+        }
+
         if !selectedUnit.isWarlord {
             throw RoasterHammerError.warlordTraitAssignedToNonWarlordUnit.error()
         }
@@ -561,6 +565,10 @@ final class UnitDatabaseQueries {
     func updateSelectedUnitRelic(_ selectedUnit: SelectedUnit,
                                  relicId: Int?,
                                  conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
+        guard let relicId = relicId else {
+            return conn.future(selectedUnit)
+        }
+
         if !selectedUnit.isWarlord {
             throw RoasterHammerError.relicAssignedToNonWarlordUnit.error()
         }
@@ -571,6 +579,10 @@ final class UnitDatabaseQueries {
     func updateSelectedUnitPsychicPower(_ selectedUnit: SelectedUnit,
                                         psychicPowerId: Int?,
                                         conn: DatabaseConnectable) throws -> Future<SelectedUnit> {
+        guard let psychicPowerId = psychicPowerId else {
+            return conn.future(selectedUnit)
+        }
+
         return try selectedUnitResponse(forSelectedUnit: selectedUnit, conn: conn)
             .flatMap(to: SelectedUnit.self, { selectedUnitResponse in
                 if !selectedUnitResponse.isPsycher() {
