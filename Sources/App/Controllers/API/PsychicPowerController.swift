@@ -39,18 +39,6 @@ final class PsychicPowerController {
             })
     }
 
-    func psychicPowerResponseOptional(forPsychicPower psychicPower: PsychicPower?,
-                              conn: DatabaseConnectable) throws -> Future<PsychicPowerResponse?> {
-        guard let psychicPower = psychicPower else {
-            return conn.future(nil)
-        }
-
-        return try psychicPowerResponse(forPsychicPower: psychicPower, conn: conn)
-            .map(to: PsychicPowerResponse?.self, { psychicPowerResponse in
-                return psychicPowerResponse
-            })
-    }
-
     func createPsychicPower(request: CreatePsychicPowerRequest, armyId: Int, conn: DatabaseConnectable) -> Future<PsychicPower> {
         return PsychicPower(name: request.name,
                             description: request.description,
@@ -74,5 +62,11 @@ final class PsychicPowerController {
             .unwrap(or: RoasterHammerError.psychicPowerIsMissing.error())
             .delete(on: conn)
             .transform(to: .ok)
+    }
+
+    func getPsychicPower(byID id: Int, conn: DatabaseConnectable) -> Future<PsychicPower> {
+        return PsychicPower
+            .find(id, on: conn)
+            .unwrap(or: RoasterHammerError.psychicPowerIsMissing.error())
     }
 }

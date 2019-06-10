@@ -137,11 +137,8 @@ final class UnitController {
                         let relicUpdateFuture = try self.unitDatabaseQueries.updateSelectedUnitRelic(unit,
                                                                                                      relicId: request.relicId,
                                                                                                      conn: req)
-                        let psychicPowerUpdateFuture = try self.unitDatabaseQueries.updateSelectedUnitPsychicPower(unit,
-                                                                                                                   psychicPowerId: request.psychicPowerId,
-                                                                                                                   conn: req)
 
-                        return map(to: SelectedUnit.self, warlordTraitUpdateFuture, relicUpdateFuture, psychicPowerUpdateFuture, { (warlordTraitUpdate, relicUpdate, psychicPowerUpdate) in
+                        return map(to: SelectedUnit.self, warlordTraitUpdateFuture, relicUpdateFuture, { (warlordTraitUpdate, relicUpdate) in
                             return unit
                         }).flatMap(to: DetachmentResponse.self, { _ in
                             let detachmentController = DetachmentController()
@@ -288,6 +285,45 @@ final class UnitController {
                 let detachmentController = DetachmentController()
                 return try detachmentController.getDetachmentById(detachmentId, conn: req)
             })
+    }
+
+    func attachPsychicPowerToSelectedUnit(_ req: Request) throws -> Future<DetachmentResponse> {
+        _ = try req.requireAuthenticated(Customer.self)
+        let detachmentId = try req.parameters.next(Int.self)
+        let modelId = try req.parameters.next(Int.self)
+        let psychicPowerId = try req.parameters.next(Int.self)
+
+        let selectedUnitFuture = SelectedUnit.find(modelId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let psychicPowerFuture = PsychicPowerController().getPsychicPower(byID: psychicPowerId, conn: req)
+
+        return flatMap(selectedUnitFuture, psychicPowerFuture, { (selectedUnit, psychicPower) in
+            return try self.unitDatabaseQueries.attachSelectedUnitPsychicPower(selectedUnit, psychicPower: psychicPower, conn: req)
+                .flatMap(to: Detachment.self, { _ in
+                    return Detachment.find(detachmentId, on: req).unwrap(or: RoasterHammerError.detachmentIsMissing.error())
+                })
+                .flatMap(to: DetachmentResponse.self, { detachment in
+                    let detachmentController = DetachmentController()
+                    return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                })
+        })
+    }
+
+    func detachPsychicPowerFromSelectedModel(_ req: Request) throws -> Future<DetachmentResponse> {
+        _ = try req.requireAuthenticated(Customer.self)
+        let detachmentId = try req.parameters.next(Int.self)
+        let modelId = try req.parameters.next(Int.self)
+        let psychicPowerId = try req.parameters.next(Int.self)
+
+        let selectedUnitFuture = SelectedUnit.find(modelId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let psychicPowerFuture = PsychicPowerController().getPsychicPower(byID: psychicPowerId, conn: req)
+
+        return flatMap(selectedUnitFuture, psychicPowerFuture, { (selectedUnit, psychicPower) in
+            return try self.unitDatabaseQueries.detachPsychicPowerFromSelectedUnit(psychicPower, selectedUnit: selectedUnit, conn: req)
+                .flatMap(to: DetachmentResponse.self, { detachment in
+                    let detachmentController = DetachmentController()
+                    return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                })
+        })
     }
 
 }

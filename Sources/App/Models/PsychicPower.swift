@@ -12,6 +12,9 @@ final class PsychicPower: PostgreSQLModel {
     var units: Siblings<PsychicPower, Unit, UnitPsychicPower> {
         return siblings()
     }
+    var selectedUnits: Siblings<PsychicPower, SelectedUnit, SelectedUnitPsychicPower> {
+        return siblings()
+    }
     var keywords: Siblings<PsychicPower, Keyword, PsychicPowerKeyword> {
         return siblings()
     }

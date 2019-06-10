@@ -33,7 +33,7 @@ class SelectedUnitResponseTests: XCTestCase {
                                                         models: [],
                                                         warlordTrait: nil,
                                                         relic: nil,
-                                                        psychicPower: nil)
+                                                        psychicPowers: [])
         // Then
         XCTAssertTrue(selectedUnitResponse.isPsycher())
     }
@@ -67,7 +67,7 @@ class SelectedUnitResponseTests: XCTestCase {
                                                         models: [],
                                                         warlordTrait: nil,
                                                         relic: nil,
-                                                        psychicPower: nil)
+                                                        psychicPowers: [])
         // Then
         XCTAssertFalse(selectedUnitResponse.isPsycher())
     }

@@ -957,9 +957,7 @@ class UnitControllerTests: BaseTests {
             loggedInCustomer: user)
 
         // Update detachment to assign warlord trait
-        let updateSelectedUnitWarlordTraitRequest = EditSelectedUnitRequest(warlordTraitId: warlordTrait.id,
-                                                                            relicId: nil,
-                                                                            psychicPowerId: nil)
+        let updateSelectedUnitWarlordTraitRequest = EditSelectedUnitRequest(warlordTraitId: warlordTrait.id, relicId: nil)
         let detachmentWithUnitWithWarlordTrait = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
             method: .PATCH,
             headers: ["Content-Type": "application/json"],
@@ -998,9 +996,7 @@ class UnitControllerTests: BaseTests {
             loggedInCustomer: user)
 
         // Update detachment to assign warlord trait
-        let updateSelectedUnitWarlordTraitRequest = EditSelectedUnitRequest(warlordTraitId: warlordTrait.id,
-                                                                            relicId: nil,
-                                                                            psychicPowerId: nil)
+        let updateSelectedUnitWarlordTraitRequest = EditSelectedUnitRequest(warlordTraitId: warlordTrait.id, relicId: nil)
 
         do {
             _ = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
@@ -1052,9 +1048,7 @@ class UnitControllerTests: BaseTests {
             loggedInCustomer: user)
 
         // Update detachment to assign warlord trait
-        let updateSelectedUnitRelicRequest = EditSelectedUnitRequest(warlordTraitId: nil,
-                                                                     relicId: relic.id,
-                                                                     psychicPowerId: nil)
+        let updateSelectedUnitRelicRequest = EditSelectedUnitRequest(warlordTraitId: nil, relicId: relic.id)
         let detachmentWithUnitWithWarlordTrait = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
             method: .PATCH,
             headers: ["Content-Type": "application/json"],
@@ -1097,9 +1091,7 @@ class UnitControllerTests: BaseTests {
             loggedInCustomer: user)
 
         // Update detachment to assign warlord trait
-        let updateSelectedUnitRelicRequest = EditSelectedUnitRequest(warlordTraitId: nil,
-                                                                     relicId: relic.id,
-                                                                     psychicPowerId: nil)
+        let updateSelectedUnitRelicRequest = EditSelectedUnitRequest(warlordTraitId: nil, relicId: relic.id)
 
         do {
             _ = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
@@ -1123,7 +1115,7 @@ class UnitControllerTests: BaseTests {
         let (_, unit) = try UnitTestsUtils.createPsychicUnit(armyId: army.id, app: app)
         let psychicPower = army.psychicPowers[0]
 
-        // Add warlord trait to army
+        // Add psychic power to army
         let addPsychicPowerRequest = CreatePsychicPowerRequest(name: "Power name",
                                                                description: "Power description",
                                                                keywordIds: [])
@@ -1142,13 +1134,9 @@ class UnitControllerTests: BaseTests {
             loggedInCustomer: user)
 
         // Update detachment to select psychic power
-        let updateSelectedUnitPsychicPowerRequest = EditSelectedUnitRequest(warlordTraitId: nil,
-                                                                            relicId: nil,
-                                                                            psychicPowerId: psychicPower.id)
-        let detachmentWithUnitWithPsychicPower = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
-            method: .PATCH,
+        let detachmentWithUnitWithPsychicPower = try app.getResponse(to: "detachments/\(detachment.id)/units/\(unit.id)/psychic-powers/\(psychicPower.id)",
+            method: .POST,
             headers: ["Content-Type": "application/json"],
-            data: updateSelectedUnitPsychicPowerRequest,
             decodeTo: DetachmentResponse.self,
             loggedInRequest: true,
             loggedInCustomer: user)
@@ -1156,7 +1144,7 @@ class UnitControllerTests: BaseTests {
         let selectedUnit = detachmentWithUnitWithPsychicPower.roles[0].units[0]
         XCTAssertNil(selectedUnit.warlordTrait)
         XCTAssertNil(selectedUnit.relic)
-        XCTAssertNotNil(selectedUnit.psychicPower)
+        XCTAssertTrue(selectedUnit.psychicPowers.count == 1)
     }
 
     func testUpdateSelectedModelPsychicPower_whenUnitIsNotAPsycher() throws {
@@ -1186,15 +1174,10 @@ class UnitControllerTests: BaseTests {
             loggedInCustomer: user)
 
         // Update detachment to select psychic power
-        let updateSelectedUnitPsychicPowerRequest = EditSelectedUnitRequest(warlordTraitId: nil,
-                                                                            relicId: nil,
-                                                                            psychicPowerId: psychicPower.id)
-
         do {
-            _ = try app.getResponse(to: "detachments/\(detachment.id)/roles/\(unitRoles[0].id)/units/\(unit.id)",
-                method: .PATCH,
+            _ = try app.getResponse(to: "detachments/\(detachment.id)/units/\(unit.id)/psychic-powers/\(psychicPower.id)",
+                method: .POST,
                 headers: ["Content-Type": "application/json"],
-                data: updateSelectedUnitPsychicPowerRequest,
                 decodeTo: DetachmentResponse.self,
                 loggedInRequest: true,
                 loggedInCustomer: user)

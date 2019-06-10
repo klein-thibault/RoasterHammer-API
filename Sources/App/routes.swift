@@ -145,6 +145,20 @@ public func routes(_ router: Router) throws {
                                "weapons",
                                Int.parameter,
                                use: unitController.unattachWeaponFromSelectedModel)
+    protectedAuthRouter.post("detachments",
+                             Int.parameter,
+                             "units",
+                             Int.parameter,
+                             "psychic-powers",
+                             Int.parameter,
+                             use: unitController.attachPsychicPowerToSelectedUnit)
+    protectedAuthRouter.delete("detachments",
+                               Int.parameter,
+                               "units",
+                               Int.parameter,
+                               "psychic-powers",
+                               Int.parameter,
+                               use: unitController.detachPsychicPowerFromSelectedModel)
 
     // Weapon
     let weaponController = WeaponController()
