@@ -168,7 +168,9 @@ final class UnitDatabaseQueries {
                                                       name: unit.name,
                                                       isUnique: unit.isUnique,
                                                       minQuantity: unit.minQuantity,
-                                                      maxQuantity: unit.maxQuantity)
+                                                      maxQuantity: unit.maxQuantity,
+                                                      minPsychicPowerQuantity: unit.minPsychicPowerQuantity,
+                                                      maxPsychicPowerQuantity: unit.maxPsychicPowerQuantity)
                                 let rulesResponse = RuleController().rulesResponse(forRules: rules)
                                 return UnitResponse(unit: unitDTO,
                                                     unitType: unitTypeString,
@@ -225,7 +227,9 @@ final class UnitDatabaseQueries {
                     minQuantity: request.minQuantity,
                     maxQuantity: request.maxQuantity,
                     unitTypeId: request.unitTypeId,
-                    armyId: request.armyId)
+                    armyId: request.armyId,
+                    minPsychicPowerQuantity: request.minPsychicPowerQuantity,
+                    maxPsychicPowerQuantity: request.maxPsychicPowerQuantity)
             .save(on: conn)
             .flatMap(to: Unit.self, { unit in
                 return try self.createModels(forUnit: unit,

@@ -17,7 +17,9 @@ class SelectedUnitResponseTests: XCTestCase {
                               name: "Unit",
                               isUnique: false,
                               minQuantity: 1,
-                              maxQuantity: 1)
+                              maxQuantity: 1,
+                              minPsychicPowerQuantity: 1,
+                              maxPsychicPowerQuantity: 2)
         let unitResponse = UnitResponse(unit: unitDTO,
                                         unitType: "Type",
                                         army: armyResponse,
@@ -51,7 +53,9 @@ class SelectedUnitResponseTests: XCTestCase {
                               name: "Unit",
                               isUnique: false,
                               minQuantity: 1,
-                              maxQuantity: 1)
+                              maxQuantity: 1,
+                              minPsychicPowerQuantity: 1,
+                              maxPsychicPowerQuantity: 2)
         let unitResponse = UnitResponse(unit: unitDTO,
                                         unitType: "Type",
                                         army: armyResponse,

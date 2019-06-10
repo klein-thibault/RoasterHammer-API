@@ -30,6 +30,16 @@
     </div>
 
     <div class="form-group">
+        <label for="short">Unit Minimum Psychic Power Quantity</label>
+        <input type="text" name="minQuantityPsychicPower" class="form-control" id="unit-min-psychic-power-quantity" #if(editing) { value="#(unit.minQuantityPsychicPower)" }/>
+        <small id="unitMinPsychicPowerHelp" class="form-text text-muted">Input 0 in case this unit cannot use psychic powers</small>
+    </div>
+    <div class="form-group">
+        <label for="short">Unit Maximum Psychic Power Quantity</label>
+        <input type="text" name="maxQuantityPsychicPower" class="form-control" id="unit-max-psychic-power-quantity" #if(editing) { value="#(unit.maxQuantityPsychicPower)" }/>
+    </div>
+
+    <div class="form-group">
         <input type="hidden" name="armyId" id="armyId" value="#(army.id)"/>
     </div>
 

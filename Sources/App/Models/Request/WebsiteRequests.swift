@@ -109,6 +109,8 @@ struct CreateUnitData: Content {
     let unitMaxQuantity: String
     let unitTypeId: String
     let armyId: String
+    let minQuantityPsychicPower: String
+    let maxQuantityPsychicPower: String
     let keywords: [String]?
     let models: DynamicFormData
     let rules: DynamicFormData

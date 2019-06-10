@@ -16,6 +16,8 @@ class UnitControllerTests: BaseTests {
         XCTAssertEqual(unit.name, createUnitRequest.name)
         XCTAssertEqual(unit.minQuantity, createUnitRequest.minQuantity)
         XCTAssertEqual(unit.maxQuantity, createUnitRequest.maxQuantity)
+        XCTAssertEqual(unit.minPsychicPowerQuantity, createUnitRequest.minPsychicPowerQuantity)
+        XCTAssertEqual(unit.maxPsychicPowerQuantity, createUnitRequest.maxPsychicPowerQuantity)
         XCTAssertEqual(unit.models[0].weaponQuantity, createUnitRequest.models[0].weaponQuantity)
         XCTAssertEqual(unit.isUnique, createUnitRequest.isUnique)
         XCTAssertEqual(unit.unitType, "HQ")
@@ -107,6 +109,8 @@ class UnitControllerTests: BaseTests {
                                                 maxQuantity: 999,
                                                 unitTypeId: 3,
                                                 armyId: army2.id!,
+                                                minPsychicPowerQuantity: 0,
+                                                maxPsychicPowerQuantity: 0,
                                                 models: [editModelRequest],
                                                 keywords: ["New Keyword Name"],
                                                 rules: [editedRuleRequest])

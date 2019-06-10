@@ -34,6 +34,8 @@ final class UnitTestsUtils {
                                                       maxQuantity: 1,
                                                       unitTypeId: hqUnitType.requireID(),
                                                       armyId: armyId,
+                                                      minPsychicPowerQuantity: 0,
+                                                      maxPsychicPowerQuantity: 0,
                                                       models: [createModelRequest],
                                                       keywords: keywords,
                                                       rules: rules)
@@ -75,6 +77,8 @@ final class UnitTestsUtils {
                                                       maxQuantity: 1,
                                                       unitTypeId: hqUnitType.requireID(),
                                                       armyId: armyId,
+                                                      minPsychicPowerQuantity: 0,
+                                                      maxPsychicPowerQuantity: 0,
                                                       models: [createModelRequest],
                                                       keywords: keywords,
                                                       rules: rules)
@@ -116,6 +120,8 @@ final class UnitTestsUtils {
                                                       maxQuantity: 10,
                                                       unitTypeId: troopUnitType.requireID(),
                                                       armyId: armyId,
+                                                      minPsychicPowerQuantity: 0,
+                                                      maxPsychicPowerQuantity: 0,
                                                       models: [createModelRequest],
                                                       keywords: keywords,
                                                       rules: rules)
@@ -157,6 +163,8 @@ final class UnitTestsUtils {
                                                       maxQuantity: 10,
                                                       unitTypeId: troopUnitType.requireID(),
                                                       armyId: armyId,
+                                                      minPsychicPowerQuantity: 1,
+                                                      maxPsychicPowerQuantity: 2,
                                                       models: [createModelRequest],
                                                       keywords: keywords,
                                                       rules: rules)

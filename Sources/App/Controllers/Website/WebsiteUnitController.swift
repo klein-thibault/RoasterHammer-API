@@ -178,7 +178,9 @@ struct WebsiteUnitController {
         guard let minQuantity = data.unitMinQuantity.intValue,
             let maxQuantity = data.unitMaxQuantity.intValue,
             let unitTypeId = data.unitTypeId.intValue,
-            let armyId = data.armyId.intValue else {
+            let armyId = data.armyId.intValue,
+            let minQuantityPsychicPower = data.minQuantityPsychicPower.intValue,
+            let maxQuantityPsychicPower = data.maxQuantityPsychicPower.intValue else {
                 throw Abort(.badRequest)
         }
 
@@ -193,6 +195,8 @@ struct WebsiteUnitController {
                                  maxQuantity: maxQuantity,
                                  unitTypeId: unitTypeId,
                                  armyId: armyId,
+                                 minPsychicPowerQuantity: minQuantityPsychicPower,
+                                 maxPsychicPowerQuantity: maxQuantityPsychicPower,
                                  models: models,
                                  keywords: keywords,
                                  rules: rules)
