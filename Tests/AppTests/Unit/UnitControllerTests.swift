@@ -1156,7 +1156,7 @@ class UnitControllerTests: BaseTests {
         let (_, detachment) = try DetachmentTestsUtils.createPatrolDetachmentWithArmy(app: app)
         let unitRoles = detachment.roles
         let (_, army) = try PsychicPowerTestsUtils.createPsychicPower(app: app)
-        let (_, unit) = try UnitTestsUtils.createPsychicUnit(armyId: army.id, app: app)
+        let (_, unit) = try UnitTestsUtils.createHQUnit(armyId: army.id, app: app)
         let psychicPower = army.psychicPowers[0]
 
         // Add warlord trait to army
