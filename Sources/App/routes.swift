@@ -216,6 +216,13 @@ public func routes(_ router: Router) throws {
                 use: websiteUnitController.warlordTraitsPostHandler)
     router.post("roasterhammer", "armies", Int.parameter, "units", Int.parameter, "warlord-traits", Int.parameter, "delete",
                 use: websiteUnitController.deleteWarlordTraitFromUnitHandler)
+    router.get("roasterhammer", "armies", Int.parameter, "units", Int.parameter, "psychic-powers",
+               use: websiteUnitController.psychicPowersHandler)
+    router.post(AssignPsychicPowerData.self,
+                at: "roasterhammer", "armies", Int.parameter, "units", Int.parameter, "psychic-powers",
+                use: websiteUnitController.psychicPowersPostHandler)
+    router.post("roasterhammer", "armies", Int.parameter, "units", Int.parameter, "psychic-powers", Int.parameter, "delete",
+                use: websiteUnitController.deletePsychicPowerFromUnitHandler)
     // - Weapons
     let websiteWeaponController = WebsiteWeaponController()
     router.get("roasterhammer", "weapons", use: websiteWeaponController.weaponsHandler)

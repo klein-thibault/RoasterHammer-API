@@ -198,6 +198,10 @@ struct AssignWarlordTraitData: Content {
     let warlordTraitCheckbox: [String: String]
 }
 
+struct AssignPsychicPowerData: Content {
+    let psychicPowerCheckbox: [String: String]
+}
+
 struct PsychicPowerContext: Encodable {
     let army: ArmyResponse
 }

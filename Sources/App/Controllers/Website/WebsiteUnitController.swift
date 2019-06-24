@@ -27,7 +27,8 @@ struct WebsiteUnitController {
             let context = UnitDetailsContext(unit: unit,
                                              army: army,
                                              warlordTraits: warlordTraits,
-                                             isPsycher: unit.isPsycher(), psychicPowers: army.psychicPowers)
+                                             isPsycher: unit.isPsycher(),
+                                             psychicPowers: unit.availablePsychicPowers)
             return try req.view().render("unit", context)
         })
     }
@@ -136,7 +137,8 @@ struct WebsiteUnitController {
             let context = UnitDetailsContext(unit: unit,
                                              army: army,
                                              warlordTraits: warlordTraits,
-                                             isPsycher: unit.isPsycher(), psychicPowers: army.psychicPowers)
+                                             isPsycher: unit.isPsycher(),
+                                             psychicPowers: army.psychicPowers)
             return try req.view().render("unitWarlordTraits", context)
         })
     }
@@ -168,6 +170,55 @@ struct WebsiteUnitController {
         return flatMap(to: Response.self, unitFuture, warlordTraitFuture, { (unit, warlordTrait) in
             return UnitDatabaseQueries()
                 .removeWarlordTraitFromUnit(unit, warlordTrait: warlordTrait, conn: req)
+                .transform(to: req.redirect(to: "/roasterhammer/armies/\(armyId)/units/\(unitId)"))
+        })
+    }
+
+    func psychicPowersHandler(_ req: Request) throws -> Future<View> {
+        let armyId = try req.parameters.next(Int.self)
+        let unitId = try req.parameters.next(Int.self)
+
+        let armyFuture = try ArmyController().getArmy(byID: armyId, conn: req)
+        let unitFuture = UnitDatabaseQueries().getUnit(byID: unitId, conn: req)
+
+        return flatMap(to: View.self, armyFuture, unitFuture, { (army, unit) in
+            let psychicPowers = army.psychicPowers.subtracting(unit.availablePsychicPowers)
+            let context = UnitDetailsContext(unit: unit,
+                                             army: army,
+                                             warlordTraits: [],
+                                             isPsycher: unit.isPsycher(),
+                                             psychicPowers: psychicPowers)
+            return try req.view().render("unitPsychicPowers", context)
+        })
+    }
+
+    func psychicPowersPostHandler(_ req: Request, assignPsychicPowers: AssignPsychicPowerData) throws -> Future<Response> {
+        let armyId = try req.parameters.next(Int.self)
+        let unitId = try req.parameters.next(Int.self)
+        let psychicPowerIds = assignPsychicPowers.psychicPowerCheckbox.keys.compactMap { $0.intValue }
+
+        let unitFuture = Unit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let psychicPowerController = PsychicPowerController()
+        let psychicPowersFuture = psychicPowerIds.map { psychicPowerController.getPsychicPower(byID: $0, conn: req) }.flatten(on: req)
+
+        return flatMap(to: Response.self, unitFuture, psychicPowersFuture, { (unit, psychicPowers) in
+            return try UnitDatabaseQueries()
+                .addAvailablePsychicPowersToUnit(unit, psychicPowers: psychicPowers, conn: req)
+                .transform(to: req.redirect(to: "/roasterhammer/armies/\(armyId)/units/\(unitId)"))
+        })
+    }
+
+    func deletePsychicPowerFromUnitHandler(_ req: Request) throws -> Future<Response> {
+        let armyId = try req.parameters.next(Int.self)
+        let unitId = try req.parameters.next(Int.self)
+        let psychicPowerId = try req.parameters.next(Int.self)
+
+        let unitFuture = Unit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let psychicPowerFuture = PsychicPowerController().getPsychicPower(byID: psychicPowerId, conn: req)
+
+        return flatMap(to: Response.self, unitFuture, psychicPowerFuture, { (unit, psychicPower) in
+            return UnitDatabaseQueries()
+                .removePsychicPowerFromUnit(unit, psychicPower: psychicPower, conn: req)
                 .transform(to: req.redirect(to: "/roasterhammer/armies/\(armyId)/units/\(unitId)"))
         })
     }

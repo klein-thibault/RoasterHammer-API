@@ -528,6 +528,15 @@ final class UnitDatabaseQueries {
             })
     }
 
+    func removeWarlordTraitFromUnit(_ unit: Unit, warlordTrait: WarlordTrait, conn: DatabaseConnectable) -> Future<Unit> {
+        return unit
+            .availableWarlordTrait
+            .detach(warlordTrait, on: conn)
+            .map(to: Unit.self, { _ in
+                return unit
+            })
+    }
+
     func addAvailablePsychicPowersToUnit(_ unit: Unit,
                                          psychicPowers: [PsychicPower],
                                          conn: DatabaseConnectable) throws -> Future<Unit> {
@@ -546,13 +555,13 @@ final class UnitDatabaseQueries {
             })
     }
 
-    func removeWarlordTraitFromUnit(_ unit: Unit, warlordTrait: WarlordTrait, conn: DatabaseConnectable) -> Future<Unit> {
+    func removePsychicPowerFromUnit(_ unit: Unit, psychicPower: PsychicPower, conn: DatabaseConnectable) -> Future<Unit> {
         return unit
-            .availableWarlordTrait
-            .detach(warlordTrait, on: conn)
-            .map(to: Unit.self, { _ in
+            .availablePsychicPower
+            .detach(psychicPower, on: conn)
+            .map(to: Unit.self) { _ in
                 return unit
-            })
+        }
     }
 
     func updateSelectedUnitWarlordTrait(_ selectedUnit: SelectedUnit,
