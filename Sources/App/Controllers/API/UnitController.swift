@@ -290,10 +290,10 @@ final class UnitController {
     func attachPsychicPowerToSelectedUnit(_ req: Request) throws -> Future<DetachmentResponse> {
         _ = try req.requireAuthenticated(Customer.self)
         let detachmentId = try req.parameters.next(Int.self)
-        let modelId = try req.parameters.next(Int.self)
+        let unitId = try req.parameters.next(Int.self)
         let psychicPowerId = try req.parameters.next(Int.self)
 
-        let selectedUnitFuture = SelectedUnit.find(modelId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let selectedUnitFuture = SelectedUnit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
         let psychicPowerFuture = PsychicPowerController().getPsychicPower(byID: psychicPowerId, conn: req)
 
         return flatMap(selectedUnitFuture, psychicPowerFuture, { (selectedUnit, psychicPower) in
@@ -314,10 +314,10 @@ final class UnitController {
     func detachPsychicPowerFromSelectedModel(_ req: Request) throws -> Future<DetachmentResponse> {
         _ = try req.requireAuthenticated(Customer.self)
         let detachmentId = try req.parameters.next(Int.self)
-        let modelId = try req.parameters.next(Int.self)
+        let unitId = try req.parameters.next(Int.self)
         let psychicPowerId = try req.parameters.next(Int.self)
 
-        let selectedUnitFuture = SelectedUnit.find(modelId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
+        let selectedUnitFuture = SelectedUnit.find(unitId, on: req).unwrap(or: RoasterHammerError.unitIsMissing.error())
         let psychicPowerFuture = PsychicPowerController().getPsychicPower(byID: psychicPowerId, conn: req)
 
         return flatMap(selectedUnitFuture, psychicPowerFuture, { (selectedUnit, psychicPower) in
