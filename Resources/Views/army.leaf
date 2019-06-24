@@ -13,6 +13,7 @@
         <tr>
             <th>Name</th>
             <th>Description</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -20,14 +21,16 @@
         <tr>
             <td>#(rule.name)</td>
             <td>#(rule.description)</td>
+            <td>
+                <form method="post" action="/roasterhammer/armies/#(army.id)/factions/#(faction.id)/delete">
+                    <a class="btn btn-primary" href="/roasterhammer/armies/#(army.id)/factions/#(faction.id)/edit" role="button">Edit</a>
+                    <input class="btn btn-danger" type="submit" value="Delete"/>
+                </form>
+            </td>
         </tr>
         }
     </tbody>
 </table>
-<form method="post" action="/roasterhammer/armies/#(army.id)/factions/#(faction.id)/delete">
-    <a class="btn btn-primary" href="/roasterhammer/armies/#(army.id)/factions/#(faction.id)/edit" role="button">Edit</a>
-    <input class="btn btn-danger" type="submit" value="Delete"/>
-</form>
 }
 
 <h2>Army Rules</h2>
