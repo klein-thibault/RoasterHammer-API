@@ -90,7 +90,7 @@ final class UnitController {
                             .flatMap(to: DetachmentResponse.self, { _ in
                                 // Return the updated detachment
                                 let detachmentController = DetachmentController()
-                                return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                                return try detachmentController.getDetachmentResponseById(detachmentId, conn: req)
                             })
         })
     }
@@ -110,7 +110,7 @@ final class UnitController {
                 .flatMap(to: DetachmentResponse.self, { _ in
                     // Return the updated detachment
                     let detachmentController = DetachmentController()
-                    return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                    return try detachmentController.getDetachmentResponseById(detachmentId, conn: req)
                 })
         })
     }
@@ -142,7 +142,7 @@ final class UnitController {
                             return unit
                         }).flatMap(to: DetachmentResponse.self, { _ in
                             let detachmentController = DetachmentController()
-                            return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                            return try detachmentController.getDetachmentResponseById(detachmentId, conn: req)
                         })
         })
     }
@@ -169,7 +169,7 @@ final class UnitController {
                 .flatMap(to: DetachmentResponse.self, { _ in
                     // Return the updated detachment
                     let detachmentController = DetachmentController()
-                    return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                    return try detachmentController.getDetachmentResponseById(detachmentId, conn: req)
                 })
         })
     }
@@ -195,7 +195,7 @@ final class UnitController {
                 .flatMap(to: DetachmentResponse.self, { _ in
                     // Return the updated detachment
                     let detachmentController = DetachmentController()
-                    return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                    return try detachmentController.getDetachmentResponseById(detachmentId, conn: req)
                 })
         })
     }
@@ -216,7 +216,7 @@ final class UnitController {
                 })
                 .flatMap(to: DetachmentResponse.self, { _ in
                     let detachmentController = DetachmentController()
-                    return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                    return try detachmentController.getDetachmentResponseById(detachmentId, conn: req)
                 })
         })
     }
@@ -265,7 +265,7 @@ final class UnitController {
                 })
                 .flatMap(to: DetachmentResponse.self, { detachment in
                     let detachmentController = DetachmentController()
-                    return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                    return try detachmentController.getDetachmentResponseById(detachmentId, conn: req)
                 })
         })
     }
@@ -283,7 +283,7 @@ final class UnitController {
                                                         conn: req)
             .flatMap(to: DetachmentResponse.self, { detachment in
                 let detachmentController = DetachmentController()
-                return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                return try detachmentController.getDetachmentResponseById(detachmentId, conn: req)
             })
     }
 
@@ -306,7 +306,7 @@ final class UnitController {
                 })
                 .flatMap(to: DetachmentResponse.self, { detachment in
                     let detachmentController = DetachmentController()
-                    return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                    return try detachmentController.getDetachmentResponseById(detachmentId, conn: req)
                 })
         })
     }
@@ -324,7 +324,7 @@ final class UnitController {
             return try self.unitDatabaseQueries.detachPsychicPowerFromSelectedUnit(psychicPower, selectedUnit: selectedUnit, conn: req)
                 .flatMap(to: DetachmentResponse.self, { detachment in
                     let detachmentController = DetachmentController()
-                    return try detachmentController.getDetachmentById(detachmentId, conn: req)
+                    return try detachmentController.getDetachmentResponseById(detachmentId, conn: req)
                 })
         })
     }

@@ -32,6 +32,7 @@ public func routes(_ router: Router) throws {
     // Roaster
     let roasterController = RoasterController()
     protectedAuthRouter.post("games", Int.parameter, "roasters", use: roasterController.createRoster)
+    protectedAuthRouter.delete("roasters", Int.parameter, use: roasterController.removeRoster)
     protectedAuthRouter.get("games", Int.parameter, "roasters", use: roasterController.getRoasters)
     router.get("roasters", Int.parameter, use: roasterController.getRoasterById)
 
@@ -65,6 +66,11 @@ public func routes(_ router: Router) throws {
                              Int.parameter,
                              "detachments",
                              use: detachmentController.addDetachmentToRoaster)
+    protectedAuthRouter.delete("roasters",
+                               Int.parameter,
+                               "detachments",
+                               Int.parameter,
+                               use: detachmentController.removeDetachmentFromRoster)
     protectedAuthRouter.post("roasters",
                              Int.parameter,
                              "detachments",

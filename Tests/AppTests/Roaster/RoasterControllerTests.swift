@@ -22,6 +22,29 @@ class RoasterControllerTests: BaseTests {
         XCTAssertEqual(roasterGame.version, game.version)
     }
 
+    func testRemoveRoaster() throws {
+        let user = try app.createAndLogUser()
+        let game = try GameTestsUtils.createGame(user: user, app: app)
+        _ = try RoasterTestsUtils.createRoaster(user: user, gameId: game.id, app: app)
+
+        var rosters = try app.getResponse(to: "games/\(game.id)/roasters",
+            decodeTo: [RoasterResponse].self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+        XCTAssertEqual(rosters.count, 1)
+
+        _ = try app.sendRequest(to: "roasters/\(rosters[0].id)",
+            method: .DELETE,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+
+        rosters = try app.getResponse(to: "games/\(game.id)/roasters",
+            decodeTo: [RoasterResponse].self,
+            loggedInRequest: true,
+            loggedInCustomer: user)
+        XCTAssertEqual(rosters.count, 0)
+    }
+
     func testGetRoasters() throws {
         let user = try app.createAndLogUser()
         let game = try GameTestsUtils.createGame(user: user, app: app)

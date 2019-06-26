@@ -70,6 +70,26 @@ final class DetachmentController {
                 return try roasterController.roasterResponse(forRoaster: roaster, conn: req)
             })
     }
+
+    func removeDetachmentFromRoster(_ req: Request) throws -> Future<RoasterResponse> {
+        _ = try req.requireAuthenticated(Customer.self)
+        let rosterId = try req.parameters.next(Int.self)
+        let detachmentId = try req.parameters.next(Int.self)
+        let rosterController = RoasterController()
+
+        let rosterFuture = try rosterController.getRosterByID(rosterId: rosterId, conn: req)
+        let detachmentFuture = try DetachmentController().getDetachmentById(detachmentId, conn: req)
+
+        return flatMap(to: RoasterResponse.self, rosterFuture, detachmentFuture) { (roster, detachment) in
+            return roster.detachments.detach(detachment, on: req)
+                .flatMap { _ in
+                    detachment.delete(on: req)
+                }
+                .flatMap(to: RoasterResponse.self) { _ in
+                    return try rosterController.getRosterResponseByID(rosterId: rosterId, conn: req)
+            }
+        }
+    }
     
     func selectDetachmentFaction(_ req: Request) throws -> Future<RoasterResponse> {
         _ = try req.requireAuthenticated(Customer.self)
@@ -151,9 +171,12 @@ final class DetachmentController {
         
     }
 
-    func getDetachmentById(_ detachmentId: Int, conn: DatabaseConnectable) throws -> Future<DetachmentResponse> {
-        return Detachment.find(detachmentId, on: conn)
-            .unwrap(or: RoasterHammerError.detachmentIsMissing.error())
+    func getDetachmentById(_ detachmentId: Int, conn: DatabaseConnectable) throws -> Future<Detachment> {
+        return Detachment.find(detachmentId, on: conn).unwrap(or: RoasterHammerError.detachmentIsMissing.error())
+    }
+
+    func getDetachmentResponseById(_ detachmentId: Int, conn: DatabaseConnectable) throws -> Future<DetachmentResponse> {
+        return try getDetachmentById(detachmentId, conn: conn)
             .flatMap(to: DetachmentResponse.self, { detachment in
                 return try self.detachmentResponse(forDetachment: detachment, conn: conn)
             })

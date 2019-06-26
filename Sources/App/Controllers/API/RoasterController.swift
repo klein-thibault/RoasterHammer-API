@@ -37,11 +37,20 @@ final class RoasterController {
     }
 
     func getRoasterById(_ req: Request) throws -> Future<RoasterResponse> {
-        let roasterId = try req.parameters.next(Int.self)
+        let rosterId = try req.parameters.next(Int.self)
 
-        return Roaster.find(roasterId, on: req).unwrap(or: RoasterHammerError.roasterIsMissing.error())
-            .flatMap(to: RoasterResponse.self, { roaster in
-                return try self.roasterResponse(forRoaster: roaster, conn: req)
+        return try getRosterResponseByID(rosterId: rosterId, conn: req)
+    }
+
+    func removeRoster(_ req: Request) throws -> Future<HTTPStatus> {
+        _ = try req.requireAuthenticated(Customer.self)
+        let rosterId = try req.parameters.next(Int.self)
+
+        return try getRosterByID(rosterId: rosterId, conn: req)
+            .flatMap(to: HTTPStatus.self, { roster in
+                return roster
+                    .delete(on: req)
+                    .transform(to: HTTPStatus.ok)
             })
     }
 
@@ -66,6 +75,18 @@ final class RoasterController {
                 return RoasterResponse(roaster: roasterDTO, detachments: detachments, rules: rulesResponse)
             })
         })
+    }
+
+    func getRosterByID(rosterId: Int, conn: DatabaseConnectable) throws -> Future<Roaster> {
+        return Roaster.find(rosterId, on: conn).unwrap(or: RoasterHammerError.roasterIsMissing.error())
+    }
+
+    func getRosterResponseByID(rosterId: Int, conn: DatabaseConnectable) throws -> Future<RoasterResponse> {
+        return Roaster
+            .find(rosterId, on: conn).unwrap(or: RoasterHammerError.roasterIsMissing.error())
+            .flatMap(to: RoasterResponse.self, { roaster in
+                return try self.roasterResponse(forRoaster: roaster, conn: conn)
+            })
     }
 
 }
