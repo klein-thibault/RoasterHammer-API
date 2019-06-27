@@ -451,11 +451,9 @@ final class UnitDatabaseQueries {
     }
 
     func removeAttachedWeapon(weaponId: Int,
-                              fromWeaponBucket weaponBucketId: Int,
                               ofSelectedModel selectedModelId: Int,
                               conn: DatabaseConnectable) -> Future<Void> {
         return getSelectedWeaponModel(selectedModelId: selectedModelId,
-                                      weaponBucketId: weaponBucketId,
                                       weaponId: weaponId,
                                       conn: conn)
             .flatMap({ selectedModelWeapon in
@@ -468,12 +466,10 @@ final class UnitDatabaseQueries {
     }
 
     func getSelectedWeaponModel(selectedModelId: Int,
-                                weaponBucketId: Int,
                                 weaponId: Int,
                                 conn: DatabaseConnectable) -> Future<SelectedModelWeapon?> {
         return SelectedModelWeapon.query(on: conn)
             .filter(\.modelId == selectedModelId)
-            .filter(\.weaponBucketId == weaponBucketId)
             .filter(\.weaponId == weaponId)
             .first()
     }

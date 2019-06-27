@@ -917,7 +917,7 @@ class UnitControllerTests: BaseTests {
         XCTAssertEqual(updatedDetachmentWithWeapon.roles[0].units[0].models[0].cost, unit.cost + weapon.cost)
 
         // Unassign weapon to model
-        let updatedDetachmentWithoutWeapon = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapon-buckets/\(weaponBucket.id)/weapons/\(modelWeapon.id)",
+        let updatedDetachmentWithoutWeapon = try app.getResponse(to: "detachments/\(detachment.id)/models/\(addedModels[0].id)/weapons/\(modelWeapon.id)",
             method: .DELETE,
             headers: ["Content-Type": "application/json"],
             decodeTo: DetachmentResponse.self,

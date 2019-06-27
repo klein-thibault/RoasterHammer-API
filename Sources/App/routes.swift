@@ -146,8 +146,6 @@ public func routes(_ router: Router) throws {
                                Int.parameter,
                                "models",
                                Int.parameter,
-                               "weapon-buckets",
-                               Int.parameter,
                                "weapons",
                                Int.parameter,
                                use: unitController.unattachWeaponFromSelectedModel)
