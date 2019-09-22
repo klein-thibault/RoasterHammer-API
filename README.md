@@ -1,8 +1,14 @@
 # RoasterHammer
 
+## Setup
+
+* Install dependencies: `swift package update`
+
 ## Deployment
 
 The application is currently deployed in Heroku.
+
+There is a webhook currently setup for `staging` (staging environment) and `master` (production environment) branches between Heroku and the git repository.
 
 ### Setup
 
